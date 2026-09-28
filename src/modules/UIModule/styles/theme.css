@@ -37,6 +37,12 @@
 
 @plugin "daisyui/theme" {
   name: "newspaper-dark";
+  --color-info: #263c4b;
+  --color-info-content: #c2dfef;
+  --color-success: #2e3c27;
+  --color-success-content: #d1e8bb;
+  --color-warning: #4b3d24;
+  --color-warning-content: #f3dfa5;
   color-scheme: dark;
   --color-base-100: #24231f;
   --color-base-200: #2e2b25;
@@ -60,4 +66,33 @@
   --border: 1px;
   --depth: 0;
   --noise: 0;
+}
+
+[data-theme-mode="dark"] {
+  color-scheme: dark;
+  --theme-ink: #eeeef2;
+  --theme-muted: #b9bfce;
+  --theme-accent: #adc0ff;
+  --theme-surface: #232c3b;
+  --theme-surface-soft: #1b2432;
+  --theme-line: #455065;
+  --theme-success: #a9dab7;
+  --theme-success-surface: #223e32;
+  --theme-error: #ffb3a8;
+  --theme-error-surface: #452c30;
+  --theme-warm: #e6c6a1;
+  --theme-warm-surface: #3c342a;
+  --theme-lilac: #d1bff3;
+  --theme-lilac-surface: #332d46;
+  --theme-cool-surface: #29374d;
+}
+
+[data-theme-mode="dark"] {
+  --theme-ink: var(--color-base-content);
+  --theme-accent: var(--color-primary);
+  --theme-muted: #c1b5a2;
+  --theme-surface: #2e2b25;
+  --theme-surface-soft: #24231f;
+  --theme-line: #625b4e;
+  --theme-warm-surface: #393329;
 }

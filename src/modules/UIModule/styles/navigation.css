@@ -36,8 +36,8 @@
     left: 0;
     right: 0;
     z-index: 20;
-    background: #faf7ef;
-    border-bottom: 1px solid #dedbce;
+    background: var(--theme-warm-surface, #faf7ef);
+    border-bottom: 1px solid var(--theme-line, #dedbce);
     padding: 18px 24px;
     box-shadow: 0 20px 30px #1328550c;
   }
@@ -45,7 +45,7 @@
     padding: 15px 0;
     display: flex;
     justify-content: space-between;
-    border-bottom: 1px solid #edf0f6;
+    border-bottom: 1px solid var(--theme-line, #edf0f6);
   }
   .mobile-nav[hidden] {
     display: none;

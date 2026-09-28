@@ -13,7 +13,7 @@ cp .env.example .env
 npm run dev
 ```
 
-Web: `http://localhost:4322`, redakce: `/admin/`. Přihlášení používá existující účty tenantu Etymolog v php-core. Nové účty ani hesla frontend nevytváří.
+Web: `http://localhost:4321`, redakce: `/admin/`. Přihlášení používá existující účty tenantu Etymolog v php-core. Nové účty ani hesla frontend nevytváří.
 
 Lokální `.env` je již připravený pro `http://127.0.0.1:8000/api` a `etymolog.localhost`. Obsahuje serverový klíč, je ignorovaný Gitem a nesmí se zveřejnit. Backend spusťte samostatně v `../../php/php-core` příkazem `php -S 127.0.0.1:8000`. Pro jiné prostředí nastavte:
 
@@ -113,3 +113,12 @@ Ověřeno: frontendové jednotkové testy, Astro check/build, Chromium a PHP int
 Produkce používá Node SSR: `npm run build`, `npm run start` za HTTPS proxy. Nasazuje se `dist/client`, `dist/server` a runtime závislosti. Produkční prostředí musí mít správný tenant, klíč, origin a nasazené nové php-core veřejné endpointy. Formuláře a auth nelze provozovat na čistě statickém hostingu.
 
 Nové obrázky, původní prompty a jejich použití: [docs/brand-assets.md](docs/brand-assets.md). Historická data se jejich generováním nijak nedoplňují.
+
+## Světlé a tmavé téma
+
+- `UIModule/config/theme.ts` definuje názvy obou témat, barvu prohlížeče a vlastní klíč úložiště projektu.
+- `UIModule/components/ThemeInit.astro` nastavuje téma v hlavičce před vykreslením obsahu. `ThemeToggle.astro` je přístupné tlačítko se sluncem/měsícem bez rámečku, pozadí nebo stínu; při ovládání klávesnicí má viditelný focus.
+- `UIModule/hooks/useTheme.ts` ukládá ruční volbu a synchronizuje záložky. Bez platné uložené volby sleduje `prefers-color-scheme` včetně změn za běhu. Chyba úložiště přepnutí nezablokuje; bez JavaScriptu zůstává výchozí světlá stránka a tlačítko je skryté.
+- Každý modul vlastní styly svých komponent. Sdílené proměnné `--theme-*` a případné daisyUI tokeny dodává UIModule; modul si může přidat vlastní proměnné a tmavé varianty pod `[data-theme-mode="dark"]`. Původní světlé barvy zůstávají ve fallback hodnotách. Nepoužívejte plošné invertování obrázků ani barev.
+- Automatický režim se obnoví smazáním projektového klíče z `localStorage`; přepínač v menu nabízí ruční světlou/tmavou volbu.
+- `tests/browser/theme.spec.ts` ověřuje systémovou i uloženou volbu, synchronizaci záložek, zakázané úložiště, klávesnici, jazyky, responzivitu a podobu tlačítka. Backendové scénáře browser testů používají mock, nikoli produkční služby.

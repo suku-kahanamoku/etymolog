@@ -1,15 +1,25 @@
 ---
 import { themeConfig } from "../config/theme";
 ---
+
 <script is:inline define:vars={{ config: themeConfig }}>
   (() => {
     let preference;
-    try { preference = localStorage.getItem(config.storageKey); } catch { /* Storage is optional. */ }
-    const valid = preference === config.light.name || preference === config.dark.name;
-    const dark = valid ? preference === config.dark.name : matchMedia("(prefers-color-scheme: dark)").matches;
+    try {
+      preference = localStorage.getItem(config.storageKey);
+    } catch {
+      /* Storage is optional. */
+    }
+    const valid =
+      preference === config.light.name || preference === config.dark.name;
+    const dark = valid
+      ? preference === config.dark.name
+      : matchMedia("(prefers-color-scheme: dark)").matches;
     const theme = dark ? config.dark : config.light;
     document.documentElement.dataset.theme = theme.name;
     document.documentElement.dataset.themeMode = dark ? "dark" : "light";
-    document.querySelector('meta[name="theme-color"]')?.setAttribute("content", theme.color);
+    document
+      .querySelector('meta[name="theme-color"]')
+      ?.setAttribute("content", theme.color);
   })();
 </script>

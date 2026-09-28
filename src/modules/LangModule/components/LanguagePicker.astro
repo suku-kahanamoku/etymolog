@@ -59,9 +59,9 @@ const languageCode = locale === "cs" ? "CZ" : locale.toUpperCase();
 <style is:global>
   .language-picker {
     --text-ui: 14px;
-    --line: #dedbce;
-    --blue: #253da4;
-    color: #202b49;
+    --line: var(--theme-line, #dedbce);
+    --blue: var(--theme-accent, #253da4);
+    color: var(--theme-accent, #202b49);
     z-index: 30;
     position: relative;
     font-size: var(--text-ui);
@@ -84,7 +84,7 @@ const languageCode = locale === "cs" ? "CZ" : locale.toUpperCase();
     flex-shrink: 0;
     border: 1px solid var(--line);
     border-radius: 50%;
-    background: #fffdf6;
+    background: var(--theme-surface, #fffdf6);
     box-shadow: 0 2px 3px #202b4926;
   }
   .language-current::after {
@@ -134,7 +134,7 @@ const languageCode = locale === "cs" ? "CZ" : locale.toUpperCase();
     right: -10px;
     top: 49px;
     padding: 7px;
-    background: #fff;
+    background: var(--theme-surface, #fff);
     border: 1px solid var(--line);
     border-radius: 12px;
     box-shadow: 0 12px 40px #16295613;
@@ -151,7 +151,7 @@ const languageCode = locale === "cs" ? "CZ" : locale.toUpperCase();
   }
   .language-options a:hover,
   .language-options [aria-current] {
-    background: #f0f5ff;
+    background: var(--theme-surface, #f0f5ff);
     color: var(--blue);
   }
 </style>

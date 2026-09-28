@@ -20,7 +20,7 @@
     -webkit-tap-highlight-color: transparent;
   }
   :focus-visible {
-    outline: 3px solid #d97050;
+    outline: 3px solid var(--theme-error, #d97050);
     outline-offset: 4px;
   }
   h1,
@@ -43,7 +43,7 @@
     left: 1rem;
     z-index: 100;
     padding: 1rem;
-    background: white;
+    background: var(--theme-surface, white);
   }
   .skip-link:focus {
     top: 1rem;
@@ -101,7 +101,7 @@
     font-weight: 650;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: #5e705f;
+    color: var(--theme-muted, #5e705f);
     margin: 0 0 24px;
   }
   .btn {
@@ -130,7 +130,7 @@
   }
   .content-section > p:not(.eyebrow) {
     margin-bottom: 24px;
-    color: #66705f;
+    color: var(--theme-muted, #66705f);
   }
   .content-section .lead {
     font-size: 20px;

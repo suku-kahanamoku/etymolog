@@ -11,13 +11,13 @@ const env = loadEnv(
   "PUBLIC_",
 );
 const site =
-  process.env.PUBLIC_SITE_URL || env.PUBLIC_SITE_URL || "http://localhost:4322";
+  process.env.PUBLIC_SITE_URL || env.PUBLIC_SITE_URL || "http://localhost:4321";
 export default defineConfig({
   site,
   output: "server",
   devToolbar: { enabled: false },
   adapter: node({ mode: "standalone" }),
-  server: { port: 4322 },
+  server: { port: 4321 },
   trailingSlash: "always",
   i18n: {
     defaultLocale: "cs",

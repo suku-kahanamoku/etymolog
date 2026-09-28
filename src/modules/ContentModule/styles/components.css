@@ -18,7 +18,7 @@
     margin: 0;
   }
   .hero-description {
-    color: #66705f;
+    color: var(--theme-muted, #66705f);
     font-size: 14px;
     margin: 24px 0;
     max-width: 390px;
@@ -34,13 +34,13 @@
     display: flex;
     align-items: center;
     gap: 14px;
-    color: #7c8475;
+    color: var(--theme-muted, #7c8475);
     font-size: 10px;
   }
   .index-line {
     height: 1px;
     width: 65px;
-    background: #d8ddcf;
+    background: var(--theme-success-surface, #d8ddcf);
   }
   .hero-art {
     display: flex;
@@ -55,7 +55,7 @@
   }
   .features-section {
     padding: 32px 24px 48px;
-    border-top: 1px solid #e8e9e1;
+    border-top: 1px solid var(--theme-line, #e8e9e1);
   }
   .section-heading {
     display: flex;
@@ -72,7 +72,7 @@
   }
   .section-heading p {
     font-size: 12px;
-    color: #70796b;
+    color: var(--theme-muted, #70796b);
     max-width: 260px;
   }
   .feature-grid {
@@ -80,13 +80,13 @@
     gap: 14px;
   }
   .feature-card {
-    background: #f5f5ef;
+    background: var(--theme-warm-surface, #f5f5ef);
     padding: 26px;
     border-radius: 8px;
   }
   .feature-number {
     font-size: 11px;
-    color: #7f8a74;
+    color: var(--theme-muted, #7f8a74);
     margin-bottom: 30px;
   }
   .feature-card h3 {
@@ -97,7 +97,7 @@
   }
   .feature-card p {
     font-size: 12px;
-    color: #6b7665;
+    color: var(--theme-muted, #6b7665);
   }
   @media (min-width: 640px) {
     .hero-section {
