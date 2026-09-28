@@ -3,6 +3,7 @@ import { test, expect, cmpScriptUrl } from "./fixtures";
 const approved = {
   consentExists: true,
   tcfcompliant: true,
+  tcfversion: 2,
   consentstring: "mock-approved-tcf",
   vendorConsents: { "621": true },
   purposeConsents: { "1": true },
@@ -107,6 +108,7 @@ test("stored approval is restored on a new document", async ({ page }) => {
 
 for (const [label, change] of [
   ["disabled TCF", { tcfcompliant: false }],
+  ["non-TCF CMP", { tcfversion: 0 }],
   ["missing Seznam", { vendorConsents: {} }],
   ["missing storage consent", { purposeConsents: {} }],
   ["missing consent string", { consentstring: "" }],

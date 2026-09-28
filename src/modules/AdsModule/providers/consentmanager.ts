@@ -9,6 +9,7 @@ type CmpApi = (
 ) => unknown;
 interface CmpData {
   tcfcompliant?: boolean;
+  tcfversion?: number;
   consentstring?: string;
   vendorConsents?: Record<string, boolean | number>;
   purposeConsents?: Record<string, boolean | number>;
@@ -44,6 +45,7 @@ export function mountConsentManager() {
       const allowed =
         status?.consentExists === true &&
         data?.tcfcompliant === true &&
+        data.tcfversion === 2 &&
         typeof data.consentstring === "string" &&
         data.consentstring.length > 0 &&
         granted(data.vendorConsents?.["621"]) &&
