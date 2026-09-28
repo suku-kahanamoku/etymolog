@@ -30,7 +30,6 @@ test.beforeEach(async ({ page }) => {
         if (command === 'removeEventListener') listeners.get(args[0])?.delete(args[1]);
         if (command === 'consentStatus') return { consentExists: state.consentExists };
         if (command === 'getCMPData') return state;
-        if (command === 'showScreenAdvanced') document.documentElement.dataset.cmpSettingsOpened = 'true';
         if (command === 'test-choice') {
           state = args;
           sessionStorage.setItem('mock-cmp', JSON.stringify(state));
@@ -48,7 +47,7 @@ test.beforeEach(async ({ page }) => {
   );
 });
 
-test("CMP loads first, requires consent, reopens settings and revokes already loaded ads", async ({
+test("CMP loads first, requires consent and revokes already loaded ads", async ({
   page,
 }) => {
   let adScripts = 0;
@@ -77,11 +76,6 @@ test("CMP loads first, requires consent, reopens settings and revokes already lo
   );
   await expect(page.locator('[data-rendered="true"]')).toHaveCount(3);
   expect(adScripts).toBe(1);
-  await page.getByRole("link", { name: "Nastavení soukromí" }).click();
-  await expect(page.locator("html")).toHaveAttribute(
-    "data-cmp-settings-opened",
-    "true",
-  );
   const navigated = page.waitForEvent(
     "framenavigated",
     (frame) => frame === page.mainFrame(),

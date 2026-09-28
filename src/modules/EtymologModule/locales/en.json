@@ -118,6 +118,17 @@
       "complete": "Completed",
       "partial": "Completed with errors",
       "failed": "Failed"
+    },
+    "syncDisabled": "Disabled",
+    "syncRateLimited": "Source temporarily limits requests (429)",
+    "syncRetryAt": "Next attempt no earlier than",
+    "jobStates": {
+      "pending": "Awaiting first run",
+      "success": "Batch completed",
+      "complete": "Pass completed",
+      "failed": "Failed",
+      "interrupted": "Interrupted",
+      "running": "Running"
     }
   },
   "fields": {

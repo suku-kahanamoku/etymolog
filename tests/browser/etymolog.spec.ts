@@ -300,3 +300,63 @@ test("one shared name detail retains multiple etymologies and mythology", async 
   await expect(page.locator("#mythology .entry")).toHaveCount(1);
   await expect(page.locator("#sources li")).toHaveCount(1);
 });
+
+test("sync jobs show source errors and cooldown instead of a dash", async ({
+  page,
+}) => {
+  await login(page, true);
+  await page.route("**/api/admin/etymolog/sync-jobs/?*", (route) =>
+    route.fulfill({
+      json: {
+        success: true,
+        data: [
+          {
+            id: 30,
+            title: "Wikipedia",
+            enabled: 1,
+            last_status: "failed",
+            last_error: "upstream_rate_limited",
+          },
+          {
+            id: 21,
+            title: "Dictionary",
+            enabled: 1,
+            last_status: "success",
+            last_error: null,
+          },
+          {
+            id: 11,
+            title: "Disabled dictionary",
+            enabled: 0,
+            last_status: null,
+            last_error: null,
+          },
+        ],
+      },
+    }),
+  );
+  await page.route("**/api/admin/etymolog/sync/status/", (route) =>
+    route.fulfill({
+      json: {
+        success: true,
+        data: {
+          status: "running",
+          completed: 0,
+          total: 3,
+          failed: 0,
+          processed: 0,
+          retry_at: "2099-01-01 03:00:00",
+        },
+      },
+    }),
+  );
+  await page.locator('[data-resource="sync-jobs"]').click();
+  const rows = page.locator("[data-admin-rows]");
+  await expect(rows).toContainText("Source temporarily limits requests (429)");
+  await expect(rows).toContainText("Batch completed");
+  await expect(rows).toContainText("Disabled · Awaiting first run");
+  await expect(page.locator("[data-sync-status]")).toContainText(
+    "Next attempt no earlier than",
+  );
+  await expect(page.locator("[data-sync-start]")).toBeDisabled();
+});

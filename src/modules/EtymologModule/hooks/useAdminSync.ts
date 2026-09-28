@@ -5,6 +5,7 @@ type Batch = {
   completed: number;
   failed: number;
   processed: number;
+  retry_at?: string | null;
 };
 export function useAdminSync(
   root: HTMLElement,
@@ -29,6 +30,11 @@ export function useAdminSync(
     output.textContent = data
       ? `${t.admin.syncStates[data.status]} · ${data.completed}/${data.total} · ${t.admin.syncProcessed}: ${data.processed} · ${t.admin.syncErrors}: ${data.failed}`
       : "";
+    if (data?.status === "running" && data.retry_at) {
+      const retry = new Date(data.retry_at.replace(" ", "T") + "Z");
+      if (retry.getTime() > Date.now())
+        output.textContent += ` · ${t.admin.syncRetryAt}: ${retry.toLocaleString(document.documentElement.lang)}`;
+    }
   }
   async function poll() {
     if (!visible || reading || !button || !output) return;

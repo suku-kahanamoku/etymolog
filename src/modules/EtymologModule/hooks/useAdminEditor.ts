@@ -129,13 +129,25 @@ export function useAdminEditor() {
           ),
           element(
             "td",
-            Object.hasOwn(record, "published")
-              ? Number(record.published)
-                ? t.admin.published
-                : t.admin.draft
-              : Object.hasOwn(record, "reviewed")
-                ? `${label("reviewed")}: ${record.reviewed}`
-                : "—",
+            selectedResource === "sync-jobs"
+              ? [
+                  Number(record.enabled) ? "" : t.admin.syncDisabled,
+                  (t.admin.jobStates as Record<string, string>)[
+                    String(record.last_status ?? "pending")
+                  ] ?? String(record.last_status),
+                  record.last_error === "upstream_rate_limited"
+                    ? t.admin.syncRateLimited
+                    : String(record.last_error ?? ""),
+                ]
+                  .filter(Boolean)
+                  .join(" · ")
+              : Object.hasOwn(record, "published")
+                ? Number(record.published)
+                  ? t.admin.published
+                  : t.admin.draft
+                : Object.hasOwn(record, "reviewed")
+                  ? `${label("reviewed")}: ${record.reviewed}`
+                  : "—",
           ),
         );
         const actions = element("td", "", "row-actions");

@@ -1,0 +1,69 @@
+# Seznam základní poptávka
+appnexus.com, 6974, RESELLER, f5ab79cb980f11d1
+pubmatic.com, 159961, RESELLER, 5d62403b186f2ace
+pubmatic.com, 163635, RESELLER, 5d62403b186f2ace
+google.com, pub-2127466377868208, RESELLER, f08c47fec0942fa0
+adform.com, 2950, RESELLER, 9f5210a2f0999e32
+adform.com, 2700, RESELLER, 9f5210a2f0999e32
+adform.com, 3304, RESELLER, 9f5210a2f0999e32
+themediagrid.com, QIPWAE, DIRECT, 35d5010d7789b49d
+wpartner.pl, 537, DIRECT
+
+# Seznam další poptávka
+wpartner.pl, 537, DIRECT
+smartadserver.com, 4756, RESELLER
+rubiconproject.com, 16114, RESELLER, 0bfd66d529a55807
+openx.com, 537149888, RESELLER, 6a698e2ec38604c6
+loopme.com, 5679, RESELLER, 6c8d5f95897a5a3b
+xad.com, 958, RESELLER, 81cbf0a75a5e0e9a
+video.unrulymedia.com, 2564526802, RESELLER
+smaato.com, 1100044045, RESELLER, 07bcf65f187117b4
+sharethrough.com, OAW69Fon, RESELLER, d53b998a7bd4ecd2
+pubnative.net, 1006576, RESELLER, d641df8625486a7b
+verve.com, 15503, RESELLER, 0c8f5958fc2d6270
+adyoulike.com, b4bf4fdd9b0b915f746f6747ff432bde, RESELLER
+axonix.com, 57264, RESELLER
+admanmedia.com, 43, RESELLER
+smartadserver.com, 4012, RESELLER
+smartadserver.com, 4071, RESELLER
+smartadserver.com, 4228, RESELLER
+smartadserver.com, 3827, RESELLER
+smartadserver.com, 3827-OB, RESELLER, 060d053dcf45cbf3
+google.com, pub-5443361439335742, RESELLER, f08c47fec0942fa0
+openx.com, 540233831, RESELLER
+openx.com, 557339706, RESELLER, 6a698e2ec38604c6
+rubiconproject.com,19094, RESELLER
+triplelift.com,13636,RESELLER, 6c33edb13117fd86
+triplelift.com,13636-EB,RESELLER, 6c33edb13117fd86
+onetag.com, 75ff55d79486d71, RESELLER
+onetag.com, 75ff55d79486d71-OB, RESELLER
+rubiconproject.com, 11006, RESELLER, 0bfd66d529a55807
+yahoo.com, 58905, RESELLER, e1a5b5b6e3255540
+smartadserver.com, 4111, RESELLER
+sharethrough.com, 7MMsjxFz, RESELLER, d53b998a7bd4ecd2
+smartadserver.com, 4342, RESELLER
+wpartner.pl, 22444050393, DIRECT
+yoc.com, 5879, RESELLER
+smartadserver.com, 3920, RESELLER
+rubiconproject.com, 23306, RESELLER, 0bfd66d529a55807
+appnexus.com, 11853, RESELLER, f5ab79cb980f11d1
+google.com, pub-8572040456674904, RESELLER, f08c47fec0942fa0
+pubmatic.com, 161557, RESELLER, 5d62403b186f2ace
+vidoomy.com, 1777325, RESELLER
+betweendigital.com, 44937, RESELLER
+admixer.com, 5a0e3544-8d64-495e-9042-ed450f205817, RESELLER
+openx.com, 540804929, RESELLER, 6a698e2ec38604c6
+lijit.com, 380632, RESELLER, fafdf38b16bf6b2b
+e-planning.net,ec771b05828a67fa,RESELLER,c1ba615865ed87b2
+vidoomy.com, 4433873, RESELLER
+contextweb.com, 562827, RESELLER, 89ff185a4c4e857c
+smartadserver.com, 4467, RESELLER
+lijit.com, 273644, RESELLER, fafdf38b16bf6b2b
+onetag.com, 5d1628750185ace, RESELLER
+yeahmobi.com, 113772, RESELLER
+e-planning.net, 949b688810cb7439, RESELLER, c1ba615865ed87b2
+rubiconproject.com, 25942, RESELLER, 0bfd66d529a55807
+richaudience.com, l4JhADYwsX, RESELLER  
+pubmatic.com, 81564, RESELLER, 5d62403b186f2ace  
+rubiconproject.com, 13510, RESELLER  
+smartadserver.com, 2640, RESELLER

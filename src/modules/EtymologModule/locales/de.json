@@ -118,6 +118,17 @@
       "complete": "Abgeschlossen",
       "partial": "Mit Fehlern abgeschlossen",
       "failed": "Fehlgeschlagen"
+    },
+    "syncDisabled": "Deaktiviert",
+    "syncRateLimited": "Quelle begrenzt vorübergehend Anfragen (429)",
+    "syncRetryAt": "Nächster Versuch frühestens",
+    "jobStates": {
+      "pending": "Wartet auf ersten Lauf",
+      "success": "Stapel abgeschlossen",
+      "complete": "Durchlauf abgeschlossen",
+      "failed": "Fehlgeschlagen",
+      "interrupted": "Unterbrochen",
+      "running": "Läuft"
     }
   },
   "fields": {

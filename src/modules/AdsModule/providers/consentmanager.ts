@@ -80,22 +80,9 @@ export function mountConsentManager() {
     }, 250);
   }
   window.addEventListener("load", connect);
-  const showSettings = (event: MouseEvent) => {
-    const target = event.target;
-    if (
-      !(target instanceof Element) ||
-      !target.closest("[data-consent-settings]") ||
-      !window.__cmp
-    )
-      return;
-    event.preventDefault();
-    window.__cmp("showScreenAdvanced");
-  };
-  document.addEventListener("click", showSettings);
   return () => {
     clearInterval(timer);
     window.removeEventListener("load", connect);
-    document.removeEventListener("click", showSettings);
     for (const event of events)
       window.__cmp?.("removeEventListener", [event, sync, false], null);
   };

@@ -118,6 +118,17 @@
       "complete": "Dokončeno",
       "partial": "Dokončeno s chybami",
       "failed": "Běh selhal"
+    },
+    "syncDisabled": "Vypnuto",
+    "syncRateLimited": "Zdroj dočasně omezuje požadavky (429)",
+    "syncRetryAt": "Další pokus nejdříve",
+    "jobStates": {
+      "pending": "Čeká na první běh",
+      "success": "Dávka dokončena",
+      "complete": "Průchod dokončen",
+      "failed": "Chyba",
+      "interrupted": "Přerušeno",
+      "running": "Probíhá"
     }
   },
   "fields": {

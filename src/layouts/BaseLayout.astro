@@ -3,7 +3,6 @@ import ThemeInit from "../modules/UIModule/components/ThemeInit.astro";
 import SeoHead from "../modules/SiteModule/components/SeoHead.astro";
 import "../styles/global.css";
 import ConsentScript from "../modules/AdsModule/components/ConsentScript.astro";
-import ConsentSettings from "../modules/AdsModule/components/ConsentSettings.astro";
 import AdFrame from "../modules/AdsModule/components/AdFrame.astro";
 import Header from "../modules/SiteModule/components/Header.astro";
 import Footer from "../modules/SiteModule/components/Footer.astro";
@@ -42,9 +41,7 @@ const { locale, page, title, description, noindex = false } = Astro.props;
       <main id="main-content" tabindex="-1">
         <slot />
       </main>
-      <Footer {locale}>
-        {site.modules.ads && <ConsentSettings {locale} />}
-      </Footer>
+      <Footer {locale} />
     </AdFrame>
   </body>
 </html>
