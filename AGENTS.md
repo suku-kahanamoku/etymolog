@@ -5,7 +5,7 @@
 - Texty UI udržujte v `src/modules/<Name>Module/locales/{cs,en,de}.json`; všechny jazyky používají stejné komponenty a helper `url()`.
 - Backendové kontrakty nejprve ověřte v `../../php/php-core/API.md` a skutečné implementaci. Nepředpokládejte dostupnost nového endpointu ani WebSocket serveru.
 - Veškeré HTTP požadavky na php-core vedou přes `src/modules/CoreModule/server/php-core.ts` a modulový serverový provider. Žádný otevřený proxy endpoint.
-- `PHP_CORE_API_KEY`, pevný tenant a uživatelský Bearer patří pouze do serverové vrstvy. Nikdy nepřebírejte klientské `X-Forwarded-Host`, API klíč či role jako důvěryhodné údaje.
+- `INTERNAL_API_KEY`, pevný tenant a uživatelský Bearer patří pouze do serverové vrstvy. Nikdy nepřebírejte klientské `X-Forwarded-Host`, API klíč či role jako důvěryhodné údaje.
 - Provider mapuje odpověď backendu; veřejná API vrstva vrací jen záměrně vybraná pole. Autorizaci nad daty vždy ověřuje php-core.
 - Nové mutace musí projít kontrolou originu, validací vstupu a limity velikosti. Soukromé odpovědi nejsou cacheovatelné.
 - Reklamní skripty načítejte až po signálu projektové CMP a pouze pro viditelné sloty.

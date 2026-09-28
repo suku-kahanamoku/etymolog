@@ -6,7 +6,7 @@ export interface RealtimeOptions {
   onState?: (state: ConnectionState) => void;
   maxRetries?: number;
   // Use short-lived, server-issued tickets if your gateway needs authentication.
-  // Never pass PHP_CORE_API_KEY or the php-core bearer token in a URL/protocol.
+  // Never pass INTERNAL_API_KEY or the php-core bearer token in a URL/protocol.
   protocols?: string[];
 }
 

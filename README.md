@@ -13,20 +13,23 @@ cp .env.example .env
 npm run dev
 ```
 
-Web: `http://localhost:4321`, redakce: `/administrace/`. Přihlášení používá existující účty tenantu Etymolog v php-core. Nové účty ani hesla frontend nevytváří.
+Frontend vyžaduje volný port 4321; při obsazení skončí chybou místo tichého přechodu na jiný port.
 
-Lokální `.env` je již připravený pro `http://127.0.0.1:8000/api` a `etymolog.localhost`. Obsahuje serverový klíč, je ignorovaný Gitem a nesmí se zveřejnit. Backend spusťte samostatně v `../../php/php-core` příkazem `php -S 127.0.0.1:8000`. Pro jiné prostředí nastavte:
+Web: `http://etymolog.localhost:4321`, redakce: `/administrace/`. Přihlášení používá existující účty tenantu Etymolog v php-core. Nové účty ani hesla frontend nevytváří.
 
-| Proměnná               | Význam                                                                                  |
-| ---------------------- | --------------------------------------------------------------------------------------- |
-| `PUBLIC_SITE_URL`      | Veřejný origin pro canonical, sitemap a kontrolu originu formulářů. Po změně přestavět. |
-| `PHP_CORE_URL`         | Serverová kořenová URL API, včetně `/api`, bez koncového lomítka.                       |
-| `PHP_CORE_API_KEY`     | Serverový `INTERNAL_API_KEY` php-core.                                                  |
-| `PHP_CORE_TENANT_HOST` | Pevný host registrovaný v `FRANCHISE_CODES`, lokálně `etymolog.localhost:etymolog`.     |
-| `PUBLIC_WEBSOCKET_URL` | Volitelná skutečná veřejná WebSocket gateway. Výchozí prázdná.                          |
-| `HOST`, `PORT`         | Naslouchání produkčního Node serveru.                                                   |
+Konfigurace používá stejné názvy a princip jako `nuxt/fann`. Lokální `.env` odkazuje na již běžící PHP API `http://127.0.0.1/php/php-core/api`; samostatný PHP server na portu 8000 ani npm příkaz pro backend nejsou potřeba. Klíč zůstal stávající platný klíč php-core a je pouze na serveru.
 
-Bez backendu se zobrazí veřejná kostra, O nás a Kontakt; hledání oznámí nedostupnost. Nevkládá falešné výsledky. Při ověření 28. 9. 2026 měla lokální databáze 1 314 aktivních jmen, žádné publikované. Veřejný archiv začne vracet hesla až po jejich publikaci v redakci. Žádný import nebyl v rámci frontendových prací automaticky publikován.
+| Proměnná               | Význam                                                                                                                                                                          |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `PHP_API_BASE_URL`     | URL existujícího PHP API včetně `/api`, lokálně `http://127.0.0.1/php/php-core/api`.                                                                                            |
+| `INTERNAL_API_KEY`     | Stejný serverový klíč jako v php-core. Nesmí být ve veřejném bundle.                                                                                                            |
+| `FRONTEND_HOST`        | Veřejná adresa webu, lokálně `http://etymolog.localhost:4321`; používá se pro canonical, sitemap, origin formulářů a hostname tenantu. Po změně přestavět a restartovat server. |
+| `PUBLIC_WEBSOCKET_URL` | Volitelná skutečná veřejná WebSocket gateway. Výchozí prázdná.                                                                                                                  |
+| `HOST`, `PORT`         | Naslouchání produkčního Node serveru.                                                                                                                                           |
+
+Tenant se odvozuje výhradně z `new URL(FRONTEND_HOST).hostname`, stejně jako ve FAnn. V php-core musí existovat mapování `etymolog.localhost:etymolog` v `FRANCHISE_CODES`. Host nikdy nepřebíráme z klientského požadavku. V prohlížeči používejte adresu z `FRONTEND_HOST`, aby souhlasila i kontrola originu při přihlášení. `PHP_FILE_ROOT` není potřeba: tento frontend pracuje přes HTTP API a nečte backendové soubory.
+
+Bez backendu se zobrazí veřejná kostra, O nás a Kontakt; hledání oznámí nedostupnost. Nevkládá falešné výsledky. Na následný pokyn byla hromadně zveřejněna všechna tehdejší aktivní hesla (1 314 jmen a příjmení). Texty a příběhy mají vlastní stav publikace. Hláška „Archiv je dočasně nedostupný“ označuje chybu komunikace/API, nikoli prázdný výsledek hledání; ověřte dostupnost existujícího PHP serveru na `PHP_API_BASE_URL` a platnost serverové konfigurace.
 
 ## Stránky a funkce
 
@@ -72,7 +75,7 @@ V `EtymologModule/config/resources.json` je explicitní snapshot polí skutečn�
 | `calendar-days` | Jmeniny, svátky, významné dny a lidové tradice |
 | `sync-jobs`     | Konfigurace synchronizací, pouze správce       |
 
-Každá část má seznam, filtr názvu nebo ID, stránkování po 20, vytvoření, načtení, úpravu a smazání. Odkazy mezi daty se zadávají referenčními ID z odpovídajících seznamů. Změny ukládá PATCH. Běžné smazání je backendový soft delete; správce má také potvrzované trvalé smazání, které backend odmítne při závislostech. Importní podklady jsou pouze pro čtení. Správce vidí historii běhů a může resetovat postup úlohy. Samotné synchronizace nadále provádí existující php-core cron; frontend nevytváří paralelní importér.
+Každá část má seznam, filtr názvu nebo ID, stránkování po 20, vytvoření, načtení, úpravu a smazání. Odkazy mezi daty se zadávají referenčními ID z odpovídajících seznamů. Změny ukládá PATCH. Běžné smazání je backendový soft delete; správce má také potvrzované trvalé smazání, které backend odmítne při závislostech. Importní podklady jsou pouze pro čtení. Správce vidí historii běhů a může resetovat postup úlohy. U synchronizačních úloh je vedle „Nový záznam“ tlačítko „Spustit synchronizaci“. Přes chráněné API spustí PHP worker na pozadí a zobrazuje jeho průběh. Worker používá stejnou službu jako cron: jednu dávku všech zapnutých splatných úloh, bez resetu kurzorů a bez automatického publikování. Opakovaný klik nevytvoří souběžný běh.
 
 Publikační pravidla, ověřování vazeb a licence vynucuje php-core. Kulturní texty potřebují doložený webový pramen a citaci. Editor se nepovýší na správce skrytím/změnou HTML: API vždy ověřuje aktuální uživatele a backend znovu kontroluje oprávnění.
 
@@ -112,6 +115,14 @@ Ověřeno: frontendové jednotkové testy, Astro check/build, Chromium a PHP int
 
 Produkce používá Node SSR: `npm run build`, `npm run start` za HTTPS proxy. Nasazuje se `dist/client`, `dist/server` a runtime závislosti. Produkční prostředí musí mít správný tenant, klíč, origin a nasazené nové php-core veřejné endpointy. Formuláře a auth nelze provozovat na čistě statickém hostingu.
 
+### Netlify
+
+Na Netlify konfigurace automaticky vybere `@astrojs/netlify` podle systémové proměnné `NETLIFY=true`. Adaptér vytvoří serverovou funkci a směrování pro SSR stránky i API. Mimo Netlify zůstává samostatný Node server s `npm run start`.
+
+Soubor `netlify.toml` nastavuje build `npm run build`, publish directory `dist` a Node 22. Base directory musí odpovídat kořeni tohoto projektu. Nenasazujte samotný `dist/client` z Node buildu ani nepřidávejte SPA přepis na `index.html`; aplikace vyžaduje serverové vykreslování. Netlify sestavení lze lokálně ověřit pomocí `NETLIFY=true npm run build`.
+
+V projektu Etymolog na Netlify přidejte doménu `etymolog.prasentace.cz` a nastavte `FRONTEND_HOST=https://etymolog.prasentace.cz` pro build i Functions. `PHP_API_BASE_URL` musí vést na veřejně dostupné produkční PHP API včetně `/api`; `INTERNAL_API_KEY` nastavte jako serverové tajemství dostupné Functions. V backendovém `FRANCHISE_CODES` musí být mapování `etymolog.prasentace.cz:etymolog`. Hodnoty z lokálního `.env` s localhostem nejsou produkční konfigurace. Po změně konfigurace spusťte nový produkční deploy.
+
 Nové obrázky, původní prompty a jejich použití: [docs/brand-assets.md](docs/brand-assets.md). Historická data se jejich generováním nijak nedoplňují.
 
 ## Světlé a tmavé téma
@@ -145,3 +156,9 @@ URL slugy jsou v `src/config/locales/{cs,en,de}.json`; stabilní ID a tvorbu odk
 Například `about` má adresy `/o-nas/`, `/en/about/` a `/de/ueber-uns/`. Menu, přepínač jazyků, canonical, hreflang a sitemap používají stejný `url()`. Staré nepřeložené cesty se pro GET/HEAD přesměrují stavem 308 se zachováním query; API cesty se nepřekládají. Robots vylučuje nové i původní soukromé adresy.
 
 Detaily používají `nameUrl(locale, id)`: `/jmeno/123/`, `/en/name/123/`, `/de/name/123/`. Přepnutí jazyka zachová ID záznamu a detail obsahuje odpovídající hreflang.
+
+Pro běh na pozadí aplikujte v php-core migrace `2026-09-28-etymolog-background.sql` a `2026-09-28-etymolog-dictionaries-tenant.sql`. Druhá připravuje 10 dalších úloh pro český a francouzský Wikislovník a prioritní česká hesla v anglickém Wiktionary. Podrobnosti licencí a požadavků na PHP worker jsou v `../../php/php-core/src/Modules/Etymolog/README.md`. Tlačítko i polling vlastní EtymologModule; AdminModule pouze poskytuje rámec administrace.
+
+Veřejné vyhledávání slučuje stejné znění jména bez ohledu na jeho druh napříč importními zdroji, jazyky a zeměmi (ignoruje velikost písmen a krajní mezery, zachovává diakritiku). `ANNA` a `Anna` tvoří jedno heslo s předností běžného zápisu. Detail sdružuje pouze zveřejněné podklady zveřejněných členů; původní URL vede přes dočasné přesměrování na aktuální společné heslo. Databázové záznamy a původ jednotlivých zdrojů zůstávají zachované. Etymologie a mytologie mají přednost i s vysvětlením chybějících podkladů; statistiky jsou poslední sekcí.
+
+Stejný zápis vedený jako křestní jméno i příjmení má také jen jeden veřejný výsledek a jeden detail. Filtr druhu zachovává stejné ID; veřejný štítek `both` se zobrazuje jako „Křestní jméno i příjmení“. Jednotlivé etymologie a kulturní texty se v detailu neslučují do jednoho výkladu.

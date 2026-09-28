@@ -29,7 +29,7 @@
   "noDetails": "No further material has been published for this entry yet.",
   "sources": "Sources and citations",
   "variants": "Forms and variants",
-  "occurrences": "Recorded occurrences",
+  "occurrences": "Statistics and recorded occurrences",
   "calendar": "Name days and calendars",
   "calendarNote": "Dates belong to the named calendar and tradition; Julian dates are not converted to Gregorian dates.",
   "source": "Source",
@@ -103,7 +103,22 @@
     "purge": "Permanently delete (administrator)",
     "purgeConfirm": "Permanently and irreversibly delete this record?",
     "readonly": "System fields",
-    "close": "Close"
+    "close": "Close",
+    "syncStart": "Start synchronization",
+    "syncRunning": "Synchronization running…",
+    "syncStarting": "Starting synchronization…",
+    "syncHelp": "Runs all enabled jobs that are due in the background. Processes one batch per job, preserving intervals and progress. New texts remain drafts.",
+    "syncProcessed": "Processed items",
+    "syncErrors": "Failed jobs",
+    "syncStatusError": "Could not load status. Retrying shortly.",
+    "syncStartError": "Could not confirm launch. Check job status.",
+    "syncStates": {
+      "queued": "Queued",
+      "running": "Running",
+      "complete": "Completed",
+      "partial": "Completed with errors",
+      "failed": "Failed"
+    }
   },
   "fields": {
     "name": "Name",
@@ -174,5 +189,8 @@
     "feminine": "Feminine form",
     "related": "Related form"
   },
-  "quotation": "Quoted passage"
+  "quotation": "Quoted passage",
+  "missingEtymology": "We do not yet have a published, sourced etymology for this name.",
+  "missingMythology": "We do not yet have published sources documenting mythological connections for this name.",
+  "both": "Given name and surname"
 }

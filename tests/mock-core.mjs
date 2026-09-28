@@ -124,7 +124,7 @@ http
     if (url.pathname === "/health") return send(200, null);
     if (
       req.headers["x-internal-key"] !== "test-only-secret" ||
-      req.headers["x-forwarded-host"] !== "etymolog.test"
+      req.headers["x-forwarded-host"] !== "localhost"
     )
       return send(403, null);
     let body = "";
@@ -155,6 +155,32 @@ http
       const items = q.toLowerCase().includes("nov") ? [name] : [];
       return send(200, { items, total: items.length, page: 1, limit: 20 });
     }
+    if (
+      url.pathname === "/etymolog/public/names/864" ||
+      url.pathname === "/etymolog/public/names/1162"
+    )
+      return send(200, {
+        ...dossier,
+        name: { ...name, id: 1162, name: "Anna", kind: "given", summary: null },
+        entries: [],
+        citations: [],
+        variants: [],
+        calendar_days: [],
+      });
+    if (url.pathname === "/etymolog/public/names/1163")
+      return send(200, {
+        ...dossier,
+        name: { ...name, id: 1163, name: "Shared name", kind: "both" },
+        entries: [
+          dossier.entries[0],
+          {
+            ...dossier.entries[0],
+            id: 20,
+            title: "Another source interpretation",
+          },
+          dossier.entries[4],
+        ],
+      });
     if (url.pathname === "/etymolog/public/names/1") return send(200, dossier);
     if (url.pathname.startsWith("/etymolog/public/names/"))
       return send(404, null);
@@ -167,6 +193,34 @@ http
     if (url.pathname === "/auth/logout") {
       tokens.delete(req.headers.authorization.replace("Bearer ", ""));
       return send(200, null);
+    }
+    if (url.pathname.startsWith("/etymolog/sync/")) {
+      if (session.user.role !== "admin") return send(403, null);
+      if (url.pathname === "/etymolog/sync/start" && req.method === "POST") {
+        if (!session.batch || session.batch.status === "complete") {
+          session.batch = {
+            status: "queued",
+            total: 2,
+            completed: 0,
+            failed: 0,
+            processed: 0,
+          };
+          session.batchPolls = 0;
+        }
+        return send(202, session.batch);
+      }
+      if (url.pathname === "/etymolog/sync/status" && req.method === "GET") {
+        if (session.batch && ++session.batchPolls > 1)
+          session.batch = {
+            status: "complete",
+            total: 2,
+            completed: 2,
+            failed: 0,
+            processed: 5,
+          };
+        return send(200, session.batch ?? null);
+      }
+      return send(405, null);
     }
     const parts = url.pathname.split("/").filter(Boolean);
     if (parts[0] === "etymolog") {

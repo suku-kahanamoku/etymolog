@@ -21,13 +21,25 @@ const {
   sources,
   citations,
 } = data;
-const groups = Object.entries(t.types)
-  .map(([type, label]) => ({
+const narrativeOrder = [
+  "etymology",
+  "mythology",
+  "legend",
+  "history",
+  "clerical_error",
+  "fiction",
+  "tradition",
+  "proverb",
+] as const;
+const groups = narrativeOrder
+  .map((type) => ({
     type,
-    label,
+    label: t.types[type],
     items: entries.filter((e) => e.type === type),
   }))
-  .filter((g) => g.items.length);
+  .filter(
+    (g) => g.items.length || g.type === "etymology" || g.type === "mythology",
+  );
 const culture = ["legend", "mythology", "fiction", "tradition", "proverb"];
 const source = (id: number) => sources.find((s) => Number(s.id) === Number(id));
 const valueLabel = (key: string | null) =>
@@ -37,9 +49,9 @@ const years = (from: number | null, to: number | null) =>
 const sections = [
   ...groups.map((g) => ({ id: g.type, label: g.label })),
   ...(variants.length ? [{ id: "variants", label: t.variants }] : []),
-  ...(occurrences.length ? [{ id: "occurrences", label: t.occurrences }] : []),
   ...(days.length ? [{ id: "calendar", label: t.calendar }] : []),
   ...(sources.length ? [{ id: "sources", label: t.sources }] : []),
+  ...(occurrences.length ? [{ id: "occurrences", label: t.occurrences }] : []),
 ];
 ---
 
@@ -82,7 +94,14 @@ const sections = [
             />
             {group.label}
           </h2>
-          {culture.includes(group.type) && (
+          {!group.items.length && (
+            <p class="notice">
+              {group.type === "etymology"
+                ? t.missingEtymology
+                : t.missingMythology}
+            </p>
+          )}
+          {group.items.length > 0 && culture.includes(group.type) && (
             <p class="cultural-note">{t.culturalNotice}</p>
           )}
           {group.items.map((entry) => (
@@ -176,54 +195,6 @@ const sections = [
           </ul>
         </section>
       )}
-      {occurrences.length > 0 && (
-        <section id="occurrences" class="dossier-group">
-          <h2 class="rule-title">
-            <EditorialIcon name="history" />
-            {t.occurrences}
-          </h2>
-          <div class="data-table-wrap">
-            <table class="data-table">
-              <thead>
-                <tr>
-                  <th>{t.year}</th>
-                  <th>{t.place}</th>
-                  <th>
-                    {t.measure} / {t.sex}
-                  </th>
-                  <th>{t.count}</th>
-                  <th>{t.source}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {occurrences.map((o) => (
-                  <tr>
-                    <td>{o.observed_on ?? o.observed_year}</td>
-                    <td>
-                      {[o.country_code, o.region].filter(Boolean).join(" · ")}
-                    </td>
-                    <td>
-                      {valueLabel(o.measure)} / {valueLabel(o.sex)}
-                      {o.original_spelling && <p>{o.original_spelling}</p>}
-                    </td>
-                    <td>
-                      {o.count === null
-                        ? "—"
-                        : new Intl.NumberFormat(locale).format(o.count)}
-                    </td>
-                    <td>
-                      <a href={`#source-${o.source_id}`}>
-                        {source(o.source_id)?.title ?? t.source}
-                      </a>
-                      {o.locator && <p>{o.locator}</p>}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
-      )}
       {days.length > 0 && (
         <section id="calendar" class="dossier-group">
           <h2 class="rule-title">
@@ -302,6 +273,54 @@ const sections = [
               </li>
             ))}
           </ol>
+        </section>
+      )}
+      {occurrences.length > 0 && (
+        <section id="occurrences" class="dossier-group">
+          <h2 class="rule-title">
+            <EditorialIcon name="history" />
+            {t.occurrences}
+          </h2>
+          <div class="data-table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>{t.year}</th>
+                  <th>{t.place}</th>
+                  <th>
+                    {t.measure} / {t.sex}
+                  </th>
+                  <th>{t.count}</th>
+                  <th>{t.source}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {occurrences.map((o) => (
+                  <tr>
+                    <td>{o.observed_on ?? o.observed_year}</td>
+                    <td>
+                      {[o.country_code, o.region].filter(Boolean).join(" · ")}
+                    </td>
+                    <td>
+                      {valueLabel(o.measure)} / {valueLabel(o.sex)}
+                      {o.original_spelling && <p>{o.original_spelling}</p>}
+                    </td>
+                    <td>
+                      {o.count === null
+                        ? "—"
+                        : new Intl.NumberFormat(locale).format(o.count)}
+                    </td>
+                    <td>
+                      <a href={`#source-${o.source_id}`}>
+                        {source(o.source_id)?.title ?? t.source}
+                      </a>
+                      {o.locator && <p>{o.locator}</p>}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </section>
       )}
     </div>

@@ -19,10 +19,9 @@ export default defineConfig({
       url: "http://localhost:4338",
       reuseExistingServer: false,
       env: {
-        PUBLIC_SITE_URL: "http://localhost:4338",
-        PHP_CORE_URL: "http://127.0.0.1:4409",
-        PHP_CORE_API_KEY: "test-only-secret",
-        PHP_CORE_TENANT_HOST: "etymolog.test",
+        FRONTEND_HOST: "http://localhost:4338",
+        PHP_API_BASE_URL: "http://127.0.0.1:4409",
+        INTERNAL_API_KEY: "test-only-secret",
       },
     },
   ],

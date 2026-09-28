@@ -29,7 +29,7 @@
   "noDetails": "Für diesen Eintrag sind noch keine weiteren Unterlagen veröffentlicht.",
   "sources": "Quellen und Zitate",
   "variants": "Formen und Varianten",
-  "occurrences": "Belegte Vorkommen",
+  "occurrences": "Statistiken und belegte Vorkommen",
   "calendar": "Namenstage und Kalender",
   "calendarNote": "Die Daten gelten für den angegebenen Kalender und die Tradition; julianische Daten werden nicht umgerechnet.",
   "source": "Quelle",
@@ -103,7 +103,22 @@
     "purge": "Endgültig löschen (Administrator)",
     "purgeConfirm": "Datensatz endgültig und unwiderruflich löschen?",
     "readonly": "Systemdaten",
-    "close": "Schließen"
+    "close": "Schließen",
+    "syncStart": "Synchronisierung starten",
+    "syncRunning": "Synchronisierung läuft…",
+    "syncStarting": "Synchronisierung wird gestartet…",
+    "syncHelp": "Führt alle aktivierten, fälligen Aufgaben im Hintergrund aus. Verarbeitet einen Stapel pro Aufgabe unter Beibehaltung der Intervalle und des Fortschritts. Neue Texte bleiben Entwürfe.",
+    "syncProcessed": "Verarbeitete Einträge",
+    "syncErrors": "Fehlgeschlagene Aufgaben",
+    "syncStatusError": "Status konnte nicht geladen werden. Erneuter Versuch folgt.",
+    "syncStartError": "Start konnte nicht bestätigt werden. Aufgabenstatus prüfen.",
+    "syncStates": {
+      "queued": "Wartet",
+      "running": "Läuft",
+      "complete": "Abgeschlossen",
+      "partial": "Mit Fehlern abgeschlossen",
+      "failed": "Fehlgeschlagen"
+    }
   },
   "fields": {
     "name": "Name",
@@ -174,5 +189,8 @@
     "feminine": "Weibliche Form",
     "related": "Verwandte Form"
   },
-  "quotation": "Zitierter Auszug"
+  "quotation": "Zitierter Auszug",
+  "missingEtymology": "Für diesen Namen liegt noch keine veröffentlichte Etymologie mit Quellenangabe vor.",
+  "missingMythology": "Mythologische Bezüge dieses Namens sind bei uns noch nicht durch veröffentlichte Quellen belegt.",
+  "both": "Vor- und Nachname"
 }

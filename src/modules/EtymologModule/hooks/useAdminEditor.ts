@@ -1,3 +1,4 @@
+import { useAdminSync } from "./useAdminSync";
 import { resources, resourceDefinition } from "../config/resources";
 import type { Dictionary } from "../providers/translations";
 import type { AdminRecord } from "../types";
@@ -60,6 +61,9 @@ export function useAdminEditor() {
     if (!payload.success) throw new Error(t.admin.error);
     return payload.data;
   }
+  const sync = useAdminSync(root, t, api, () =>
+    resource === "sync-jobs" ? load() : Promise.resolve(),
+  );
   function button(text: string, run: () => void | Promise<void>) {
     const b = element("button", text, "btn btn-sm btn-outline");
     b.type = "button";
@@ -219,7 +223,7 @@ export function useAdminEditor() {
       const options = type.startsWith("enum:")
         ? type.slice(5).split(",")
         : type === "language"
-          ? ["cs", "sk", "pl", "uk", "de", "en"]
+          ? ["cs", "sk", "pl", "uk", "de", "en", "fr"]
           : null;
       if (options) {
         const s = element("select");
@@ -356,6 +360,7 @@ export function useAdminEditor() {
   root.querySelectorAll<HTMLButtonElement>("[data-resource]").forEach((b) =>
     b.addEventListener("click", () => {
       resource = b.dataset.resource!;
+      sync.select(resource);
       page = 1;
       query = "";
       select<HTMLInputElement>("#admin-filter").value = "";

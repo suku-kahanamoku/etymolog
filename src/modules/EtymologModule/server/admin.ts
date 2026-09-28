@@ -15,6 +15,24 @@ export const adminHandler: APIRoute = async ({
     if (!user) throw new HttpError(401, "unauthorized");
     const parts = (params.path ?? "").split("/").filter(Boolean);
     const [resource, rawId, action] = parts;
+    if (resource === "sync" && parts.length === 2) {
+      if (user.role !== "admin") throw new HttpError(403, "forbidden");
+      let data: unknown;
+      if (rawId === "start" && request.method === "POST") {
+        const body = await readFields(request, 1024);
+        if (Object.keys(body).length) throw new HttpError(422, "invalid_input");
+        data = await locals.providers.etymolog.startSync();
+      } else if (rawId === "status" && request.method === "GET") {
+        data = await locals.providers.etymolog.syncStatus();
+      } else throw new HttpError(405, "method_not_allowed");
+      return Response.json(
+        { success: true, data },
+        {
+          status: request.method === "POST" ? 202 : 200,
+          headers: { "Cache-Control": "private, no-store" },
+        },
+      );
+    }
     const definition = resourceDefinition(resource ?? "");
     if (!definition || parts.length > 3) throw new HttpError(404, "not_found");
     if (definition.admin && user.role !== "admin")

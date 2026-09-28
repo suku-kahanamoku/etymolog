@@ -16,7 +16,7 @@ import { dictionary as etymologDictionary } from "../modules/EtymologModule/prov
 import { dictionary as contactDictionary } from "../modules/ContactModule/providers/translations";
 import { dictionary as authDictionary } from "../modules/AuthModule/providers/translations";
 import { localeFromPath } from "../modules/LangModule/providers/locale";
-import { resolveRoute, resolveName, url } from "../config/routes";
+import { resolveRoute, resolveName, url, nameUrl } from "../config/routes";
 import { site } from "../config/site";
 import { HttpError } from "../modules/CoreModule/server/errors";
 import type { User } from "../modules/AuthModule/types";
@@ -57,6 +57,8 @@ if (!error && (page === "account" || page === "login" || page === "admin")) {
 if (!error && nameRoute) {
   try {
     detail = await Astro.locals.providers.etymolog.detail(nameRoute.id);
+    if (Number(detail.name.id) !== nameRoute.id)
+      return Astro.redirect(nameUrl(locale, Number(detail.name.id)), 302);
   } catch (e) {
     error = e instanceof HttpError && e.status === 404 ? 404 : 503;
   }

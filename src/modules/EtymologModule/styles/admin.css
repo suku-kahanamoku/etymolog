@@ -166,3 +166,12 @@
     min-width: 560px;
   }
 }
+
+.admin-toolbar-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+.etymolog-admin [hidden] {
+  display: none !important;
+}

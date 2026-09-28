@@ -31,10 +31,23 @@ const t = dictionary(locale);
       <h2 data-resource-title class="rule-title">
         {t.resources.names}
       </h2>
-      <button class="btn btn-primary" data-create type="button">
-        + {t.admin.new}
-      </button>
+      <div class="admin-toolbar-actions">
+        {isAdmin && (
+          <button class="btn btn-outline" data-sync-start type="button" hidden>
+            {t.admin.syncStart}
+          </button>
+        )}
+        <button class="btn btn-primary" data-create type="button">
+          + {t.admin.new}
+        </button>
+      </div>
     </div>
+    {isAdmin && (
+      <div data-sync-panel hidden>
+        <p class="editor-help">{t.admin.syncHelp}</p>
+        <p data-sync-status role="status" aria-live="polite"></p>
+      </div>
+    )}
     <form data-filter class="admin-filter">
       <label for="admin-filter">{t.admin.filter}</label>
       <div>

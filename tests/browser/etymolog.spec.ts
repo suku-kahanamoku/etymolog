@@ -191,3 +191,111 @@ test("all ten resource forms create, read, update and delete through authenticat
     );
   }
 });
+
+test("admin starts background synchronization and sees progress without leaving the page", async ({
+  page,
+}) => {
+  await login(page, true);
+  await expect(page.locator("[data-sync-start]")).toBeHidden();
+  await page.locator('[data-resource="sync-jobs"]').click();
+  const start = page.getByRole("button", {
+    name: "Start synchronization",
+    exact: true,
+  });
+  await expect(start).toBeVisible();
+  const response = page.waitForResponse(
+    (r) => r.url().includes("/sync/start") && r.request().method() === "POST",
+  );
+  await start.click();
+  expect((await response).status()).toBe(202);
+  await expect(page.locator("[data-sync-start]")).toBeDisabled();
+  await expect(page.locator("[data-sync-status]")).toContainText("Completed", {
+    timeout: 10000,
+  });
+  await expect(page.locator("[data-sync-status]")).toContainText("2/2");
+  await expect(start).toBeEnabled();
+  const hostile = await page.request.post("/api/admin/etymolog/sync/start/", {
+    data: {},
+    headers: { Origin: "https://evil.test" },
+  });
+  expect(hostile.status()).toBe(403);
+  const invalid = await page.request.post("/api/admin/etymolog/sync/start/", {
+    data: { tenant: "other" },
+    headers: { Origin: "http://localhost:4338" },
+  });
+  expect(invalid.status()).toBe(422);
+  await page.screenshot({
+    path: "test-results/sync-admin.png",
+    fullPage: true,
+  });
+});
+
+test("editor cannot start or inspect synchronization", async ({ page }) => {
+  await login(page);
+  await expect(page.locator("[data-sync-start]")).toHaveCount(0);
+  expect(
+    (await page.request.get("/api/admin/etymolog/sync/status/")).status(),
+  ).toBe(403);
+  expect(
+    (
+      await page.request.post("/api/admin/etymolog/sync/start/", {
+        data: {},
+        headers: { Origin: "http://localhost:4338" },
+      })
+    ).status(),
+  ).toBe(403);
+});
+
+test("narratives lead the dossier and statistics are its final section", async ({
+  page,
+}) => {
+  await page.goto("/jmeno/1/");
+  const sections = await page
+    .locator(".dossier-body .dossier-group")
+    .evaluateAll((nodes) => nodes.map((node) => node.id));
+  expect(sections.slice(0, 2)).toEqual(["etymology", "mythology"]);
+  expect(sections.at(-1)).toBe("occurrences");
+  await expect(page.locator(".dossier-index a").last()).toHaveAttribute(
+    "href",
+    "#occurrences",
+  );
+});
+
+test("old statistical name links redirect to one dossier with honest missing-source states", async ({
+  page,
+  request,
+}) => {
+  const redirect = await request.get("/jmeno/864/", { maxRedirects: 0 });
+  expect(redirect.status()).toBe(302);
+  expect(redirect.headers().location).toBe("/jmeno/1162/");
+  await page.goto("/jmeno/864/");
+  await expect(page).toHaveURL("/jmeno/1162/");
+  await expect(page.locator("main h1")).toHaveText("Anna");
+  await expect(page.locator("#etymology")).toContainText(
+    "zatím nemáme zveřejněný etymologický výklad",
+  );
+  await expect(page.locator("#mythology")).toContainText(
+    "zatím nemáme doložené",
+  );
+  await expect(page.locator(".dossier-group").last()).toHaveAttribute(
+    "id",
+    "occurrences",
+  );
+  await page.screenshot({
+    path: "test-results/anna-dossier.png",
+    fullPage: true,
+  });
+});
+
+test("one shared name detail retains multiple etymologies and mythology", async ({
+  page,
+}) => {
+  await page.goto("/en/name/1163/");
+  await expect(page.locator("main h1")).toHaveText("Shared name");
+  await expect(page.locator(".dossier-tags")).toContainText(
+    "Given name and surname",
+  );
+  await expect(page.locator("#etymology .entry")).toHaveCount(2);
+  await expect(page.locator("#mythology .entry")).toHaveCount(1);
+  await expect(page.locator("#sources li")).toHaveCount(1);
+});

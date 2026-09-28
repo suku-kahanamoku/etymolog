@@ -1,7 +1,7 @@
 export interface NameRecord {
   id: number;
   name: string;
-  kind: "given" | "surname";
+  kind: "given" | "surname" | "both";
   language: string | null;
   country_code: string | null;
   summary: string | null;

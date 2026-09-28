@@ -1,4 +1,6 @@
-# Astro scaffold
+# Infrastruktura převzatá ze scaffoldu
+
+Názvy backendových proměnných jsou aktualizované podle Etymologu / FAnn. Aktuální konfiguraci a odlišnosti projektu popisuje hlavní README.
 
 Univerzální základ běžného obsahového webu s vlastní serverovou vrstvou před php-core. Inspirace: `astro-prasentace` (společné šablony, JSON překlady, centrální značka) a `astro-sorry-jako` (malé komponenty a jednoduchý routing). Žádná závislost na souborech sousedních projektů.
 
@@ -22,13 +24,13 @@ npm run build
 npm run start
 ```
 
-`start` načte lokální `.env`, pokud existuje. V hostingu nastavujte serverové proměnné přímo v prostředí. `PUBLIC_SITE_URL` se používá při sestavení (canonical, sitemap, očekávaný origin formulářů); po změně web znovu sestavte. Build nevolá php-core. `HOST` a `PORT` nastavují naslouchání standalone serveru.
+`start` načte lokální `.env`, pokud existuje. V hostingu nastavujte serverové proměnné přímo v prostředí. `FRONTEND_HOST` se používá při sestavení (canonical, sitemap, očekávaný origin formulářů); po změně web znovu sestavte. Build nevolá php-core. `HOST` a `PORT` nastavují naslouchání standalone serveru.
 
 ## Nový projekt
 
 1. Zkopírujte tento adresář bez `node_modules`, `dist`, `.astro`, `.env`, testových výstupů a případného `.git`. Ponechte lockfile a `.env.example`.
 2. Změňte název balíčku v `package.json` (poté `npm install --package-lock-only`), značku/kontakt/moduly v `src/config/site.ts` a barvy v `src/modules/UIModule/styles/theme.css`.
-3. Nastavte `PUBLIC_SITE_URL`, `PHP_CORE_URL`, `PHP_CORE_API_KEY` a `PHP_CORE_TENANT_HOST`. Skutečné hodnoty klíčů necommitujte.
+3. Nastavte `FRONTEND_HOST`, `PHP_API_BASE_URL` a `INTERNAL_API_KEY`. Skutečné hodnoty klíčů necommitujte.
 4. Zajistěte backendové mapování hostu, například `novy-web.cz:tenant_code` v `FRANCHISE_CODES` php-core. Frontend toto mapování nevytváří. Backend URL může obsahovat `/api` prefix.
 5. Nahraďte ukázkový obsah, `src/modules/ContentModule/assets/hero.svg`, `public/social.png` a favicon. Pro rastrové obrázky používejte `Image`/`Picture` z `astro:assets`; lokální SVG ukázka se záměrně nerasterizuje a nepotřebuje vzdálený image host.
 6. Nastavte případné reklamní jednotky, CMP a veřejnou WebSocket URL. Bez této konfigurace žádné externí reklamní ani WebSocket spojení nevzniká.
@@ -90,7 +92,7 @@ Každý upstream požadavek přidává serverový `X-Internal-Key` a pevný `X-F
 
 User Bearer se přenáší v host-only `HttpOnly`, `SameSite=Lax` cookie, v produkci se `Secure`, bez localStorage. Cookie je relační; platnost a odvolání tokenu určuje php-core, backendový čas bez timezone se nepřepočítává. Není potřeba session databáze na jednotlivých Astro instancích. Pro souběžné instance stačí stejná konfigurace a backend. Při 401 z `/auth/me` se cookie zahodí; výpadek backendu se ukáže jako 503, nikoli jako falešné odhlášení. Při neúspěšném odvolání tokenu logout zobrazí chybu a zachová cookie pro opakování.
 
-Všechny `/api` mutace kontrolují `Origin` proti nakonfigurovanému veřejnému originu (včetně portu). JSON i formuláře mají limit 16 KiB. API a soukromé stránky vracejí `Cache-Control: private, no-store`; validace a rate limiting přihlášení v php-core zůstávají zachované. Role v profilu slouží UI, nikdy nenahrazují backendovou autorizaci. Pro produkci nastavte HTTPS a případné edge rate limiting podle hostingu. Za reverse proxy musí `PUBLIC_SITE_URL` odpovídat veřejné adrese.
+Všechny `/api` mutace kontrolují `Origin` proti nakonfigurovanému veřejnému originu (včetně portu). JSON i formuláře mají limit 16 KiB. API a soukromé stránky vracejí `Cache-Control: private, no-store`; validace a rate limiting přihlášení v php-core zůstávají zachované. Role v profilu slouží UI, nikdy nenahrazují backendovou autorizaci. Pro produkci nastavte HTTPS a případné edge rate limiting podle hostingu. Za reverse proxy musí `FRONTEND_HOST` odpovídat veřejné adrese.
 
 ## Layout a reklama
 

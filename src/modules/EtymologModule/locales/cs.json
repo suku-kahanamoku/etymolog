@@ -29,7 +29,7 @@
   "noDetails": "K tomuto heslu zatím nejsou zveřejněny další podklady.",
   "sources": "Prameny a citace",
   "variants": "Podoby a varianty",
-  "occurrences": "Výskyt v záznamech",
+  "occurrences": "Statistiky a výskyt v záznamech",
   "calendar": "Svátky a kalendáře",
   "calendarNote": "Data platí pro uvedený kalendář a tradici; juliánská data nejsou převáděna na gregoriánská.",
   "source": "Pramen",
@@ -103,7 +103,22 @@
     "purge": "Trvale smazat (správce)",
     "purgeConfirm": "Trvale a nevratně odstranit záznam?",
     "readonly": "Systémové údaje",
-    "close": "Zavřít"
+    "close": "Zavřít",
+    "syncStart": "Spustit synchronizaci",
+    "syncRunning": "Synchronizace probíhá…",
+    "syncStarting": "Spouštím synchronizaci…",
+    "syncHelp": "Na pozadí projde všechny zapnuté úlohy, které jsou na řadě. U každé zpracuje jednu dávku a zachová interval i uložený postup. Nové texty zůstanou koncepty.",
+    "syncProcessed": "Zpracované položky",
+    "syncErrors": "Chybné úlohy",
+    "syncStatusError": "Stav se nepodařilo načíst. Zkusíme to znovu.",
+    "syncStartError": "Spuštění se nepodařilo potvrdit. Ověřte stav úloh.",
+    "syncStates": {
+      "queued": "Čeká na spuštění",
+      "running": "Probíhá",
+      "complete": "Dokončeno",
+      "partial": "Dokončeno s chybami",
+      "failed": "Běh selhal"
+    }
   },
   "fields": {
     "name": "Jméno",
@@ -174,5 +189,8 @@
     "feminine": "Ženská podoba",
     "related": "Příbuzná podoba"
   },
-  "quotation": "Citovaný úryvek"
+  "quotation": "Citovaný úryvek",
+  "missingEtymology": "K tomuto jménu zatím nemáme zveřejněný etymologický výklad s uvedeným pramenem.",
+  "missingMythology": "Mytologické souvislosti tohoto jména zatím nemáme doložené zveřejněným pramenem.",
+  "both": "Křestní jméno i příjmení"
 }

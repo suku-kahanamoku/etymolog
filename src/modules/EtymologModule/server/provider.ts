@@ -115,6 +115,12 @@ export function createEtymologProvider(core: CoreClient, token?: string) {
         query: { page, limit: "20" },
       });
     },
+    startSync() {
+      return privateRequest("sync/start", { method: "POST", body: {} });
+    },
+    syncStatus() {
+      return privateRequest("sync/status");
+    },
     reset(id: number) {
       return privateRequest(resourcePath("sync-jobs", id) + "/reset", {
         method: "POST",

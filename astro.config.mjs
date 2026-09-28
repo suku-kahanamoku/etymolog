@@ -1,5 +1,6 @@
 import { defineConfig, envField } from "astro/config";
 import node from "@astrojs/node";
+import netlify from "@astrojs/netlify";
 import sitemap from "@astrojs/sitemap";
 import tailwindcss from "@tailwindcss/vite";
 import { loadEnv } from "vite";
@@ -8,15 +9,18 @@ import { locales, publicPages, url } from "./src/config/routes";
 const env = loadEnv(
   process.env.NODE_ENV ?? "development",
   process.cwd(),
-  "PUBLIC_",
+  "FRONTEND_HOST",
 );
 const site =
-  process.env.PUBLIC_SITE_URL || env.PUBLIC_SITE_URL || "http://localhost:4321";
+  process.env.FRONTEND_HOST ||
+  env.FRONTEND_HOST ||
+  "http://etymolog.localhost:4321";
 export default defineConfig({
   site,
   output: "server",
   devToolbar: { enabled: false },
-  adapter: node({ mode: "standalone" }),
+  adapter:
+    process.env.NETLIFY === "true" ? netlify() : node({ mode: "standalone" }),
   server: { port: 4321 },
   trailingSlash: "always",
   i18n: {
@@ -26,17 +30,17 @@ export default defineConfig({
   },
   env: {
     schema: {
-      PHP_CORE_URL: envField.string({
+      PHP_API_BASE_URL: envField.string({
         context: "server",
         access: "secret",
         optional: true,
       }),
-      PHP_CORE_API_KEY: envField.string({
+      INTERNAL_API_KEY: envField.string({
         context: "server",
         access: "secret",
         optional: true,
       }),
-      PHP_CORE_TENANT_HOST: envField.string({
+      FRONTEND_HOST: envField.string({
         context: "server",
         access: "secret",
         optional: true,
@@ -56,5 +60,5 @@ export default defineConfig({
         ),
     }),
   ],
-  vite: { plugins: [tailwindcss()] },
+  vite: { server: { strictPort: true }, plugins: [tailwindcss()] },
 });

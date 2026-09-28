@@ -18,6 +18,7 @@
     "format:check": "prettier --check ."
   },
   "dependencies": {
+    "@astrojs/netlify": "^8.2.6",
     "@astrojs/node": "^11.1.6",
     "@astrojs/sitemap": "^3.7.4",
     "@tailwindcss/vite": "^4.3.3",
