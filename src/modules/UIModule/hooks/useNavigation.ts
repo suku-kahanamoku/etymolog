@@ -14,6 +14,7 @@ export function useNavigation(
     cancelLeave();
     toggle.setAttribute("aria-expanded", "false");
     mobileNav.hidden = true;
+    toggle.setAttribute("aria-label", toggle.dataset.openLabel ?? "");
   };
   toggle.addEventListener(
     "click",
@@ -22,6 +23,10 @@ export function useNavigation(
       const expanded = toggle.getAttribute("aria-expanded") === "true";
       toggle.setAttribute("aria-expanded", String(!expanded));
       mobileNav.hidden = expanded;
+      toggle.setAttribute(
+        "aria-label",
+        (expanded ? toggle.dataset.openLabel : toggle.dataset.closeLabel) ?? "",
+      );
     },
     options,
   );
@@ -76,10 +81,17 @@ export function useNavigation(
     },
     options,
   );
-  matchMedia("(min-width: 768px)").addEventListener(
+  matchMedia("(min-width: 1280px)").addEventListener(
     "change",
     (event) => {
       if (event.matches) close();
+    },
+    options,
+  );
+  mobileNav.addEventListener(
+    "click",
+    (event) => {
+      if (event.target instanceof Element && event.target.closest("a")) close();
     },
     options,
   );

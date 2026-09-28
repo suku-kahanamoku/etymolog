@@ -1,0 +1,13 @@
+{
+  "routes": {
+    "home": "",
+    "about": "ueber-uns",
+    "login": "anmelden",
+    "account": "konto",
+    "contact": "kontakt",
+    "admin": "verwaltung"
+  },
+  "detail": {
+    "name": "name"
+  }
+}

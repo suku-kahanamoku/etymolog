@@ -1,0 +1,13 @@
+{
+  "routes": {
+    "home": "",
+    "about": "about",
+    "login": "login",
+    "account": "account",
+    "contact": "contact",
+    "admin": "admin"
+  },
+  "detail": {
+    "name": "name"
+  }
+}

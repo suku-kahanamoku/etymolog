@@ -23,7 +23,7 @@ test("search updates below form, detail shows every section and sources safely",
     "Nalezená hesla: 1",
   );
   await page.locator(".result-card").click();
-  await expect(page).toHaveURL("/name/1/");
+  await expect(page).toHaveURL("/jmeno/1/");
   await expect(page.locator("main h1")).toHaveText("Novák");
   for (const id of [
     "etymology",
@@ -46,7 +46,7 @@ test("search updates below form, detail shows every section and sources safely",
   expect(errors).toEqual([]);
   await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
     "href",
-    "http://localhost:4338/name/1/",
+    "http://localhost:4338/jmeno/1/",
   );
   await page.locator(".language-picker summary").click();
   await page
@@ -58,7 +58,7 @@ test("search updates below form, detail shows every section and sources safely",
   expect(await response.text()).not.toMatch(
     /private_field|should-not-leak|test-only-secret/,
   );
-  expect((await request.get("/name/999/")).status()).toBe(404);
+  expect((await request.get("/jmeno/999/")).status()).toBe(404);
   await page.screenshot({ path: "test-results/detail.png", fullPage: true });
 });
 test("search empty, failure, invalid input and no-JS fallback", async ({
@@ -94,7 +94,7 @@ test("theme survives navigation and contact uses actual reference data", async (
     "data-theme",
     "newspaper-dark",
   );
-  await page.goto("/contact/");
+  await page.goto("/kontakt/");
   await expect(page.locator("html")).toHaveAttribute(
     "data-theme",
     "newspaper-dark",

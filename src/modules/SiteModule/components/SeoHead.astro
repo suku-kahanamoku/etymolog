@@ -1,7 +1,7 @@
 ---
 import { SEO } from "astro-seo";
 import { locales, type Locale } from "../../LangModule/config";
-import { url, type PageId } from "../../../config/routes";
+import { url, nameUrl, resolveName, type PageId } from "../../../config/routes";
 import { site } from "../../../config/site";
 interface Props {
   locale: Locale;
@@ -11,8 +11,11 @@ interface Props {
   noindex?: boolean;
 }
 const { locale, page, title, description, noindex = false } = Astro.props;
+const nameRoute = resolveName(Astro.url.pathname);
+const localizedHref = (code: Locale) =>
+  nameRoute ? nameUrl(code, nameRoute.id) : url(code, page);
 const canonical = new URL(
-  page ? url(locale, page) : Astro.url.pathname,
+  page || nameRoute ? localizedHref(locale) : Astro.url.pathname,
   Astro.site,
 );
 ---
@@ -38,19 +41,19 @@ const canonical = new URL(
   }}
   twitter={{ card: "summary_large_image" }}
 />
-{!noindex && page && (
+{!noindex && (page || nameRoute) && (
   <>
     {locales.map((code) => (
       <link
         rel="alternate"
         hreflang={code}
-        href={new URL(url(code, page), Astro.site)}
+        href={new URL(localizedHref(code), Astro.site)}
       />
     ))}
     <link
       rel="alternate"
       hreflang="x-default"
-      href={new URL(url("cs", page), Astro.site)}
+      href={new URL(localizedHref("cs"), Astro.site)}
     />
   </>
 )}

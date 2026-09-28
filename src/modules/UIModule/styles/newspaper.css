@@ -103,9 +103,6 @@ button:disabled {
 .language-options [aria-current] {
   background: var(--color-base-200) !important;
 }
-.mobile-menu-panel {
-  background: var(--paper);
-}
 .content-section > p:not(.eyebrow) {
   color: var(--muted);
 }
@@ -118,15 +115,4 @@ button:disabled {
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border: 0;
-}
-
-.menu-toggle span {
-  background: var(--ink);
-}
-.mobile-nav {
-  background: var(--paper);
-  border-color: var(--rule);
-}
-.mobile-nav a {
-  border-color: var(--rule);
 }

@@ -13,7 +13,7 @@ cp .env.example .env
 npm run dev
 ```
 
-Web: `http://localhost:4321`, redakce: `/admin/`. Přihlášení používá existující účty tenantu Etymolog v php-core. Nové účty ani hesla frontend nevytváří.
+Web: `http://localhost:4321`, redakce: `/administrace/`. Přihlášení používá existující účty tenantu Etymolog v php-core. Nové účty ani hesla frontend nevytváří.
 
 Lokální `.env` je již připravený pro `http://127.0.0.1:8000/api` a `etymolog.localhost`. Obsahuje serverový klíč, je ignorovaný Gitem a nesmí se zveřejnit. Backend spusťte samostatně v `../../php/php-core` příkazem `php -S 127.0.0.1:8000`. Pro jiné prostředí nastavte:
 
@@ -31,10 +31,10 @@ Bez backendu se zobrazí veřejná kostra, O nás a Kontakt; hledání oznámí 
 ## Stránky a funkce
 
 - `/`: hledání jména/příjmení, filtr druhu, výsledky pod formulářem a stránkování. Formulář funguje i bez JavaScriptu přes GET; JS doplňuje výsledky bez přechodu na jinou stránku a brání závodům starých odpovědí.
-- `/name/:id/`: publikovaný detail. Etymologie, historie, úřední změny, pověsti, mytologie, literární příběhy, tradice, pranostiky, varianty, výskyty, kalendáře a prameny. Prázdné oddíly se nevykreslují.
-- `/about/`: smysl projektu, práce s prameny a omezení výkladu.
-- `/contact/`: skutečný kontakt z Prasentace, `info@prasentace.cz`, `+420 722 767 646`, IČO `04473442`, Eleonory Voračické 2167/29, 616 00 Brno – Žabovřesky. E-mail a telefon mají funkční odkazy; stránka nepředstírá odesílání pošty.
-- `/login/`, `/account/`, `/admin/`: přihlášení, účet/odhlášení a chráněná redakce. Po přihlášení se otevře redakce.
+- `/jmeno/:id/`: publikovaný detail. Etymologie, historie, úřední změny, pověsti, mytologie, literární příběhy, tradice, pranostiky, varianty, výskyty, kalendáře a prameny. Prázdné oddíly se nevykreslují.
+- `/o-nas/`: smysl projektu, práce s prameny a omezení výkladu.
+- `/kontakt/`: skutečný kontakt z Prasentace, `info@prasentace.cz`, `+420 722 767 646`, IČO `04473442`, Eleonory Voračické 2167/29, 616 00 Brno – Žabovřesky. E-mail a telefon mají funkční odkazy; stránka nepředstírá odesílání pošty.
+- `/prihlaseni/`, `/ucet/`, `/administrace/`: přihlášení, účet/odhlášení a chráněná redakce. Po přihlášení se otevře redakce.
 - CS bez prefixu, EN `/en/`, DE `/de/`. Změna jazyka zachovává detail stejného ID. UI se překládá, historické texty se automaticky nepřekládají ani nedoplňují.
 - Světlé/tmavé téma, systémová preference při první návštěvě, uložení volby, klávesnice, hamburger a funkční navigace bez JS.
 
@@ -122,3 +122,26 @@ Nové obrázky, původní prompty a jejich použití: [docs/brand-assets.md](doc
 - Každý modul vlastní styly svých komponent. Sdílené proměnné `--theme-*` a případné daisyUI tokeny dodává UIModule; modul si může přidat vlastní proměnné a tmavé varianty pod `[data-theme-mode="dark"]`. Původní světlé barvy zůstávají ve fallback hodnotách. Nepoužívejte plošné invertování obrázků ani barev.
 - Automatický režim se obnoví smazáním projektového klíče z `localStorage`; přepínač v menu nabízí ruční světlou/tmavou volbu.
 - `tests/browser/theme.spec.ts` ověřuje systémovou i uloženou volbu, synchronizaci záložek, zakázané úložiště, klávesnici, jazyky, responzivitu a podobu tlačítka. Backendové scénáře browser testů používají mock, nikoli produkční služby.
+
+## Společné hlavní menu
+
+Rozložení hlavičky vlastní `src/modules/UIModule/components/MainMenu.astro`, styly `UIModule/styles/main-menu.css` a chování `useMainMenu`, `useNavigation` a `useHeaderOffset`. Tato komponenta a její rozložení jsou shodné v projektech astro-scaffold, astro-etymolog, astro-prasentace a astro-sorry-jako. Repozitáře zůstávají samostatné a neimportují soubory sousedních projektů.
+
+`SiteModule/components/Header.astro` je pouze projektová kompozice:
+
+- `items` definuje hlavní odkazy (`href`, `label`, volitelně `current`); `mobileItems` navíc obsahuje přihlášení nebo hlavní akci.
+- Slot `brand` obsahuje logo, slot `language` jazykový přepínač a slot `action` přihlášení nebo výrazné CTA. `locale` předává jazyk přepínači tématu z UIModule, `label` pojmenovává navigaci. Volitelné `openLabel`/`closeLabel` pojmenovávají hamburger.
+- Desktop od 1280 px používá tři sloupce: logo vlevo, navigace přesně uprostřed, akce vpravo v pořadí téma → jazyk → hlavní akce. Mezi tématem a jazykem je 8 px.
+- Pod 1280 px přechází navigace do hamburgeru. Pod 768 px se hlavní akce přesune do mobilních odkazů. Funguje Escape, kliknutí mimo, zavření po výběru odkazu, změna šířky i navigace bez JavaScriptu.
+- `framed` zapojuje hlavičku do existujícího subgridu stránky (Scaffold/Etymolog); nezapíná reklamy. `showAction={false}` skryje volitelnou akci i její prostor.
+- Projektové barvy se upravují pomocí `--menu-background`, `--menu-panel`, `--menu-link`, `--menu-accent` a `--menu-border` ve stylech SiteModule. Logo si zachovává vlastní brand styly. Rozložení se v SiteModule znovu nedefinuje.
+
+Při založení dalšího projektu použijte Scaffold jako šablonu a zachovejte MainMenu i jeho UI závislosti. Měňte pouze značku, data odkazů, překlady a slot hlavní akce v projektové hlavičce. Při změně společného rozložení přeneste stejné soubory UIModule do ostatních samostatných projektů. `tests/browser/main-menu.spec.ts` hlídá centrování, pořadí, rozestupy, překryvy a přechod mezi desktopem a hamburgerem.
+
+## Lokalizované URL
+
+URL slugy jsou v `src/config/locales/{cs,en,de}.json`; stabilní ID a tvorbu odkazů spravuje `src/config/routes.ts`. Nové odkazy skládejte helpery, nikoli ručně. Překlady textů zůstávají v jednotlivých modulech.
+
+Například `about` má adresy `/o-nas/`, `/en/about/` a `/de/ueber-uns/`. Menu, přepínač jazyků, canonical, hreflang a sitemap používají stejný `url()`. Staré nepřeložené cesty se pro GET/HEAD přesměrují stavem 308 se zachováním query; API cesty se nepřekládají. Robots vylučuje nové i původní soukromé adresy.
+
+Detaily používají `nameUrl(locale, id)`: `/jmeno/123/`, `/en/name/123/`, `/de/name/123/`. Přepnutí jazyka zachová ID záznamu a detail obsahuje odpovídající hreflang.

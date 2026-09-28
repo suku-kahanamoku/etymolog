@@ -1,0 +1,13 @@
+{
+  "routes": {
+    "home": "",
+    "about": "o-nas",
+    "login": "prihlaseni",
+    "account": "ucet",
+    "contact": "kontakt",
+    "admin": "administrace"
+  },
+  "detail": {
+    "name": "jmeno"
+  }
+}
