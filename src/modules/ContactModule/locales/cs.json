@@ -6,7 +6,8 @@
   "phone": "Telefon",
   "address": "Adresa",
   "registration": "IČO",
-  "operator": "Kontaktní údaje Prasentace",
+  "operator": "Provozovatel webu",
   "send": "Napsat e-mail",
-  "call": "Zavolat"
+  "call": "Zavolat",
+  "registryEntry": "Fyzická osoba podnikající dle živnostenského zákona, zapsaná v živnostenském rejstříku."
 }

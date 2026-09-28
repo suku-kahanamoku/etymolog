@@ -1,6 +1,7 @@
 import { defaultTheme } from "../modules/UIModule/config/theme";
 export const site = {
   name: "Etymolog",
+  operatorName: "Süchceren Cecegé",
   email: "info@prasentace.cz",
   phone: "+420 722 767 646",
   registrationId: "04473442",

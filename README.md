@@ -36,7 +36,7 @@ Bez backendu se zobrazí veřejná kostra, O nás a Kontakt; hledání oznámí 
 - `/`: hledání jména/příjmení, filtr druhu, výsledky pod formulářem a stránkování. Formulář funguje i bez JavaScriptu přes GET; JS doplňuje výsledky bez přechodu na jinou stránku a brání závodům starých odpovědí.
 - `/jmeno/:id/`: publikovaný detail. Etymologie, historie, úřední změny, pověsti, mytologie, literární příběhy, tradice, pranostiky, varianty, výskyty, kalendáře a prameny. Prázdné oddíly se nevykreslují.
 - `/o-nas/`: smysl projektu, práce s prameny a omezení výkladu.
-- `/kontakt/`: skutečný kontakt z Prasentace, `info@prasentace.cz`, `+420 722 767 646`, IČO `04473442`, Eleonory Voračické 2167/29, 616 00 Brno – Žabovřesky. E-mail a telefon mají funkční odkazy; stránka nepředstírá odesílání pošty.
+- `/kontakt/`: provozovatel Süchceren Cecegé, fyzická osoba podnikající dle živnostenského zákona, zapsaná v živnostenském rejstříku; `info@prasentace.cz`, `+420 722 767 646`, IČO `04473442`, Eleonory Voračické 2167/29, 616 00 Brno – Žabovřesky. E-mail a telefon mají funkční odkazy; stránka nepředstírá odesílání pošty.
 - `/prihlaseni/`, `/ucet/`, `/administrace/`: přihlášení, účet/odhlášení a chráněná redakce. Po přihlášení se otevře redakce.
 - CS bez prefixu, EN `/en/`, DE `/de/`. Změna jazyka zachovává detail stejného ID. UI se překládá, historické texty se automaticky nepřekládají ani nedoplňují.
 - Světlé/tmavé téma, systémová preference při první návštěvě, uložení volby, klávesnice, hamburger a funkční navigace bez JS.

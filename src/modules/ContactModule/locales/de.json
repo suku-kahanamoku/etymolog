@@ -6,7 +6,8 @@
   "phone": "Telefon",
   "address": "Adresse",
   "registration": "Unternehmensnummer",
-  "operator": "Kontaktdaten von Prasentace",
+  "operator": "Websitebetreiber",
   "send": "E-Mail schreiben",
-  "call": "Anrufen"
+  "call": "Anrufen",
+  "registryEntry": "Einzelunternehmen nach tschechischem Gewerbegesetz, eingetragen im tschechischen Gewerberegister."
 }

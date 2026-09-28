@@ -50,9 +50,12 @@ const t = dictionary(Astro.props.locale);
       </address>
     </article>
     <article>
-      <h2 class="rule-title">{t.registration}</h2>
-      <p class="contact-value">{site.registrationId}</p>
-      <p class="contact-caption">{t.operator}</p>
+      <h2 class="rule-title">{t.operator}</h2>
+      <p class="contact-value">{site.operatorName}</p>
+      <p>
+        {t.registration}: {site.registrationId}
+      </p>
+      <p class="contact-caption">{t.registryEntry}</p>
     </article>
   </div>
 </section>

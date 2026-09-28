@@ -6,7 +6,8 @@
   "phone": "Phone",
   "address": "Address",
   "registration": "Business registration number",
-  "operator": "Prasentace contact details",
+  "operator": "Website operator",
   "send": "Send an email",
-  "call": "Call"
+  "call": "Call",
+  "registryEntry": "Sole trader registered in the Czech Trade Register under the Trade Licensing Act."
 }
