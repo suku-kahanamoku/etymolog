@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixtures";
 
 test("ad providers wait for consent and request side slots only when visible", async ({
   page,

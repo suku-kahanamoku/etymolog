@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, blockExternalCmp } from "./fixtures";
 
 test("responsive frame keeps content visible and hides rails below xl", async ({
   page,
@@ -302,6 +302,7 @@ test("module navigation and language picker remain usable without JavaScript", a
     javaScriptEnabled: false,
     viewport: { width: 390, height: 844 },
   });
+  await blockExternalCmp(context);
   try {
     const page = await context.newPage();
     await page.goto("/");

@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, blockExternalCmp } from "./fixtures";
 import { themeConfig } from "../../src/modules/UIModule/config/theme";
 
 test("theme follows the system until explicitly chosen and survives navigation", async ({
@@ -61,6 +61,7 @@ test("invalid saved theme follows system and blocked storage still permits switc
 }) => {
   for (const blocked of [false, true]) {
     const context = await browser.newContext({ baseURL, colorScheme: "dark" });
+    await blockExternalCmp(context);
     await context.addInitScript(
       ({ key, blocked }) => {
         if (blocked) {
@@ -193,6 +194,7 @@ test("without JavaScript the default theme and content remain usable", async ({
     baseURL,
     javaScriptEnabled: false,
   });
+  await blockExternalCmp(context);
   try {
     const page = await context.newPage();
     expect((await page.goto("/"))?.status()).toBe(200);

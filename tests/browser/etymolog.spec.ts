@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, blockExternalCmp } from "./fixtures";
 import definitions from "../../src/modules/EtymologModule/config/resources.json" with { type: "json" };
 async function login(page: import("@playwright/test").Page, admin = false) {
   await page.goto("/en/admin/");
@@ -78,6 +78,7 @@ test("search empty, failure, invalid input and no-JS fallback", async ({
     javaScriptEnabled: false,
     reducedMotion: "reduce",
   });
+  await blockExternalCmp(context);
   const nojs = await context.newPage();
   await nojs.goto("/en/");
   await nojs.getByLabel("Name or surname", { exact: true }).fill("Novak");

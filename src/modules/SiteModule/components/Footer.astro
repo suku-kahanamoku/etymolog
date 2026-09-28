@@ -20,6 +20,7 @@ const t = dictionary(locale);
   </div>
   <div class="footer-contact">
     <a href={`mailto:${site.email}`}>{site.email}</a>
+    <slot />
     <span>
       © {new Date().getFullYear()} {site.name}
     </span>

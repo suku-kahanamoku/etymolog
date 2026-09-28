@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixtures";
 import { locales, publicPages, pages, url } from "../../src/config/routes";
 
 test("localized pages, menu, SEO and language switch share canonical routes", async ({

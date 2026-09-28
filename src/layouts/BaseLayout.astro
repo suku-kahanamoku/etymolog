@@ -2,6 +2,8 @@
 import ThemeInit from "../modules/UIModule/components/ThemeInit.astro";
 import SeoHead from "../modules/SiteModule/components/SeoHead.astro";
 import "../styles/global.css";
+import ConsentScript from "../modules/AdsModule/components/ConsentScript.astro";
+import ConsentSettings from "../modules/AdsModule/components/ConsentSettings.astro";
 import AdFrame from "../modules/AdsModule/components/AdFrame.astro";
 import Header from "../modules/SiteModule/components/Header.astro";
 import Footer from "../modules/SiteModule/components/Footer.astro";
@@ -23,6 +25,7 @@ const { locale, page, title, description, noindex = false } = Astro.props;
 <html lang={locale} data-theme={site.theme.name}>
   <head>
     <meta charset="utf-8" />
+    {site.modules.ads && <ConsentScript />}
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content={site.theme.color} />
     <link rel="icon" href="/favicon.png" type="image/png" />
@@ -39,7 +42,9 @@ const { locale, page, title, description, noindex = false } = Astro.props;
       <main id="main-content" tabindex="-1">
         <slot />
       </main>
-      <Footer {locale} />
+      <Footer {locale}>
+        {site.modules.ads && <ConsentSettings {locale} />}
+      </Footer>
     </AdFrame>
   </body>
 </html>
