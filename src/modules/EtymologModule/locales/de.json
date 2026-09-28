@@ -180,7 +180,10 @@
     "name_day": "Namenstag",
     "feast": "Festtag",
     "observance": "Gedenktag",
-    "folklore": "Volksüberlieferung"
+    "folklore": "Volksüberlieferung",
+    "wikipedia-names": "Tschechische Wikipedia – Namen und Traditionen",
+    "etymologies": "Ausgewählte Etymologien",
+    "culture": "Legenden, Mythologie und Traditionen"
   },
   "relations": {
     "spelling": "Schreibvariante",

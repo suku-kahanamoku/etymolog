@@ -162,3 +162,13 @@ Pro běh na pozadí aplikujte v php-core migrace `2026-09-28-etymolog-background
 Veřejné vyhledávání slučuje stejné znění jména bez ohledu na jeho druh napříč importními zdroji, jazyky a zeměmi (ignoruje velikost písmen a krajní mezery, zachovává diakritiku). `ANNA` a `Anna` tvoří jedno heslo s předností běžného zápisu. Detail sdružuje pouze zveřejněné podklady zveřejněných členů; původní URL vede přes dočasné přesměrování na aktuální společné heslo. Databázové záznamy a původ jednotlivých zdrojů zůstávají zachované. Etymologie a mytologie mají přednost i s vysvětlením chybějících podkladů; statistiky jsou poslední sekcí.
 
 Stejný zápis vedený jako křestní jméno i příjmení má také jen jeden veřejný výsledek a jeden detail. Filtr druhu zachovává stejné ID; veřejný štítek `both` se zobrazuje jako „Křestní jméno i příjmení“. Jednotlivé etymologie a kulturní texty se v detailu neslučují do jednoho výkladu.
+
+Migrace `2026-09-28-etymolog-wikipedia-tenant.sql` navíc připravuje dvě úlohy
+`wikipedia-names`: vybrané etymologie a kulturní texty z české Wikipedie pod
+CC BY-SA 4.0. Katalog obsahuje 15 oddílů pro Annu, Jiřího, Martina, Mikuláše,
+Barboru a Dianu. První úspěšné spuštění nových úloh načte pro Annu etymologii,
+legendu, patronát a pranostiky; další kulturní texty pokračují v dalších dávkách
+(interval 5 minut). Stávající tlačítko spouští jednu dávku každé splatné úlohy.
+Importované texty jsou koncepty: před zobrazením na webu je redaktor zkontroluje
+a publikuje v administraci. Odkaz na revizi, licence a autorství doprovázejí
+texty; při opakování se nezdvojují ani nepřepisují ruční úpravy.

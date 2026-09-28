@@ -180,7 +180,10 @@
     "name_day": "Jmeniny",
     "feast": "Svátek",
     "observance": "Významný den",
-    "folklore": "Lidová tradice"
+    "folklore": "Lidová tradice",
+    "wikipedia-names": "Česká Wikipedie – jména a tradice",
+    "etymologies": "Vybrané etymologie",
+    "culture": "Legendy, mytologie a tradice"
   },
   "relations": {
     "spelling": "Pravopisná podoba",
