@@ -100,3 +100,8 @@
   border-color: var(--rule);
   border-radius: 2px;
 }
+
+/* Fixed Seznam formats need the full slot width, including the 160px rails. */
+.ad-content-seznam {
+  border: 0;
+}

@@ -9,14 +9,18 @@ interface Props {
 }
 const { position, locale } = Astro.props;
 const t = dictionary(locale);
+const unit = ads[position];
 ---
 
 <aside class:list={["ad-slot", `ad-${position}`]} aria-label={t.ad}>
   <span class="ad-label">{t.ad}</span>
   <div
     id={`ad-${position}`}
-    class="ad-content"
-    data-ad-unit={JSON.stringify(ads[position])}
+    class:list={[
+      "ad-content",
+      { "ad-content-seznam": unit.provider === "seznam" },
+    ]}
+    data-ad-unit={JSON.stringify(unit)}
   >
     <span class="ad-placeholder">{t.adSpace}</span>
   </div>

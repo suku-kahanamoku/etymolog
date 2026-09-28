@@ -94,7 +94,7 @@ Browser používá pouze Astro `/api/etymolog/search/` a chráněné `/api/admin
 
 ## Zachovaná infrastruktura
 
-Reklamní rám má horní a dvě boční pozice, původní parallax/sticky chování a načítání až po consent signálu z projektové CMP. `config/ads.ts` nyní používá nevolající placeholdery. Boční reklamy se načítají pouze při viditelnosti; soukromé stránky jsou bez reklam. Při aktivaci skutečných vendorů nastavte jejich ID a napojte `AdsModule/providers/consent.ts` na skutečnou CMP. Modul sám souhlas neuděluje.
+Reklamní rám má horní a dvě boční pozice, původní parallax/sticky chování a načítání až po consent signálu z projektové CMP. `config/ads.ts` zapojuje Seznam SSP: nahoře zónu `429132` (728 × 90), vlevo `429135` (160 × 600) a vpravo `429138` (160 × 600). Výdejový skript se načte pouze jednou a zóny se volají až po souhlasu, při viditelnosti a dostatečné šířce; horní desktopová zóna se na úzkém mobilu nevolá. Boční reklamy se načítají pouze při viditelnosti; soukromé stránky jsou bez reklam. Pro skutečný výdej ještě napojte `AdsModule/providers/consent.ts` na skutečnou CMP. Modul sám souhlas neuděluje.
 
 Realtime klient, reconnect a hooky jsou zachované; neexistující backendový WebSocket endpoint se nevymýšlí. Veřejná URL nesmí obsahovat API klíč ani uživatelský bearer. Detaily původní infrastruktury jsou v [referenční dokumentaci scaffoldu](docs/scaffold-reference.md); aktuální odlišnosti Etymologu popisuje tento soubor.
 

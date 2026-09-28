@@ -9,7 +9,7 @@ test("ad providers wait for consent and request side slots only when visible", a
     scripts.push("seznam");
     return route.fulfill({
       contentType: "application/javascript",
-      body: "window.sssp = { getAds(config) { document.getElementById(config.id).dataset.rendered = String(config.zoneId); } };",
+      body: "window.sssp = { getAds(configs) { configs.forEach(config => { document.getElementById(config.id).dataset.rendered = String(config.zoneId); }); } };",
     });
   });
   await page.route("https://pagead2.googlesyndication.com/**", (route) => {
@@ -43,7 +43,7 @@ test("ad providers wait for consent and request side slots only when visible", a
   await expect(page.locator('#ad-top [data-rendered="google"]')).toHaveCount(1);
   expect(scripts).toEqual(["google"]);
   await page.setViewportSize({ width: 1440, height: 1000 });
-  await expect(page.locator("#ad-left")).toHaveAttribute(
+  await expect(page.locator("#ssp-zone-12345")).toHaveAttribute(
     "data-rendered",
     "12345",
   );
@@ -124,4 +124,70 @@ test("sticky side ads stay above full-width section backgrounds", async ({
     });
     expect(aboveBackground).toBe(true);
   }
+});
+
+test("Seznam zones use supplied IDs and sizes only after consent and with enough space", async ({
+  page,
+}) => {
+  const calls: { zoneId: number; id: string; width: number; height: number }[] =
+    [];
+  let scripts = 0;
+  await page.exposeFunction(
+    "recordSeznamAd",
+    (config: (typeof calls)[number]) => calls.push(config),
+  );
+  await page.route("https://ssp.seznam.cz/static/js/ssp.js", (route) => {
+    scripts++;
+    return route.fulfill({
+      contentType: "application/javascript",
+      body: `window.sssp = { getAds(configs) { configs.forEach(config => {
+        window.recordSeznamAd(config);
+        const ad = document.createElement('div');
+        ad.style.width = config.width + 'px';
+        ad.style.height = config.height + 'px';
+        document.getElementById(config.id).append(ad);
+      }); } };`,
+    });
+  });
+  await page.setViewportSize({ width: 390, height: 900 });
+  await page.goto("/");
+  expect(scripts).toBe(0);
+  await page.evaluate(async () => {
+    const modulePath = "/src/modules/AdsModule/providers/consent.ts";
+    const { consentProvider } = await import(/* @vite-ignore */ modulePath);
+    consentProvider.setAdvertising(true);
+  });
+  // Let visibility/resize observers run before asserting that mobile does not request desktop ads.
+  await page.evaluate(
+    () =>
+      new Promise((resolve) =>
+        requestAnimationFrame(() => requestAnimationFrame(resolve)),
+      ),
+  );
+  expect(scripts).toBe(0);
+  expect(calls).toEqual([]);
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await expect.poll(() => calls.length).toBe(3);
+  expect(calls.sort((a, b) => a.zoneId - b.zoneId)).toEqual([
+    { zoneId: 429132, id: "ssp-zone-429132", width: 728, height: 90 },
+    { zoneId: 429135, id: "ssp-zone-429135", width: 160, height: 600 },
+    { zoneId: 429138, id: "ssp-zone-429138", width: 160, height: 600 },
+  ]);
+  expect(scripts).toBe(1);
+  for (const call of calls) {
+    const zone = page.locator(`#${call.id}`);
+    await expect(zone).toHaveCount(1);
+    const fits = await zone.evaluate(
+      (el) => el.getBoundingClientRect().width <= el.parentElement!.clientWidth,
+    );
+    expect(fits).toBe(true);
+  }
+  await page.setViewportSize({ width: 1536, height: 1000 });
+  await page.evaluate(
+    () =>
+      new Promise((resolve) =>
+        requestAnimationFrame(() => requestAnimationFrame(resolve)),
+      ),
+  );
+  expect(calls).toHaveLength(3);
 });

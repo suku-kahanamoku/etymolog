@@ -5,12 +5,14 @@ declare global {
   interface Window {
     adsbygoogle?: Record<string, never>[];
     sssp?: {
-      getAds: (config: {
-        zoneId: number;
-        id: string;
-        width: number;
-        height: number;
-      }) => void;
+      getAds: (
+        config: {
+          zoneId: number;
+          id: string;
+          width: number;
+          height: number;
+        }[],
+      ) => void;
     };
   }
 }
@@ -64,13 +66,18 @@ async function renderAd(target: HTMLElement, unit: AdUnit) {
     await loadScript("https://ssp.seznam.cz/static/js/ssp.js");
     if (!consentProvider.advertising || !target.getClientRects().length) return;
     if (!window.sssp) throw new Error("Ad provider unavailable");
-    target.replaceChildren();
-    window.sssp.getAds({
-      zoneId: unit.zoneId,
-      id: target.id,
-      width: unit.width,
-      height: unit.height,
-    });
+    if (target.clientWidth < unit.width) return;
+    const zone = document.createElement("div");
+    zone.id = `ssp-zone-${unit.zoneId}`;
+    target.replaceChildren(zone);
+    window.sssp.getAds([
+      {
+        zoneId: unit.zoneId,
+        id: zone.id,
+        width: unit.width,
+        height: unit.height,
+      },
+    ]);
   }
 }
 
@@ -91,6 +98,8 @@ export function mountAds(root: ParentNode = document) {
           continue;
         const unit = JSON.parse(target.dataset.adUnit ?? "{}") as AdUnit;
         if (unit.provider === "placeholder") continue;
+        if (unit.provider === "seznam" && target.clientWidth < unit.width)
+          continue;
         requested.add(target);
         issued = true;
         void renderAd(target, unit).catch(() => {
@@ -100,6 +109,16 @@ export function mountAds(root: ParentNode = document) {
     },
     { rootMargin: "100px" },
   );
+  // Recheck unrequested slots when the viewport makes room for their format.
+  const resizeObserver = new ResizeObserver((entries) => {
+    if (!consentProvider.advertising) return;
+    for (const { target } of entries) {
+      if (requested.has(target as HTMLElement)) continue;
+      observer.unobserve(target);
+      observer.observe(target);
+    }
+  });
+  slots.forEach((slot) => resizeObserver.observe(slot));
   const unsubscribe = consentProvider.subscribe((allowed) => {
     observer.disconnect();
     if (allowed) slots.forEach((slot) => observer.observe(slot));
@@ -109,5 +128,6 @@ export function mountAds(root: ParentNode = document) {
   return () => {
     unsubscribe();
     observer.disconnect();
+    resizeObserver.disconnect();
   };
 }
