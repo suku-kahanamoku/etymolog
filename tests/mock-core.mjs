@@ -194,6 +194,22 @@ http
       tokens.delete(req.headers.authorization.replace("Bearer ", ""));
       return send(200, null);
     }
+    if (url.pathname === "/etymolog/publish-all" && req.method === "POST") {
+      if (session.user.role !== "admin") return send(403, null);
+      let published = 0;
+      for (const resource of ["names", "entries", "calendar-days"])
+        for (const row of session.records[resource] ?? [])
+          if (!row.published) {
+            row.published = 1;
+            published++;
+          }
+      return send(200, {
+        published,
+        skipped: 0,
+        resources: {},
+        skipped_records: [],
+      });
+    }
     if (url.pathname.startsWith("/etymolog/sync/")) {
       if (session.user.role !== "admin") return send(403, null);
       if (url.pathname === "/etymolog/sync/start" && req.method === "POST") {

@@ -1,3 +1,4 @@
+import { useAdminPublish } from "./useAdminPublish";
 import { useAdminSync } from "./useAdminSync";
 import { resources, resourceDefinition } from "../config/resources";
 import type { Dictionary } from "../providers/translations";
@@ -61,8 +62,13 @@ export function useAdminEditor() {
     if (!payload.success) throw new Error(t.admin.error);
     return payload.data;
   }
-  const sync = useAdminSync(root, t, api, () =>
-    resource === "sync-jobs" ? load() : Promise.resolve(),
+  const publish = useAdminPublish(root, t, api, () => load());
+  const sync = useAdminSync(
+    root,
+    t,
+    api,
+    () => (resource === "sync-jobs" ? load() : Promise.resolve()),
+    publish.setSyncBusy,
   );
   function button(text: string, run: () => void | Promise<void>) {
     const b = element("button", text, "btn btn-sm btn-outline");
@@ -373,6 +379,7 @@ export function useAdminEditor() {
     b.addEventListener("click", () => {
       resource = b.dataset.resource!;
       sync.select(resource);
+      publish.select(resource);
       page = 1;
       query = "";
       select<HTMLInputElement>("#admin-filter").value = "";

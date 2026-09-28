@@ -210,6 +210,7 @@ test("admin starts background synchronization and sees progress without leaving 
   await start.click();
   expect((await response).status()).toBe(202);
   await expect(page.locator("[data-sync-start]")).toBeDisabled();
+  await expect(page.locator("[data-publish-all]")).toBeDisabled();
   await expect(page.locator("[data-sync-status]")).toContainText("Completed", {
     timeout: 10000,
   });
@@ -359,4 +360,108 @@ test("sync jobs show source errors and cooldown instead of a dash", async ({
     "Next attempt no earlier than",
   );
   await expect(page.locator("[data-sync-start]")).toBeDisabled();
+  await expect(page.locator("[data-publish-all]")).toBeDisabled();
+});
+
+test("admin publishes all current drafts through the adjacent toolbar button", async ({
+  page,
+}) => {
+  await login(page, true);
+  const api = page.request;
+  for (const resource of ["names", "entries", "calendar-days"]) {
+    expect(
+      (
+        await api.post(`/api/admin/etymolog/${resource}/`, {
+          headers: { Origin: "http://localhost:4338" },
+          data:
+            resource === "names"
+              ? { name: "Fixture", kind: "given", published: 0 }
+              : { title: "Fixture", published: 0 },
+        })
+      ).status(),
+    ).toBe(201);
+  }
+  await expect(page.locator("[data-publish-all]")).toBeHidden();
+  await page.locator('[data-resource="sync-jobs"]').click();
+  await expect(
+    page.locator("[data-sync-start] + [data-publish-all]"),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Publish all", exact: true }).click();
+  await expect(page.locator("[data-publish-status]")).toContainText(
+    "Published records: 4. Skipped records: 0.",
+  );
+  for (const resource of ["names", "entries", "calendar-days"]) {
+    const r = await api.get(`/api/admin/etymolog/${resource}/`);
+    expect(
+      (await r.json()).data.every(
+        (record: { published: number }) => record.published === 1,
+      ),
+    ).toBe(true);
+  }
+  await page.getByRole("button", { name: "Publish all", exact: true }).click();
+  await expect(page.locator("[data-publish-status]")).toContainText(
+    "Published records: 0.",
+  );
+  expect(
+    (
+      await api.post("/api/admin/etymolog/publish-all/", {
+        headers: { Origin: "https://evil.test" },
+        data: {},
+      })
+    ).status(),
+  ).toBe(403);
+  expect(
+    (
+      await api.post("/api/admin/etymolog/publish-all/", {
+        headers: { Origin: "http://localhost:4338" },
+        data: { force: true },
+      })
+    ).status(),
+  ).toBe(422);
+});
+
+test("bulk publication is unavailable to editors", async ({ page }) => {
+  await login(page);
+  await expect(page.locator("[data-publish-all]")).toHaveCount(0);
+  expect(
+    (
+      await page.request.post("/api/admin/etymolog/publish-all/", {
+        headers: { Origin: "http://localhost:4338" },
+        data: {},
+      })
+    ).status(),
+  ).toBe(403);
+});
+
+test("bulk publication displays skipped evidence without interpreting HTML", async ({
+  page,
+}) => {
+  await login(page, true);
+  await page.route("**/api/admin/etymolog/publish-all/", (route) =>
+    route.fulfill({
+      json: {
+        success: true,
+        data: {
+          published: 2,
+          skipped: 1,
+          skipped_records: [
+            {
+              resource: "entries",
+              id: 12,
+              reason: "Missing citation <img src=x onerror=alert(1)>",
+            },
+          ],
+        },
+      },
+    }),
+  );
+  await page.locator('[data-resource="sync-jobs"]').click();
+  await page.getByRole("button", { name: "Publish all", exact: true }).click();
+  await expect(page.locator("[data-publish-status]")).toContainText(
+    "Published records: 2. Skipped records: 1.",
+  );
+  await expect(page.locator("[data-publish-skipped]")).toContainText(
+    "#12: Missing citation <img",
+  );
+  await expect(page.locator("[data-publish-skipped] img")).toHaveCount(0);
 });

@@ -129,7 +129,13 @@
       "failed": "Failed",
       "interrupted": "Interrupted",
       "running": "Running"
-    }
+    },
+    "publishAll": "Publish all",
+    "publishing": "Publishing…",
+    "publishDone": "Published records",
+    "publishSkipped": "Skipped records",
+    "publishSkippedHelp": "Check the listed records and complete the information required for publication.",
+    "publishError": "Publication could not be confirmed. Refresh the list and check the status."
   },
   "fields": {
     "name": "Name",

@@ -129,7 +129,13 @@
       "failed": "Chyba",
       "interrupted": "Přerušeno",
       "running": "Probíhá"
-    }
+    },
+    "publishAll": "Publikovat vše",
+    "publishing": "Publikuji…",
+    "publishDone": "Publikované záznamy",
+    "publishSkipped": "Přeskočené záznamy",
+    "publishSkippedHelp": "Zkontrolujte uvedené záznamy a doplňte údaje vyžadované pro publikaci.",
+    "publishError": "Publikování se nepodařilo potvrdit. Obnovte seznam a zkontrolujte stav."
   },
   "fields": {
     "name": "Jméno",

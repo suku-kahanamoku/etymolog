@@ -176,3 +176,16 @@ legendu, patronát a pranostiky; další kulturní texty pokračují v dalších
 Importované texty jsou koncepty: před zobrazením na webu je redaktor zkontroluje
 a publikuje v administraci. Odkaz na revizi, licence a autorství doprovázejí
 texty; při opakování se nezdvojují ani nepřepisují ruční úpravy.
+
+Synchronizační úlohy zobrazují `last_status` a `last_error` místo publikačního
+stavu. HTTP 429 má čitelný popis; při odloženém opakování ukazuje panel běhu
+`retry_at` z PHP (UTC převedené do místního času). Oprava vyžaduje backendovou
+migraci `2026-09-28-etymolog-rate-limit.sql` a odpovídající Cloudflare Worker.
+
+Vedle tlačítka synchronizace je pro administrátora „Publikovat vše“.
+Volá autentizované `POST /api/admin/etymolog/publish-all/` a přes serverový provider
+nový PHP endpoint `POST /api/etymolog/publish-all`. Publikuje všechna aktivní hesla,
+texty a kalendářní údaje, které splní stávající pravidla publikace; zobrazí počet
+publikovaných a přeskočených záznamů. Během synchronizace je tlačítko vypnuté.
+Nezapíná automatické publikování dalších importů. Před nasazením frontendu
+nasaďte odpovídající změny PHP API/service/repository; nová migrace není potřeba.

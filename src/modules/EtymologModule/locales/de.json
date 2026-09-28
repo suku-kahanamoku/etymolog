@@ -129,7 +129,13 @@
       "failed": "Fehlgeschlagen",
       "interrupted": "Unterbrochen",
       "running": "Läuft"
-    }
+    },
+    "publishAll": "Alles veröffentlichen",
+    "publishing": "Veröffentlichung läuft…",
+    "publishDone": "Veröffentlichte Einträge",
+    "publishSkipped": "Übersprungene Einträge",
+    "publishSkippedHelp": "Prüfen Sie die aufgeführten Einträge und ergänzen Sie die erforderlichen Angaben.",
+    "publishError": "Die Veröffentlichung konnte nicht bestätigt werden. Aktualisieren Sie die Liste und prüfen Sie den Status."
   },
   "fields": {
     "name": "Name",

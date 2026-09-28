@@ -33,9 +33,24 @@ const t = dictionary(locale);
       </h2>
       <div class="admin-toolbar-actions">
         {isAdmin && (
-          <button class="btn btn-outline" data-sync-start type="button" hidden>
-            {t.admin.syncStart}
-          </button>
+          <>
+            <button
+              class="btn btn-outline"
+              data-sync-start
+              type="button"
+              hidden
+            >
+              {t.admin.syncStart}
+            </button>
+            <button
+              class="btn btn-outline"
+              data-publish-all
+              type="button"
+              hidden
+            >
+              {t.admin.publishAll}
+            </button>
+          </>
         )}
         <button class="btn btn-primary" data-create type="button">
           + {t.admin.new}
@@ -46,6 +61,8 @@ const t = dictionary(locale);
       <div data-sync-panel hidden>
         <p class="editor-help">{t.admin.syncHelp}</p>
         <p data-sync-status role="status" aria-live="polite"></p>
+        <p data-publish-status role="status" aria-live="polite"></p>
+        <ul data-publish-skipped></ul>
       </div>
     )}
     <form data-filter class="admin-filter">

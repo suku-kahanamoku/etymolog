@@ -115,6 +115,9 @@ export function createEtymologProvider(core: CoreClient, token?: string) {
         query: { page, limit: "20" },
       });
     },
+    publishAll() {
+      return privateRequest("publish-all", { method: "POST", body: {} });
+    },
     startSync() {
       return privateRequest("sync/start", { method: "POST", body: {} });
     },

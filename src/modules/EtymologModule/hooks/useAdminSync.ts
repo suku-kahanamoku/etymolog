@@ -12,6 +12,7 @@ export function useAdminSync(
   t: Dictionary,
   api: (path: string, method?: string, body?: unknown) => Promise<unknown>,
   refresh: () => Promise<void>,
+  onBusy: (busy: boolean) => void = () => {},
 ) {
   const button = root.querySelector<HTMLButtonElement>("[data-sync-start]");
   const panel = root.querySelector<HTMLElement>("[data-sync-panel]");
@@ -25,6 +26,7 @@ export function useAdminSync(
   function render(data: Batch | null) {
     if (!button || !output) return;
     busy = active(data);
+    onBusy(busy);
     button.disabled = busy;
     button.textContent = busy ? t.admin.syncRunning : t.admin.syncStart;
     output.textContent = data
@@ -54,6 +56,7 @@ export function useAdminSync(
   button?.addEventListener("click", async () => {
     if (busy || !output) return;
     busy = true;
+    onBusy(true);
     button.disabled = true;
     clearTimeout(timer);
     output.textContent = t.admin.syncStarting;
@@ -61,6 +64,7 @@ export function useAdminSync(
       render((await api("sync/start/", "POST", {})) as Batch);
     } catch {
       busy = false;
+      onBusy(false);
       button.disabled = false;
       output.textContent = t.admin.syncStartError;
     }

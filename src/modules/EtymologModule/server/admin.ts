@@ -15,6 +15,18 @@ export const adminHandler: APIRoute = async ({
     if (!user) throw new HttpError(401, "unauthorized");
     const parts = (params.path ?? "").split("/").filter(Boolean);
     const [resource, rawId, action] = parts;
+    if (resource === "publish-all" && parts.length === 1) {
+      if (user.role !== "admin") throw new HttpError(403, "forbidden");
+      if (request.method !== "POST")
+        throw new HttpError(405, "method_not_allowed");
+      const body = await readFields(request, 1024);
+      if (Object.keys(body).length) throw new HttpError(422, "invalid_input");
+      const data = await locals.providers.etymolog.publishAll();
+      return Response.json(
+        { success: true, data },
+        { headers: { "Cache-Control": "private, no-store" } },
+      );
+    }
     if (resource === "sync" && parts.length === 2) {
       if (user.role !== "admin") throw new HttpError(403, "forbidden");
       let data: unknown;
