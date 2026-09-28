@@ -1,0 +1,309 @@
+---
+import EditorialIcon from "../../UIModule/components/EditorialIcon.astro";
+import type { Locale } from "../../LangModule/config";
+import type { Dossier } from "../types";
+import { dictionary } from "../providers/translations";
+import { safeWebUrl } from "../providers/links";
+import { url, nameUrl } from "../../../config/routes";
+import "../styles/public.css";
+interface Props {
+  locale: Locale;
+  data: Dossier;
+}
+const { locale, data } = Astro.props;
+const t = dictionary(locale);
+const {
+  name,
+  entries,
+  variants,
+  occurrences,
+  calendar_days: days,
+  sources,
+  citations,
+} = data;
+const groups = Object.entries(t.types)
+  .map(([type, label]) => ({
+    type,
+    label,
+    items: entries.filter((e) => e.type === type),
+  }))
+  .filter((g) => g.items.length);
+const culture = ["legend", "mythology", "fiction", "tradition", "proverb"];
+const source = (id: number) => sources.find((s) => Number(s.id) === Number(id));
+const valueLabel = (key: string | null) =>
+  key ? ((t.values as Record<string, string>)[key] ?? key) : "—";
+const years = (from: number | null, to: number | null) =>
+  [from, to].filter((v) => v !== null).join("–");
+const sections = [
+  ...groups.map((g) => ({ id: g.type, label: g.label })),
+  ...(variants.length ? [{ id: "variants", label: t.variants }] : []),
+  ...(occurrences.length ? [{ id: "occurrences", label: t.occurrences }] : []),
+  ...(days.length ? [{ id: "calendar", label: t.calendar }] : []),
+  ...(sources.length ? [{ id: "sources", label: t.sources }] : []),
+];
+---
+
+<section class="page-section paper-section">
+  <div class="section-inner section-pad dossier-header">
+    <a class="text-link" href={url(locale)}>
+      ← {t.back}
+    </a>
+    <p class="eyebrow">{t.dossier}</p>
+    <h1 class="editorial-heading">{name.name}</h1>
+    <div class="dossier-tags">
+      <span>{t[name.kind]}</span>
+      {name.country_code && <span>{name.country_code}</span>}
+      {name.language && <span>{name.language.toUpperCase()}</span>}
+    </div>
+    {name.summary && <p class="editorial-lead prose-copy">{name.summary}</p>}
+  </div>
+</section>
+<section class="page-section">
+  <div class="section-inner section-pad dossier-body">
+    <nav class="dossier-index" aria-label={t.contents}>
+      <p>{t.contents}</p>
+      {sections.map((section) => (
+        <a href={`#${section.id}`}>{section.label}</a>
+      ))}
+    </nav>
+    <div>
+      {!sections.length && <p class="notice">{t.noDetails}</p>}
+      {groups.map((group) => (
+        <section class="dossier-group" id={group.type}>
+          <h2 class="rule-title">
+            <EditorialIcon
+              name={
+                culture.includes(group.type)
+                  ? "story"
+                  : group.type === "etymology"
+                    ? "book"
+                    : "history"
+              }
+            />
+            {group.label}
+          </h2>
+          {culture.includes(group.type) && (
+            <p class="cultural-note">{t.culturalNotice}</p>
+          )}
+          {group.items.map((entry) => (
+            <article class="entry">
+              <div class="entry-meta">
+                <span class="certainty">
+                  {(t.certainty as Record<string, string>)[entry.certainty] ??
+                    entry.certainty}
+                </span>
+                <span>{entry.language.toUpperCase()}</span>
+                {entry.region && <span>{entry.region}</span>}
+                {(entry.year_from !== null || entry.year_to !== null) && (
+                  <span>{years(entry.year_from, entry.year_to)}</span>
+                )}
+              </div>
+              <h3>{entry.title}</h3>
+              <p class="prose-copy entry-body" lang={entry.language}>
+                {entry.body}
+              </p>
+              {citations
+                .filter((c) => Number(c.entry_id) === Number(entry.id))
+                .map((c) => (
+                  <div class="entry-citation">
+                    <a href={`#source-${c.source_id}`}>
+                      {source(c.source_id)?.title ?? t.source}
+                    </a>
+                    {c.locator && <span> · {c.locator}</span>}
+                    {safeWebUrl(c.url) && (
+                      <span>
+                        {" "}
+                        ·{" "}
+                        <a href={safeWebUrl(c.url)} rel="noopener noreferrer">
+                          {t.original}
+                        </a>
+                      </span>
+                    )}
+                    {c.quotation && (
+                      <details>
+                        <summary>{t.quotation}</summary>
+                        <blockquote class="prose-copy">
+                          {c.quotation}
+                        </blockquote>
+                      </details>
+                    )}
+                  </div>
+                ))}
+              {safeWebUrl(entry.source_url) && (
+                <a
+                  class="text-link"
+                  href={safeWebUrl(entry.source_url)}
+                  rel="noopener noreferrer"
+                >
+                  {t.original}
+                </a>
+              )}
+            </article>
+          ))}
+        </section>
+      ))}
+      {variants.length > 0 && (
+        <section id="variants" class="dossier-group">
+          <h2 class="rule-title">
+            <EditorialIcon name="branch" />
+            {t.variants}
+          </h2>
+          <ul class="variant-list">
+            {variants.map((v) => (
+              <li>
+                {v.target_name_id ? (
+                  <a href={nameUrl(locale, v.target_name_id)}>{v.variant}</a>
+                ) : (
+                  v.variant
+                )}
+                {v.language && <small> · {v.language}</small>}
+                <small class="variant-meta">
+                  {(t.relations as Record<string, string>)[v.relation] ??
+                    v.relation}
+                  {v.region ? ` · ${v.region}` : ""}
+                  {years(v.year_from, v.year_to)
+                    ? ` · ${years(v.year_from, v.year_to)}`
+                    : ""}
+                </small>
+                {v.source_id && source(v.source_id) && (
+                  <a href={`#source-${v.source_id}`} aria-label={t.source}>
+                    {" "}
+                    *
+                  </a>
+                )}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+      {occurrences.length > 0 && (
+        <section id="occurrences" class="dossier-group">
+          <h2 class="rule-title">
+            <EditorialIcon name="history" />
+            {t.occurrences}
+          </h2>
+          <div class="data-table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>{t.year}</th>
+                  <th>{t.place}</th>
+                  <th>
+                    {t.measure} / {t.sex}
+                  </th>
+                  <th>{t.count}</th>
+                  <th>{t.source}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {occurrences.map((o) => (
+                  <tr>
+                    <td>{o.observed_on ?? o.observed_year}</td>
+                    <td>
+                      {[o.country_code, o.region].filter(Boolean).join(" · ")}
+                    </td>
+                    <td>
+                      {valueLabel(o.measure)} / {valueLabel(o.sex)}
+                      {o.original_spelling && <p>{o.original_spelling}</p>}
+                    </td>
+                    <td>
+                      {o.count === null
+                        ? "—"
+                        : new Intl.NumberFormat(locale).format(o.count)}
+                    </td>
+                    <td>
+                      <a href={`#source-${o.source_id}`}>
+                        {source(o.source_id)?.title ?? t.source}
+                      </a>
+                      {o.locator && <p>{o.locator}</p>}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      )}
+      {days.length > 0 && (
+        <section id="calendar" class="dossier-group">
+          <h2 class="rule-title">
+            <EditorialIcon name="calendar" />
+            {t.calendar}
+          </h2>
+          <p class="cultural-note">{t.calendarNote}</p>
+          <div class="calendar-grid">
+            {days.map((d) => (
+              <article class="calendar-card">
+                <span class="calendar-date">
+                  {d.date_kind === "fixed"
+                    ? `${d.day}. ${d.month}.`
+                    : d.date_rule}
+                </span>
+                <h3>{d.title}</h3>
+                <p>
+                  {valueLabel(d.kind)} · {d.country_code}
+                </p>
+                <p>
+                  {d.calendar_title} · {valueLabel(d.system)}
+                </p>
+                <p>
+                  {d.tradition}
+                  {d.region ? ` · ${d.region}` : ""}
+                  {years(d.year_from, d.year_to)
+                    ? ` · ${years(d.year_from, d.year_to)}`
+                    : ""}
+                </p>
+                {d.locator && <p>{d.locator}</p>}
+                <a
+                  href={safeWebUrl(d.source_url) ?? `#source-${d.source_id}`}
+                  rel="noopener noreferrer"
+                >
+                  {source(d.source_id)?.title ?? t.source}
+                </a>
+              </article>
+            ))}
+          </div>
+        </section>
+      )}
+      {sources.length > 0 && (
+        <section id="sources" class="dossier-group">
+          <h2 class="rule-title">
+            <EditorialIcon name="book" />
+            {t.sources}
+          </h2>
+          <ol class="source-list">
+            {sources.map((s) => (
+              <li id={`source-${s.id}`}>
+                <strong>{s.title}</strong>
+                {s.author && <span> — {s.author}</span>}
+                {safeWebUrl(s.url) && (
+                  <p>
+                    <a href={safeWebUrl(s.url)} rel="noopener noreferrer">
+                      {t.original}
+                    </a>
+                  </p>
+                )}
+                {s.license && (
+                  <p>
+                    {t.license}:{" "}
+                    {safeWebUrl(s.license_url) ? (
+                      <a
+                        href={safeWebUrl(s.license_url)}
+                        rel="noopener noreferrer"
+                      >
+                        {s.license}
+                      </a>
+                    ) : (
+                      s.license
+                    )}
+                  </p>
+                )}
+                {s.attribution && <p class="prose-copy">{s.attribution}</p>}
+              </li>
+            ))}
+          </ol>
+        </section>
+      )}
+    </div>
+  </div>
+</section>

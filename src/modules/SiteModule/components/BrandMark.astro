@@ -1,0 +1,23 @@
+---
+import { Image } from "astro:assets";
+import emblem from "../assets/emblem.png";
+---
+
+<Image
+  src={emblem}
+  width={60}
+  height={60}
+  alt=""
+  class="brand-emblem"
+  loading="eager"
+/>
+<style is:global>
+  .brand-emblem {
+    width: 45px;
+    height: 45px;
+    object-fit: contain;
+  }
+  [data-theme="newspaper-dark"] .brand-emblem {
+    filter: invert(1);
+  }
+</style>

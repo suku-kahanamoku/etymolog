@@ -1,0 +1,43 @@
+---
+import cs from "../locales/cs.json";
+import en from "../locales/en.json";
+import de from "../locales/de.json";
+interface Props { locale: string; }
+const dictionaries = { cs, en, de };
+const label = dictionaries[Astro.props.locale as keyof typeof dictionaries]?.themeToggle ?? cs.themeToggle;
+---
+<button type="button" class="theme-toggle" aria-label={label} title={label} aria-pressed="false" hidden>
+  <svg class="theme-sun" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+    <circle cx="12" cy="12" r="4" />
+    <path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5" />
+  </svg>
+  <svg class="theme-moon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+    <path d="M20 14a8.5 8.5 0 0 1-10-10A8.5 8.5 0 1 0 20 14Z" />
+  </svg>
+</button>
+<script>
+  import { useTheme } from "../hooks/useTheme";
+  useTheme();
+  document.addEventListener("astro:page-load", useTheme);
+</script>
+<style is:global>
+  .theme-toggle {
+    width: 44px;
+    height: 44px;
+    flex: 0 0 auto;
+    display: grid;
+    place-items: center;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+  }
+  .theme-toggle[hidden] { display: none; }
+  .theme-toggle:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }
+  .theme-moon { display: none; }
+  [data-theme-mode="dark"] .theme-moon { display: block; }
+  [data-theme-mode="dark"] .theme-sun { display: none; }
+</style>

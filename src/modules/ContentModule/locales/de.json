@@ -1,0 +1,38 @@
+{
+  "home": {
+    "title": "Herkunft von Vor- und Nachnamen",
+    "description": "Etymolog verbindet die Herkunft von Vor- und Nachnamen mit historischen Aufzeichnungen, Volksüberlieferungen und Literatur. Wir beginnen in den böhmischen Ländern und erweitern das Archiv schrittweise.",
+    "eyebrow": "Ein Zuhause für Ihr nächstes Projekt",
+    "cta": "Projekt entdecken",
+    "secondary": "Zum Konto",
+    "section": "Alles beginnt mit einer guten Grundlage.",
+    "intro": "Einfach im Auftritt. Bereit für alles, was kommt.",
+    "cards": [
+      {
+        "title": "Inhalte an erster Stelle",
+        "text": "Geben Sie Ihrer Geschichte Raum. Artikel, Leistungen und Neuigkeiten an einem Ort."
+      },
+      {
+        "title": "Komfort auf jedem Bildschirm",
+        "text": "Ein angenehmes Erlebnis auf dem Handy, Tablet und großen Monitor."
+      },
+      {
+        "title": "Näher an Ihren Menschen",
+        "text": "Mehrere Sprachen und ein persönlicher Bereich für wiederkehrende Besucher."
+      }
+    ],
+    "imageAlt": "Abstrakte geometrische Komposition in Grün und Creme"
+  },
+  "about": {
+    "title": "Namen tragen Erinnerungen.\nWir hören ihnen zu.",
+    "description": "Etymolog verbindet die Herkunft von Vor- und Nachnamen mit historischen Aufzeichnungen, Volksüberlieferungen und Literatur. Wir beginnen in den böhmischen Ländern und erweitern das Archiv schrittweise.",
+    "method": "Quellen vor Vermutungen",
+    "body": "Wir unterscheiden belegte Etymologie, wissenschaftliche Hypothesen, historische Aufzeichnungen und Erzählungen. Sagen, Mythologie, Traditionen und Bauernregeln stammen ausschließlich aus nachvollziehbaren Quellen; KI erfindet ihre Inhalte nicht. Wir nennen Herkunft, Urheber und verfügbare Lizenzinformationen.",
+    "limits": "Ein Archiv, das allmählich wächst",
+    "limitsBody": "Ein gleicher Nachname bedeutet nicht zwingend eine gemeinsame Familie oder Herkunft. Amtliche Schreibfehler nennen wir nur mit konkretem Beleg. Häufigkeiten beziehen sich auf einen Ort, Zeitraum und eine Messart. Automatische Importe werden vor der Veröffentlichung redaktionell geprüft.",
+    "visual": "Die Bilder sind moderne dekorative Illustrationen, keine historischen Quellen.",
+    "contact": "Kennen Sie eine Quelle, die uns fehlt?",
+    "contactLink": "Schreiben Sie uns",
+    "eyebrow": "Über Etymolog"
+  }
+}

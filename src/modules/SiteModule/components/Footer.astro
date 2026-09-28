@@ -1,0 +1,27 @@
+---
+import "../styles/components.css";
+import { site } from "../../../config/site";
+import { dictionary } from "../providers/translations";
+import { type Locale } from "../../LangModule/providers/locale";
+import { url } from "../../../config/routes";
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+const t = dictionary(locale);
+---
+
+<footer class="site-footer">
+  <div>
+    <a class="footer-brand" href={url(locale)}>
+      {site.name}
+    </a>
+    <p>{t.common.footer}</p>
+  </div>
+  <div class="footer-contact">
+    <a href={`mailto:${site.email}`}>{site.email}</a>
+    <span>
+      © {new Date().getFullYear()} {site.name}
+    </span>
+  </div>
+</footer>

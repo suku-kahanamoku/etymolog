@@ -1,0 +1,38 @@
+{
+  "home": {
+    "title": "Původ jmen a příjmení",
+    "description": "Etymolog propojuje původ jmen a příjmení s historickými záznamy, lidovou tradicí a literaturou. Začínáme v českých zemích a archiv postupně otevíráme dalším jazykům a krajinám.",
+    "eyebrow": "Místo pro váš další projekt",
+    "cta": "Poznat projekt",
+    "secondary": "Vstoupit do účtu",
+    "section": "Všechno začíná dobrým základem.",
+    "intro": "Jednoduché na pohled. Připravené na to, co přijde dál.",
+    "cards": [
+      {
+        "title": "Obsah na prvním místě",
+        "text": "Dejte svému příběhu prostor. Články, služby i novinky přehledně na jednom místě."
+      },
+      {
+        "title": "Pohodlně na každé obrazovce",
+        "text": "Stejně příjemný zážitek na telefonu, tabletu i velkém monitoru."
+      },
+      {
+        "title": "Blíž vašim lidem",
+        "text": "Více jazyků a osobní prostor pro návštěvníky, kteří se vracejí."
+      }
+    ],
+    "imageAlt": "Abstraktní geometrická kompozice v zelené a krémové barvě"
+  },
+  "about": {
+    "title": "Jména mají paměť.\nMy jí nasloucháme.",
+    "description": "Etymolog propojuje původ jmen a příjmení s historickými záznamy, lidovou tradicí a literaturou. Začínáme v českých zemích a archiv postupně otevíráme dalším jazykům a krajinám.",
+    "method": "Pramen před domněnkou",
+    "body": "Rozlišujeme doloženou etymologii, odbornou hypotézu, historický záznam i vyprávění. Pověsti, mytologii, tradice a pranostiky přebíráme pouze z dohledatelných pramenů; AI jejich obsah nevymýšlí. U každého převzatého textu uvádíme původ a dostupné údaje o autorství a licenci.",
+    "limits": "Archiv, který postupně roste",
+    "limitsBody": "Stejná podoba příjmení nemusí znamenat stejný rod ani jediný původ. Úřední zkomolení uvádíme jen tehdy, pokud je doložené konkrétním záznamem. Četnosti vždy patří k určitému místu, období a druhu statistiky. Automatický import prochází redakční kontrolou před zveřejněním.",
+    "visual": "Obrazový doprovod je novodobá dekorativní ilustrace, nikoli historický pramen.",
+    "contact": "Máte pramen, který nám chybí?",
+    "contactLink": "Napište nám",
+    "eyebrow": "O Etymologu"
+  }
+}

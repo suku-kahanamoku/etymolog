@@ -1,0 +1,18 @@
+---
+import type { NavigationItem } from "../types";
+interface Props {
+  items: NavigationItem[];
+  class?: string;
+}
+const { items, class: className } = Astro.props;
+---
+
+{items.map((item) => (
+  <a
+    class:list={[className, { active: item.current }]}
+    href={item.href}
+    aria-current={item.current ? "page" : undefined}
+  >
+    {item.label}
+  </a>
+))}

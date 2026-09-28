@@ -1,0 +1,82 @@
+---
+import "../styles/components.css";
+import ThemeToggle from "../../UIModule/components/ThemeToggle.astro";
+import MobileMenu from "../../UIModule/components/MobileMenu.astro";
+import NavigationLinks from "../../UIModule/components/NavigationLinks.astro";
+import type { NavigationItem } from "../../UIModule/types";
+import BrandMark from "./BrandMark.astro";
+import LanguagePicker from "../../LangModule/components/LanguagePicker.astro";
+import { site } from "../../../config/site";
+import { dictionary } from "../providers/translations";
+import { type Locale } from "../../LangModule/providers/locale";
+import { url, nameUrl, resolveName, type PageId } from "../../../config/routes";
+interface Props {
+  locale: Locale;
+  page?: PageId;
+}
+const { locale, page = "home" } = Astro.props;
+const t = dictionary(locale);
+const detailId = resolveName(Astro.url.pathname)?.id;
+const links: NavigationItem[] = [
+  { href: url(locale), label: t.nav.home, current: page === "home" },
+  { href: url(locale, "about"), label: t.nav.about, current: page === "about" },
+  {
+    href: url(locale, "contact"),
+    label: t.nav.contact,
+    current: page === "contact",
+  },
+];
+const mobileLinks: NavigationItem[] = site.modules.auth
+  ? [
+      ...links,
+      {
+        href: url(locale, "admin"),
+        label: t.nav.admin,
+        current: page === "account",
+      },
+    ]
+  : links;
+---
+
+<header class="site-header">
+  <div class="header-inner">
+    <a class="brand" href={url(locale)} aria-label={site.name}>
+      <BrandMark />
+      {site.name}
+    </a>
+    <nav class="desktop-nav" aria-label={t.nav.menu}>
+      <NavigationLinks items={links} class="nav-link" />
+    </nav>
+    <div class="header-actions">
+      <ThemeToggle {locale} />
+      <LanguagePicker
+        {locale}
+        href={(code) => (detailId ? nameUrl(code, detailId) : url(code, page))}
+      />
+      {site.modules.auth && (
+        <a
+          class="btn btn-sm btn-outline login-link"
+          href={url(locale, "admin")}
+        >
+          {t.nav.admin}
+        </a>
+      )}
+    </div>
+    <MobileMenu id="mobile-navigation" label={t.nav.menu} items={mobileLinks} />
+  </div>
+</header>
+<script>
+  import { useHeaderOffset } from "../../UIModule/hooks/useHeaderOffset";
+  import { onDocumentDispose } from "../../UIModule/hooks/onDocumentDispose";
+  const header = document.querySelector<HTMLElement>(".site-header");
+  if (header) onDocumentDispose(useHeaderOffset(header));
+</script>
+<noscript>
+  <style is:global>
+    @media (max-width: 767px) {
+      .header-inner {
+        flex-wrap: wrap;
+      }
+    }
+  </style>
+</noscript>

@@ -1,0 +1,132 @@
+:root {
+  --ink: var(--color-base-content);
+  --muted: #716757;
+  --rule: #c4b9a6;
+  --paper: var(--color-base-100);
+}
+[data-theme="newspaper-dark"] {
+  --muted: #c1b5a2;
+  --rule: #625b4e;
+}
+h1,
+h2,
+h3,
+.brand,
+.footer-brand {
+  font-family: Georgia, "Times New Roman", serif;
+  font-weight: 400;
+}
+body {
+  font-family: "Segoe UI", Arial, sans-serif;
+}
+a {
+  text-underline-offset: 0.2em;
+}
+input,
+select,
+textarea {
+  max-width: 100%;
+  color: var(--ink);
+  background: var(--paper);
+}
+input:not([type="checkbox"]),
+select,
+textarea {
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  padding: 0.85rem 1rem;
+  font: inherit;
+}
+label {
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+button:disabled {
+  cursor: wait;
+  opacity: 0.6;
+}
+.eyebrow {
+  color: var(--muted);
+  font-size: 0.68rem;
+  letter-spacing: 0.17em;
+}
+.paper-section {
+  background: var(--color-base-200);
+}
+.section-pad {
+  padding: clamp(2rem, 5vw, 4rem) clamp(1rem, 4vw, 3rem);
+}
+.editorial-heading {
+  font-size: clamp(2.7rem, 6vw, 4.6rem);
+  line-height: 1.06;
+  letter-spacing: -0.045em;
+}
+.editorial-lead {
+  font-family: Georgia, serif;
+  font-size: clamp(1.1rem, 2vw, 1.3rem);
+  color: var(--muted);
+}
+.rule-title {
+  border-top: 3px double var(--ink);
+  border-bottom: 1px solid var(--rule);
+  padding: 0.9rem 0;
+  font-size: 1.65rem;
+  margin-bottom: 1.7rem;
+}
+.prose-copy {
+  max-width: 70ch;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  line-height: 1.85;
+}
+.notice {
+  color: var(--muted);
+  padding: 1rem;
+  border: 1px solid var(--rule);
+}
+.error-text {
+  color: var(--color-error-content);
+  background: var(--color-error);
+  padding: 0.8rem;
+}
+.text-link {
+  text-decoration: underline;
+  font-size: 0.9rem;
+}
+.language-options {
+  background: var(--paper) !important;
+}
+.language-picker {
+  color: var(--ink) !important;
+}
+.language-options a:hover,
+.language-options [aria-current] {
+  background: var(--color-base-200) !important;
+}
+.mobile-menu-panel {
+  background: var(--paper);
+}
+.content-section > p:not(.eyebrow) {
+  color: var(--muted);
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.menu-toggle span {
+  background: var(--ink);
+}
+.mobile-nav {
+  background: var(--paper);
+  border-color: var(--rule);
+}
+.mobile-nav a {
+  border-color: var(--rule);
+}

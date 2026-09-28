@@ -1,0 +1,56 @@
+---
+import "../styles/navigation.css";
+import NavigationLinks from "./NavigationLinks.astro";
+import type { NavigationItem } from "../types";
+interface Props {
+  id: string;
+  label: string;
+  items: NavigationItem[];
+}
+const { id, label, items } = Astro.props;
+---
+
+<button
+  class="menu-toggle"
+  aria-expanded="false"
+  aria-controls={id}
+  aria-label={label}
+  data-menu-toggle
+>
+  <span></span>
+  <span></span>
+</button>
+<nav id={id} class="mobile-nav" aria-label={label} hidden>
+  <NavigationLinks {items} />
+</nav>
+<script>
+  import { useNavigation } from "../hooks/useNavigation";
+  import { onDocumentDispose } from "../hooks/onDocumentDispose";
+  document
+    .querySelectorAll<HTMLButtonElement>("[data-menu-toggle]")
+    .forEach((toggle) => {
+      const menu = document.getElementById(
+        toggle.getAttribute("aria-controls") ?? "",
+      );
+      if (menu) onDocumentDispose(useNavigation(toggle, menu));
+    });
+</script>
+<noscript>
+  <style is:global>
+    @media (max-width: 767px) {
+      .menu-toggle {
+        display: none;
+      }
+      .mobile-nav[hidden] {
+        position: static;
+        width: 100%;
+      }
+      @layer base {
+        /* Override Tailwind preflight in the same layer, with higher specificity. */
+        .mobile-nav[hidden] {
+          display: block !important;
+        }
+      }
+    }
+  </style>
+</noscript>

@@ -1,0 +1,39 @@
+---
+import cs from "../locales/cs.json";
+import en from "../locales/en.json";
+import de from "../locales/de.json";
+import type { Locale } from "../../LangModule/config";
+import { url } from "../../../config/routes";
+interface Props {
+  locale: Locale;
+  title: string;
+  description: string;
+  email: string;
+}
+const { locale, title, description, email } = Astro.props;
+const t = { cs, en, de }[locale];
+---
+
+<section class="page-section paper-section">
+  <div class="section-inner section-pad">
+    <p class="eyebrow">{t.eyebrow}</p>
+    <h1 class="editorial-heading">{title}</h1>
+    <p class="editorial-lead" style="margin-top:1rem">
+      {description}
+    </p>
+    <p style="font-size:.8rem;margin-top:1rem">
+      {email} ·{" "}
+      <a class="text-link" href={url(locale, "account")}>
+        {t.account}
+      </a>
+    </p>
+  </div>
+</section>
+<section class="page-section">
+  <div class="section-inner section-pad">
+    <noscript>
+      <p class="notice">{t.nojs}</p>
+    </noscript>
+    <slot />
+  </div>
+</section>

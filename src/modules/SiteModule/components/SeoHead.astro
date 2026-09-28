@@ -1,0 +1,56 @@
+---
+import { SEO } from "astro-seo";
+import { locales, type Locale } from "../../LangModule/config";
+import { url, type PageId } from "../../../config/routes";
+import { site } from "../../../config/site";
+interface Props {
+  locale: Locale;
+  page?: PageId;
+  title: string;
+  description: string;
+  noindex?: boolean;
+}
+const { locale, page, title, description, noindex = false } = Astro.props;
+const canonical = new URL(
+  page ? url(locale, page) : Astro.url.pathname,
+  Astro.site,
+);
+---
+
+<SEO
+  title={`${title} | ${site.name}`}
+  {description}
+  canonical={canonical.href}
+  {noindex}
+  nofollow={noindex}
+  openGraph={{
+    basic: {
+      title,
+      type: "website",
+      image: new URL("/social.webp", Astro.site).href,
+      url: canonical.href,
+    },
+    optional: {
+      description,
+      siteName: site.name,
+      locale: { cs: "cs_CZ", en: "en_GB", de: "de_DE" }[locale],
+    },
+  }}
+  twitter={{ card: "summary_large_image" }}
+/>
+{!noindex && page && (
+  <>
+    {locales.map((code) => (
+      <link
+        rel="alternate"
+        hreflang={code}
+        href={new URL(url(code, page), Astro.site)}
+      />
+    ))}
+    <link
+      rel="alternate"
+      hreflang="x-default"
+      href={new URL(url("cs", page), Astro.site)}
+    />
+  </>
+)}

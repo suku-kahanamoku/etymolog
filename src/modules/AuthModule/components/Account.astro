@@ -1,0 +1,38 @@
+---
+import "../styles/components.css";
+import { url } from "../../../config/routes";
+import Section from "../../UIModule/components/Section.astro";
+import { dictionary } from "../providers/translations";
+import { type Locale } from "../../LangModule/providers/locale";
+import type { User } from "../types";
+interface Props {
+  locale: Locale;
+  user: User;
+}
+const { locale, user } = Astro.props;
+const t = dictionary(locale);
+---
+
+<Section contentClass="auth-section">
+  <div class="card auth-card">
+    <p class="eyebrow">{t.auth.account}</p>
+    <h1>
+      {user.first_name} {user.last_name}
+    </h1>
+    <p>{user.email}</p>
+    <a class="text-link" href={url(locale, "admin")}>
+      ← Etymolog
+    </a>
+    {Astro.url.searchParams.get("error") === "logout" && (
+      <p class="alert alert-error" role="alert">
+        {t.auth.logoutError}
+      </p>
+    )}
+    <form method="post" action="/api/auth/logout/">
+      <input type="hidden" name="locale" value={locale} />
+      <button class="btn btn-outline" type="submit">
+        {t.auth.logout}
+      </button>
+    </form>
+  </div>
+</Section>

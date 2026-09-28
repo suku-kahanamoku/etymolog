@@ -1,0 +1,17 @@
+---
+interface Props {
+  class?: string;
+  contentClass?: string;
+  background?: string;
+}
+const { class: className, contentClass, background } = Astro.props;
+---
+
+<section
+  class:list={["page-section", className]}
+  style={background ? { "--section-background": background } : undefined}
+>
+  <div class:list={["section-inner", contentClass]}>
+    <slot />
+  </div>
+</section>

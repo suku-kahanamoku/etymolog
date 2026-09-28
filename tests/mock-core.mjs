@@ -1,0 +1,211 @@
+import http from "node:http";
+const baseUser = {
+  id: 7,
+  email: "user@example.test",
+  first_name: "Test",
+  last_name: "Account",
+  role: "user",
+};
+const tokens = new Map();
+let counter = 0;
+const name = {
+  id: 1,
+  name: "Novák",
+  kind: "surname",
+  language: "cs",
+  country_code: "CZ",
+  summary: "Testovací heslo pro ověření rozhraní.",
+  private_field: "should-not-leak",
+};
+const dossier = {
+  name,
+  entries: [
+    "etymology",
+    "history",
+    "clerical_error",
+    "legend",
+    "mythology",
+    "fiction",
+    "tradition",
+    "proverb",
+  ].map((type, i) => ({
+    id: i + 1,
+    type,
+    title: `Test ${type}`,
+    body: "Testovací citovaný text <script>alert('unsafe')</script>",
+    source_url: "https://example.org/source",
+    certainty: i < 3 ? "documented" : "fiction",
+    language: "cs",
+    region: "Čechy",
+    year_from: 1900,
+    year_to: null,
+    notes: "should-not-leak",
+  })),
+  citations: [
+    {
+      id: 1,
+      entry_id: 1,
+      source_id: 1,
+      url: "https://example.org/source",
+      locator: "s. 12",
+      quotation: "Test",
+    },
+  ],
+  variants: [
+    {
+      id: 1,
+      variant: "Novak",
+      relation: "spelling",
+      language: "cs",
+      region: null,
+      year_from: null,
+      year_to: null,
+      source_id: 1,
+      target_name_id: null,
+    },
+  ],
+  occurrences: [
+    {
+      id: 1,
+      source_id: 1,
+      country_code: "CZ",
+      region: null,
+      observed_year: 2025,
+      observed_on: null,
+      sex: "all",
+      measure: "living_persons",
+      count: 0,
+      original_spelling: null,
+      locator: null,
+    },
+  ],
+  calendar_days: [
+    {
+      id: 1,
+      source_id: 1,
+      title: "Testovací kalendářní den",
+      kind: "name_day",
+      date_kind: "fixed",
+      month: 1,
+      day: 1,
+      date_rule: null,
+      source_url: "https://example.org/calendar",
+      locator: null,
+      calendar_title: "Testovací kalendář",
+      country_code: "CZ",
+      system: "julian",
+      tradition: "Test",
+      region: null,
+      year_from: null,
+      year_to: null,
+    },
+  ],
+  sources: [
+    {
+      id: 1,
+      title: "Testovací pramen",
+      author: "Test Author",
+      url: "https://example.org/source",
+      license: "CC0",
+      license_url: "https://creativecommons.org/publicdomain/zero/1.0/",
+      attribution: "Test attribution",
+      notes: "should-not-leak",
+    },
+  ],
+  imports: [{ payload: "should-not-leak" }],
+};
+http
+  .createServer(async (req, res) => {
+    const send = (status, data) => {
+      res.writeHead(status, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ success: status >= 200 && status < 300, data }));
+    };
+    const url = new URL(req.url, "http://localhost");
+    if (url.pathname === "/health") return send(200, null);
+    if (
+      req.headers["x-internal-key"] !== "test-only-secret" ||
+      req.headers["x-forwarded-host"] !== "etymolog.test"
+    )
+      return send(403, null);
+    let body = "";
+    for await (const chunk of req) body += chunk;
+    if (url.pathname === "/auth/login" && req.method === "POST") {
+      const data = JSON.parse(body);
+      if (
+        ![baseUser.email, "admin@example.test"].includes(data.email) ||
+        data.password !== "test-password"
+      )
+        return send(401, null);
+      const token = (++counter).toString(16).padStart(64, "0");
+      const user = {
+        ...baseUser,
+        email: data.email,
+        role: data.email.startsWith("admin") ? "admin" : "user",
+      };
+      tokens.set(token, {
+        user,
+        records: { names: [{ ...name, published: 0 }] },
+        next: 100,
+      });
+      return send(200, { ...user, token, expires_at: "2026-12-01 12:00:00" });
+    }
+    if (url.pathname === "/etymolog/public/names") {
+      const q = url.searchParams.get("q") ?? "";
+      if (q === "error") return send(503, null);
+      const items = q.toLowerCase().includes("nov") ? [name] : [];
+      return send(200, { items, total: items.length, page: 1, limit: 20 });
+    }
+    if (url.pathname === "/etymolog/public/names/1") return send(200, dossier);
+    if (url.pathname.startsWith("/etymolog/public/names/"))
+      return send(404, null);
+    const session = tokens.get(
+      req.headers.authorization?.replace("Bearer ", ""),
+    );
+    if (!session) return send(401, null);
+    if (url.pathname === "/auth/me")
+      return send(200, { ...session.user, private_field: "should-not-leak" });
+    if (url.pathname === "/auth/logout") {
+      tokens.delete(req.headers.authorization.replace("Bearer ", ""));
+      return send(200, null);
+    }
+    const parts = url.pathname.split("/").filter(Boolean);
+    if (parts[0] === "etymolog") {
+      const [, resource, rawId, action] = parts;
+      const id = Number(rawId);
+      if (resource === "sync-jobs" && session.user.role !== "admin")
+        return send(403, null);
+      const list =
+        session.records[resource] ?? (session.records[resource] = []);
+      if (action) return send(200, action === "reset" ? { id } : []);
+      const found = list.find((row) => row.id === id);
+      if (req.method === "GET") {
+        if (rawId) return send(found ? 200 : 404, found);
+        let filtered = list;
+        const q = url.searchParams.get("q");
+        if (q) {
+          const [key, val] = Object.entries(JSON.parse(q))[0];
+          filtered = list.filter((row) =>
+            String(row[key] ?? "").includes(String(val)),
+          );
+        }
+        const offset = (Number(url.searchParams.get("page") ?? 1) - 1) * 20;
+        return send(200, filtered.slice(offset, offset + 20));
+      }
+      if (req.method === "POST") {
+        const record = { id: session.next++, ...JSON.parse(body) };
+        list.push(record);
+        return send(201, record);
+      }
+      if (!found) return send(404, null);
+      if (req.method === "PATCH") {
+        Object.assign(found, JSON.parse(body));
+        return send(200, found);
+      }
+      if (req.method === "DELETE") {
+        list.splice(list.indexOf(found), 1);
+        return send(200, null);
+      }
+    }
+    send(404, null);
+  })
+  .listen(4409, "127.0.0.1");

@@ -1,0 +1,23 @@
+---
+import "../styles/components.css";
+import { ads, type AdPosition } from "../../../config/ads";
+import { dictionary } from "../providers/translations";
+import { type Locale } from "../../LangModule/providers/locale";
+interface Props {
+  position: AdPosition;
+  locale: Locale;
+}
+const { position, locale } = Astro.props;
+const t = dictionary(locale);
+---
+
+<aside class:list={["ad-slot", `ad-${position}`]} aria-label={t.ad}>
+  <span class="ad-label">{t.ad}</span>
+  <div
+    id={`ad-${position}`}
+    class="ad-content"
+    data-ad-unit={JSON.stringify(ads[position])}
+  >
+    <span class="ad-placeholder">{t.adSpace}</span>
+  </div>
+</aside>

@@ -1,0 +1,107 @@
+---
+import { Image } from "astro:assets";
+import archive from "../assets/archive.png";
+import { dictionary } from "../providers/translations";
+import type { Locale } from "../../LangModule/config";
+import { url } from "../../../config/routes";
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+const t = dictionary(locale).about;
+---
+
+<section class="page-section paper-section">
+  <div class="section-inner section-pad about-intro">
+    <div>
+      <p class="eyebrow">{t.eyebrow}</p>
+      <h1 class="editorial-heading">{t.title}</h1>
+      <p class="editorial-lead">{t.description}</p>
+    </div>
+    <figure>
+      <Image src={archive} width={680} alt="" class="archive-illustration" />
+      <figcaption>{t.visual}</figcaption>
+    </figure>
+  </div>
+</section>
+<section class="page-section">
+  <div class="section-inner section-pad about-columns">
+    <article>
+      <h2 class="rule-title">{t.method}</h2>
+      <p>{t.body}</p>
+    </article>
+    <article>
+      <h2 class="rule-title">{t.limits}</h2>
+      <p>{t.limitsBody}</p>
+    </article>
+    <div class="about-contact">
+      <h2>{t.contact}</h2>
+      <a class="text-link" href={url(locale, "contact")}>
+        {t.contactLink}
+      </a>
+    </div>
+  </div>
+</section>
+<style>
+  .about-intro {
+    display: grid;
+    grid-template-columns: 1.1fr 1fr;
+    gap: 2rem;
+    align-items: center;
+  }
+  .about-intro h1 {
+    white-space: pre-line;
+    font-size: clamp(2.4rem, 5vw, 3.8rem);
+    margin-bottom: 1.5rem;
+  }
+  .about-intro figure {
+    min-width: 0;
+  }
+  .archive-illustration {
+    width: 100%;
+    height: auto;
+    mix-blend-mode: multiply;
+  }
+  .about-intro figcaption {
+    font-size: 0.62rem;
+    color: var(--muted);
+    margin-top: 0.8rem;
+  }
+  .about-columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+  }
+  .about-columns p {
+    font-family: Georgia, serif;
+    font-size: 1.05rem;
+  }
+  .about-contact {
+    grid-column: 1/-1;
+    border-top: 1px solid var(--rule);
+    padding-top: 1.7rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+  }
+  .about-contact h2 {
+    font-size: 1.5rem;
+  }
+  :global([data-theme="newspaper-dark"]) .archive-illustration {
+    mix-blend-mode: normal;
+    opacity: 0.8;
+  }
+  @media (max-width: 767px) {
+    .about-intro,
+    .about-columns {
+      grid-template-columns: 1fr;
+    }
+    .about-contact {
+      flex-wrap: wrap;
+    }
+    .about-intro figure {
+      max-width: 480px;
+    }
+  }
+</style>

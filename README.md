@@ -1,0 +1,115 @@
+# Etymolog
+
+Samostatný frontend z `astro-scaffold`: Astro 7, Node SSR, TypeScript, Tailwind 4 a daisyUI 5. Vzhled připomíná prvorepublikové noviny: knižní typografie, tiskařské linky, barevné podklady sekcí a nové dekorativní ilustrace. Původní projekty scaffold a Prasentace nejsou upravené.
+
+## Spuštění
+
+Node >= 22.12.0, npm. Závislosti jsou uzamčené v `package-lock.json`.
+
+```sh
+npm ci
+# Pouze pokud .env ještě neexistuje:
+cp .env.example .env
+npm run dev
+```
+
+Web: `http://localhost:4322`, redakce: `/admin/`. Přihlášení používá existující účty tenantu Etymolog v php-core. Nové účty ani hesla frontend nevytváří.
+
+Lokální `.env` je již připravený pro `http://127.0.0.1:8000/api` a `etymolog.localhost`. Obsahuje serverový klíč, je ignorovaný Gitem a nesmí se zveřejnit. Backend spusťte samostatně v `../../php/php-core` příkazem `php -S 127.0.0.1:8000`. Pro jiné prostředí nastavte:
+
+| Proměnná               | Význam                                                                                  |
+| ---------------------- | --------------------------------------------------------------------------------------- |
+| `PUBLIC_SITE_URL`      | Veřejný origin pro canonical, sitemap a kontrolu originu formulářů. Po změně přestavět. |
+| `PHP_CORE_URL`         | Serverová kořenová URL API, včetně `/api`, bez koncového lomítka.                       |
+| `PHP_CORE_API_KEY`     | Serverový `INTERNAL_API_KEY` php-core.                                                  |
+| `PHP_CORE_TENANT_HOST` | Pevný host registrovaný v `FRANCHISE_CODES`, lokálně `etymolog.localhost:etymolog`.     |
+| `PUBLIC_WEBSOCKET_URL` | Volitelná skutečná veřejná WebSocket gateway. Výchozí prázdná.                          |
+| `HOST`, `PORT`         | Naslouchání produkčního Node serveru.                                                   |
+
+Bez backendu se zobrazí veřejná kostra, O nás a Kontakt; hledání oznámí nedostupnost. Nevkládá falešné výsledky. Při ověření 28. 9. 2026 měla lokální databáze 1 314 aktivních jmen, žádné publikované. Veřejný archiv začne vracet hesla až po jejich publikaci v redakci. Žádný import nebyl v rámci frontendových prací automaticky publikován.
+
+## Stránky a funkce
+
+- `/`: hledání jména/příjmení, filtr druhu, výsledky pod formulářem a stránkování. Formulář funguje i bez JavaScriptu přes GET; JS doplňuje výsledky bez přechodu na jinou stránku a brání závodům starých odpovědí.
+- `/name/:id/`: publikovaný detail. Etymologie, historie, úřední změny, pověsti, mytologie, literární příběhy, tradice, pranostiky, varianty, výskyty, kalendáře a prameny. Prázdné oddíly se nevykreslují.
+- `/about/`: smysl projektu, práce s prameny a omezení výkladu.
+- `/contact/`: skutečný kontakt z Prasentace, `info@prasentace.cz`, `+420 722 767 646`, IČO `04473442`, Eleonory Voračické 2167/29, 616 00 Brno – Žabovřesky. E-mail a telefon mají funkční odkazy; stránka nepředstírá odesílání pošty.
+- `/login/`, `/account/`, `/admin/`: přihlášení, účet/odhlášení a chráněná redakce. Po přihlášení se otevře redakce.
+- CS bez prefixu, EN `/en/`, DE `/de/`. Změna jazyka zachovává detail stejného ID. UI se překládá, historické texty se automaticky nepřekládají ani nedoplňují.
+- Světlé/tmavé téma, systémová preference při první návštěvě, uložení volby, klávesnice, hamburger a funkční navigace bez JS.
+
+Pověsti a literární fikce jsou označené jako vyprávění, nikoli doklad původu. Citace, licence a atribuce pocházejí z backendu. Datum je zobrazené ve svém kalendáři; aplikace nepřevádí juliánská data na gregoriánská. Četnosti rozlišují rok, zemi, měření a pohlaví; nula není zaměněna za chybějící údaj. Texty se escapují, nespouští se jako HTML. Odkazy na prameny povolují pouze HTTP(S).
+
+## Moduly
+
+Všech osm původních modulů scaffoldu je zachováno: `CoreModule`, `UIModule`, `LangModule`, `SiteModule`, `ContentModule`, `AuthModule`, `AdsModule`, `RealtimeModule`.
+
+| Modul            | Vlastněná odpovědnost                                                                                    |
+| ---------------- | -------------------------------------------------------------------------------------------------------- |
+| `EtymologModule` | Hledání, detaily, všechny redakční CRUD formuláře, jejich konfigurace, hooky, serverové providery a API. |
+| `AdminModule`    | Nezávislý obal chráněné redakce a slot pro jednotlivé doménové administrace. Neimportuje Etymolog.       |
+| `ContactModule`  | Kontaktní stránka a lokalizace. Údaje čte z `config/site.ts`.                                            |
+| `UIModule`       | Obě témata, přepínač, sdílené UI, navigace, ikony a barvy pozadí.                                        |
+| `ContentModule`  | O projektu, stručné vysvětlení na homepage a dekorativní archivní ilustrace.                             |
+| `SiteModule`     | Hlavička, patička, nové logo a SEO.                                                                      |
+
+Routy pouze skládají moduly. Serverová kompozice zůstává v `src/server/providers.ts`; `src/pages/api` pouze exportuje modulové handlery. Doménové moduly se navzájem neimportují. Modulové slovníky CS/EN/DE mají kontrolovanou stejnou strukturu. Původní demonstrační komponenty scaffoldu zůstaly k dispozici, nejsou vložené do homepage Etymologu.
+
+## Redakce a CRUD
+
+V `EtymologModule/config/resources.json` je explicitní snapshot polí skutečného `php-core/src/Modules/Etymolog/ResourceRegistry.php`. Při změně backendového registru aktualizujte snapshot i překlady. Formuláře podporují typy, enumy, povinné hodnoty, nullable pole, data a referenční ID.
+
+| Zdroj API       | Redakční část                                  |
+| --------------- | ---------------------------------------------- |
+| `names`         | Jména a příjmení, shrnutí, publikace           |
+| `sources`       | Prameny, autoři, URL, licence, atribuce        |
+| `entries`       | Výklady a příběhy všech osmi typů              |
+| `entry-names`   | Sdílené vazby textů ke jménům, jejich kontrola |
+| `variants`      | Pravopisné a historické varianty               |
+| `occurrences`   | Výskyty, statistiky, historická doložení       |
+| `citations`     | Citace textů a pramenů                         |
+| `calendars`     | Kalendáře, systémy a tradice                   |
+| `calendar-days` | Jmeniny, svátky, významné dny a lidové tradice |
+| `sync-jobs`     | Konfigurace synchronizací, pouze správce       |
+
+Každá část má seznam, filtr názvu nebo ID, stránkování po 20, vytvoření, načtení, úpravu a smazání. Odkazy mezi daty se zadávají referenčními ID z odpovídajících seznamů. Změny ukládá PATCH. Běžné smazání je backendový soft delete; správce má také potvrzované trvalé smazání, které backend odmítne při závislostech. Importní podklady jsou pouze pro čtení. Správce vidí historii běhů a může resetovat postup úlohy. Samotné synchronizace nadále provádí existující php-core cron; frontend nevytváří paralelní importér.
+
+Publikační pravidla, ověřování vazeb a licence vynucuje php-core. Kulturní texty potřebují doložený webový pramen a citaci. Editor se nepovýší na správce skrytím/změnou HTML: API vždy ověřuje aktuální uživatele a backend znovu kontroluje oprávnění.
+
+## Backendový kontrakt a bezpečnost
+
+Nové úzce vymezené GET endpointy php-core:
+
+```text
+GET /api/etymolog/public/names?q=Novak&kind=surname&page=1
+GET /api/etymolog/public/names/123
+```
+
+Vyžadují interní klíč a známý tenant, nikoli uživatelský token. Pevná veřejná projekce nezahrnuje redakční poznámky, importní payloady, auditní uživatele ani tenant sloupce. Hledání obsahuje `items,total,page,limit`. Detail obsahuje `name,entries,citations,variants,occurrences,calendar_days,sources`. Zobrazuje jen aktivní publikovaná jména a texty, ověřené sdílené vazby, publikované kalendářní dny a aktivní zdroje. Varianty neodkazují na neveřejné cílové jméno. Chybějící/smazané/nepublikované/cizí heslo vrací 404. Nová migrace není potřeba.
+
+Browser používá pouze Astro `/api/etymolog/search/` a chráněné `/api/admin/etymolog/:resource/[:id/[:action/]]`. Nemůže volit upstream URL, tenant, klíč ani důvěryhodnou roli. API nefunguje jako otevřená proxy. Všechny HTTP požadavky vedou přes CoreClient a provider modulu. Uživatelský token je jen v HttpOnly, SameSite=Lax cookie `etymolog_session`, v produkci Secure. Mutace kontrolují origin, typ a velikost těla; administrace dovoluje pouze známá pole. Soukromé stránky i API mají `private, no-store`; redakce není indexovatelná. Chyby upstreamu se nevracejí v syrovém znění.
+
+## Zachovaná infrastruktura
+
+Reklamní rám má horní a dvě boční pozice, původní parallax/sticky chování a načítání až po consent signálu z projektové CMP. `config/ads.ts` nyní používá nevolající placeholdery. Boční reklamy se načítají pouze při viditelnosti; soukromé stránky jsou bez reklam. Při aktivaci skutečných vendorů nastavte jejich ID a napojte `AdsModule/providers/consent.ts` na skutečnou CMP. Modul sám souhlas neuděluje.
+
+Realtime klient, reconnect a hooky jsou zachované; neexistující backendový WebSocket endpoint se nevymýšlí. Veřejná URL nesmí obsahovat API klíč ani uživatelský bearer. Detaily původní infrastruktury jsou v [referenční dokumentaci scaffoldu](docs/scaffold-reference.md); aktuální odlišnosti Etymologu popisuje tento soubor.
+
+Sitemap obsahuje statické veřejné stránky všech jazyků. Dynamická hesla mají vlastní canonical, do sitemap se zatím neenumerují. Přihlašovací a redakční stránky mají noindex. Sdílení používá nový `public/social.webp`.
+
+## Ověření a nasazení
+
+```sh
+npm test
+npm run build
+npm run format:check
+npm run test:browser
+```
+
+Prohlížečové testy spouštějí izolovaný mock na 4409 a Astro na 4338. Ověřují všech deset CRUD částí, hledání, detail, zdroje, escapování textů, role, CSRF, auth cookie, jazyky, reklamy, bez-JS formulář, theme, menu a šířky 360–1920 px. Testovací příběhy existují pouze v `tests/mock-core.mjs`.
+
+Ověřeno: frontendové jednotkové testy, Astro check/build, Chromium a PHP integrační testy na jednorázové MySQL (`scripts/test-etymolog.sh`, 340 kontrol; též HTTP a Transport suite). Živě prošel read-only dotaz Astro → lokální php-core → aktuální databáze. Přihlášení a CRUD s reálným redakčním účtem ani produkční nasazení v tomto kroku neproběhly; browser testy auth/CRUD používají mock a backend má vlastní databázové integrační testy.
+
+Produkce používá Node SSR: `npm run build`, `npm run start` za HTTPS proxy. Nasazuje se `dist/client`, `dist/server` a runtime závislosti. Produkční prostředí musí mít správný tenant, klíč, origin a nasazené nové php-core veřejné endpointy. Formuláře a auth nelze provozovat na čistě statickém hostingu.
+
+Nové obrázky, původní prompty a jejich použití: [docs/brand-assets.md](docs/brand-assets.md). Historická data se jejich generováním nijak nedoplňují.

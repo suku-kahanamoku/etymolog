@@ -1,0 +1,89 @@
+---
+import { site } from "../../../config/site";
+import { dictionary } from "../providers/translations";
+import type { Locale } from "../../LangModule/config";
+interface Props {
+  locale: Locale;
+}
+const t = dictionary(Astro.props.locale);
+---
+
+<section class="page-section paper-section">
+  <div class="section-inner section-pad contact-intro">
+    <p class="eyebrow">{t.eyebrow}</p>
+    <h1 class="editorial-heading">{t.title}</h1>
+    <p class="editorial-lead">{t.description}</p>
+  </div>
+</section>
+<section class="page-section">
+  <div class="section-inner section-pad contact-grid">
+    <article>
+      <h2 class="rule-title">{t.email}</h2>
+      <a class="contact-value" href={`mailto:${site.email}`}>
+        {site.email}
+      </a>
+      <p>
+        <a class="text-link" href={`mailto:${site.email}`}>
+          {t.send}
+        </a>
+      </p>
+    </article>
+    <article>
+      <h2 class="rule-title">{t.phone}</h2>
+      <a class="contact-value" href={`tel:${site.phone.replaceAll(" ", "")}`}>
+        {site.phone}
+      </a>
+      <p>
+        <a class="text-link" href={`tel:${site.phone.replaceAll(" ", "")}`}>
+          {t.call}
+        </a>
+      </p>
+    </article>
+    <article>
+      <h2 class="rule-title">{t.address}</h2>
+      <address>
+        {site.address.street}
+        <br />
+        {site.address.postalCode} {site.address.city}
+        <br />
+        {site.address.country}
+      </address>
+    </article>
+    <article>
+      <h2 class="rule-title">{t.registration}</h2>
+      <p class="contact-value">{site.registrationId}</p>
+      <p class="contact-caption">{t.operator}</p>
+    </article>
+  </div>
+</section>
+<style>
+  .contact-intro .editorial-lead {
+    max-width: 680px;
+    margin-top: 1.5rem;
+  }
+  .contact-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem 3rem;
+  }
+  .contact-value {
+    font-family: Georgia, serif;
+    font-size: clamp(1.2rem, 3vw, 1.8rem);
+    overflow-wrap: anywhere;
+  }
+  address {
+    font-style: normal;
+    font-family: Georgia, serif;
+    font-size: 1.2rem;
+    line-height: 1.8;
+  }
+  .contact-caption {
+    color: var(--muted);
+    font-size: 0.8rem;
+  }
+  @media (max-width: 600px) {
+    .contact-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

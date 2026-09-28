@@ -1,0 +1,45 @@
+---
+import ThemeInit from "../modules/UIModule/components/ThemeInit.astro";
+import SeoHead from "../modules/SiteModule/components/SeoHead.astro";
+import "../styles/global.css";
+import AdFrame from "../modules/AdsModule/components/AdFrame.astro";
+import Header from "../modules/SiteModule/components/Header.astro";
+import Footer from "../modules/SiteModule/components/Footer.astro";
+import { dictionary } from "../modules/SiteModule/providers/translations";
+import { type Locale } from "../modules/LangModule/providers/locale";
+import { type PageId } from "../config/routes";
+import { site } from "../config/site";
+interface Props {
+  locale: Locale;
+  page?: PageId;
+  title: string;
+  description: string;
+  noindex?: boolean;
+}
+const { locale, page, title, description, noindex = false } = Astro.props;
+---
+
+<!doctype html>
+<html lang={locale} data-theme={site.theme.name}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content={site.theme.color} />
+    <link rel="icon" href="/favicon.png" type="image/png" />
+    <SeoHead {locale} {page} {title} {description} {noindex} />
+    <ThemeInit />
+    <slot name="head" />
+  </head>
+  <body>
+    <a href="#main-content" class="skip-link">
+      {dictionary(locale).common.skip}
+    </a>
+    <AdFrame {locale} enabled={site.modules.ads && !Astro.locals.privatePage}>
+      <Header {locale} {page} />
+      <main id="main-content" tabindex="-1">
+        <slot />
+      </main>
+      <Footer {locale} />
+    </AdFrame>
+  </body>
+</html>

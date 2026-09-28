@@ -1,0 +1,4 @@
+@import "tailwindcss";
+@import "../modules/UIModule/styles/theme.css";
+@import "../modules/UIModule/styles/base.css";
+@import "../modules/UIModule/styles/newspaper.css";

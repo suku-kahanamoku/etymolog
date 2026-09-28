@@ -1,0 +1,162 @@
+---
+import { dictionary } from "../providers/translations";
+import type { Locale } from "../../LangModule/config";
+import type { SearchResult } from "../types";
+import { url, nameUrl } from "../../../config/routes";
+import "../styles/public.css";
+interface Props {
+  locale: Locale;
+  result?: SearchResult;
+  error?: string;
+  query?: string;
+  kind?: string;
+}
+const { locale, result, error, query = "", kind = "" } = Astro.props;
+const t = dictionary(locale);
+const pageHref = (page: number) =>
+  `${url(locale)}?${new URLSearchParams({ q: query, kind, page: String(page) })}#results`;
+---
+
+<section class="page-section paper-section">
+  <div class="section-inner search-edition section-pad">
+    <div class="edition-line">
+      <span>{t.edition}</span>
+      <span>EST. MMXXVI</span>
+    </div>
+    <div class="masthead">
+      <p>ETYMOLOG</p>
+      <span>{t.dossier}</span>
+    </div>
+    <div class="search-intro">
+      <span class="printer-ornament" aria-hidden="true">
+        ✦
+      </span>
+      <h1 class="editorial-heading">{t.headline}</h1>
+      <p class="editorial-lead">{t.intro}</p>
+    </div>
+    <form
+      method="get"
+      action={url(locale)}
+      class="archive-search"
+      data-name-search
+      data-locale={locale}
+      data-text={JSON.stringify(t)}
+      aria-label={t.searchTitle}
+    >
+      <div class="search-fields">
+        <div class="search-field">
+          <label for="name-query">{t.query}</label>
+          <input
+            id="name-query"
+            name="q"
+            type="search"
+            value={query}
+            placeholder={t.placeholder}
+            minlength="2"
+            maxlength="100"
+            required
+            aria-describedby="search-hint"
+            autocomplete="off"
+          />
+        </div>
+        <div class="search-kind">
+          <label for="name-kind">{t.kind}</label>
+          <select id="name-kind" name="kind">
+            <option value="" selected={!kind}>
+              {t.all}
+            </option>
+            <option value="given" selected={kind === "given"}>
+              {t.given}
+            </option>
+            <option value="surname" selected={kind === "surname"}>
+              {t.surname}
+            </option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary search-button">
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+            aria-hidden="true"
+          >
+            <circle cx="10.5" cy="10.5" r="6.5" />
+            <path d="m16 16 5 5" />
+          </svg>
+          {t.search}
+        </button>
+      </div>
+      <p id="search-hint" class="search-hint">
+        {t.hint}
+      </p>
+    </form>
+    <div id="results" class="search-results" data-results>
+      <p
+        data-search-status
+        role="status"
+        aria-live="polite"
+        class:list={{ "error-text": !!error }}
+      >
+        {error
+          ? error === "invalid"
+            ? t.invalid
+            : t.error
+          : result
+            ? `${t.results}: ${result.total}`
+            : ""}
+      </p>
+      <div data-result-items class="result-list">
+        {result?.items.map((item) => (
+          <a class="result-card" href={nameUrl(locale, item.id)}>
+            <div>
+              <span class="result-meta">
+                {t[item.kind]}
+                {item.country_code ? ` · ${item.country_code}` : ""}
+              </span>
+              <h2>{item.name}</h2>
+              {item.summary && (
+                <p>
+                  {item.summary.slice(0, 220)}
+                  {item.summary.length > 220 ? "…" : ""}
+                </p>
+              )}
+            </div>
+
+            <span class="sr-only">{t.read}</span>
+          </a>
+        ))}
+      </div>
+      {result && !result.items.length && (
+        <p class="notice" data-empty>
+          {t.empty}
+        </p>
+      )}
+      <nav class="result-pagination" data-result-pagination aria-label={t.page}>
+        {result && (
+          <>
+            <span>
+              {t.page} {result.page}
+            </span>
+            {result.page > 1 && (
+              <a class="text-link" href={pageHref(result.page - 1)}>
+                {t.previous}
+              </a>
+            )}
+            {result.page * result.limit < result.total && (
+              <a class="text-link" href={pageHref(result.page + 1)}>
+                {t.next} →
+              </a>
+            )}
+          </>
+        )}
+      </nav>
+    </div>
+  </div>
+</section>
+<script>
+  import { useNameSearch } from "../hooks/useNameSearch";
+  useNameSearch();
+</script>

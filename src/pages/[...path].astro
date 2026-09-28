@@ -1,0 +1,151 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Search from "../modules/EtymologModule/components/Search.astro";
+import Detail from "../modules/EtymologModule/components/Detail.astro";
+import AdminEditor from "../modules/EtymologModule/components/AdminEditor.astro";
+import AdminShell from "../modules/AdminModule/components/AdminShell.astro";
+import ArchiveNote from "../modules/ContentModule/components/ArchiveNote.astro";
+import About from "../modules/ContentModule/components/AboutSection.astro";
+import Contact from "../modules/ContactModule/components/Contact.astro";
+import Login from "../modules/AuthModule/components/Login.astro";
+import Account from "../modules/AuthModule/components/Account.astro";
+import ErrorPage from "../modules/SiteModule/components/ErrorSection.astro";
+import { dictionary } from "../modules/SiteModule/providers/translations";
+import { dictionary as contentDictionary } from "../modules/ContentModule/providers/translations";
+import { dictionary as etymologDictionary } from "../modules/EtymologModule/providers/translations";
+import { dictionary as contactDictionary } from "../modules/ContactModule/providers/translations";
+import { dictionary as authDictionary } from "../modules/AuthModule/providers/translations";
+import { localeFromPath } from "../modules/LangModule/providers/locale";
+import { resolveRoute, resolveName, url } from "../config/routes";
+import { site } from "../config/site";
+import { HttpError } from "../modules/CoreModule/server/errors";
+import type { User } from "../modules/AuthModule/types";
+import type { Dossier, SearchResult } from "../modules/EtymologModule/types";
+const route = resolveRoute(Astro.url.pathname);
+const nameRoute = resolveName(Astro.url.pathname);
+const locale =
+  route?.locale ?? nameRoute?.locale ?? localeFromPath(Astro.url.pathname);
+const page = route?.page;
+const t = dictionary(locale),
+  content = contentDictionary(locale),
+  ety = etymologDictionary(locale),
+  contact = contactDictionary(locale),
+  { auth } = authDictionary(locale);
+let error: 404 | 503 | undefined,
+  user: User | null = null,
+  detail: Dossier | undefined,
+  result: SearchResult | undefined,
+  searchError: string | undefined;
+if (
+  (!route && !nameRoute) ||
+  (!site.modules.auth &&
+    (page === "login" || page === "account" || page === "admin"))
+)
+  error = 404;
+if (!error && (page === "account" || page === "login" || page === "admin")) {
+  Astro.locals.privatePage = true;
+  try {
+    user = await Astro.locals.getUser();
+  } catch {
+    error = 503;
+  }
+  if (!error && (page === "account" || page === "admin") && !user)
+    return Astro.redirect(url(locale, "login"), 302);
+  if (!error && page === "login" && user)
+    return Astro.redirect(url(locale, "admin"), 302);
+}
+if (!error && nameRoute) {
+  try {
+    detail = await Astro.locals.providers.etymolog.detail(nameRoute.id);
+  } catch (e) {
+    error = e instanceof HttpError && e.status === 404 ? 404 : 503;
+  }
+}
+const query = (Astro.url.searchParams.get("q") ?? "").slice(0, 101),
+  kind = Astro.url.searchParams.get("kind") ?? "";
+if (!error && page === "home" && Astro.url.searchParams.has("q")) {
+  try {
+    result = await Astro.locals.providers.etymolog.search(
+      query,
+      kind,
+      Astro.url.searchParams.get("page") ?? "1",
+    );
+  } catch (e) {
+    searchError =
+      e instanceof HttpError && e.status === 422 ? "invalid" : "unavailable";
+  }
+}
+if (error) Astro.response.status = error;
+const metadata = error
+  ? {
+      title: error === 404 ? t.errors.notFound : t.errors.unavailable,
+      description:
+        error === 404
+          ? t.errors.notFoundDescription
+          : t.errors.unavailableDescription,
+    }
+  : detail
+    ? {
+        title: detail.name.name,
+        description:
+          detail.name.summary?.slice(0, 180) ||
+          `${detail.name.name} · ${content.home.title}`,
+      }
+    : page === "home"
+      ? content.home
+      : page === "about"
+        ? content.about
+        : page === "contact"
+          ? contact
+          : page === "admin"
+            ? { title: ety.admin.title, description: ety.admin.intro }
+            : page === "account"
+              ? { title: auth.account, description: auth.accountDescription }
+              : auth;
+---
+
+<BaseLayout
+  {locale}
+  page={error || detail ? undefined : page}
+  title={metadata.title}
+  description={metadata.description}
+  noindex={
+    !!error ||
+    ["login", "account", "admin"].includes(page ?? "") ||
+    (page === "home" && Astro.url.searchParams.has("q"))
+  }
+>
+  {error ? (
+    <ErrorPage {locale} status={error} />
+  ) : detail ? (
+    <Detail {locale} data={detail} />
+  ) : page === "home" ? (
+    <>
+      <Search {locale} {result} error={searchError} {query} {kind} />
+      <ArchiveNote
+        {locale}
+        title={ety.principle}
+        body={ety.principleText}
+        link={ety.aboutLink}
+        href={url(locale, "about")}
+      />
+    </>
+  ) : page === "about" ? (
+    <About {locale} />
+  ) : page === "contact" ? (
+    <Contact {locale} />
+  ) : page === "admin" && user ? (
+    <AdminShell
+      {locale}
+      title={ety.admin.title}
+      description={ety.admin.intro}
+      email={user.email}
+    >
+      <AdminEditor {locale} isAdmin={user.role === "admin"} />
+    </AdminShell>
+  ) : page === "account" && user ? (
+    <Account {locale} {user} />
+  ) : (
+    <Login {locale} />
+  )}
+</BaseLayout>
