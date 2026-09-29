@@ -87,7 +87,11 @@ export const adminHandler: APIRoute = async ({
       if (search && field === "id" && !/^[1-9][0-9]*$/.test(search))
         throw new HttpError(422, "invalid_input");
       const filter = search
-        ? JSON.stringify({ [field]: field === "id" ? Number(search) : search })
+        ? JSON.stringify(
+            field === "id"
+              ? { id: Number(search) }
+              : { [field]: { $regex: search } },
+          )
         : "";
       data = id
         ? await provider.get(resource, id)

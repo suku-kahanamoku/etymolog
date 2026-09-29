@@ -8,6 +8,22 @@ const baseUser = {
 };
 const tokens = new Map();
 let counter = 0;
+function parseFilter(raw) {
+  if (!raw) return null;
+  let decoded;
+  try {
+    decoded = JSON.parse(raw);
+  } catch {
+    return null;
+  }
+  if (!decoded || typeof decoded !== "object" || Array.isArray(decoded))
+    return null;
+  const [key, spec] = Object.entries(decoded)[0] ?? [];
+  if (key === undefined) return null;
+  if (spec && typeof spec === "object" && !Array.isArray(spec))
+    return { key, value: spec.$regex ?? spec.value ?? "" };
+  return { key, value: spec };
+}
 const name = {
   id: 1,
   name: "Novák",
@@ -150,11 +166,12 @@ http
       return send(200, { ...user, token, expires_at: "2026-12-01 12:00:00" });
     }
     if (url.pathname === "/etymolog/public/names") {
-      const q = url.searchParams.get("q") ?? "";
-      if (q === "error") return send(503, null);
-      const items = q.toLowerCase().includes("nov")
+      const filter = parseFilter(url.searchParams.get("q"));
+      if (filter?.value === "error") return send(503, null);
+      const needle = String(filter?.value ?? "").toLowerCase();
+      const items = needle.includes("nov")
         ? [name]
-        : q.toLowerCase() === "anna"
+        : needle === "anna"
           ? [
               { ...name, id: 1162, name: "Anna", kind: "given" },
               { ...name, id: 1164, name: "Anna", kind: "surname" },
@@ -263,11 +280,10 @@ http
       if (req.method === "GET") {
         if (rawId) return send(found ? 200 : 404, found);
         let filtered = list;
-        const q = url.searchParams.get("q");
-        if (q) {
-          const [key, val] = Object.entries(JSON.parse(q))[0];
+        const filter = parseFilter(url.searchParams.get("q"));
+        if (filter) {
           filtered = list.filter((row) =>
-            String(row[key] ?? "").includes(String(val)),
+            String(row[filter.key] ?? "").includes(String(filter.value)),
           );
         }
         const offset = (Number(url.searchParams.get("page") ?? 1) - 1) * 20;

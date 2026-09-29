@@ -42,17 +42,19 @@ export function createEtymologProvider(core: CoreClient, token?: string) {
   };
   return {
     async search(q: string, kind = "", page = "1"): Promise<SearchResult> {
+      const name = q.trim();
       if (
-        q.trim().length < 2 ||
-        q.trim().length > 100 ||
+        name.length < 2 ||
+        name.length > 100 ||
         !["", "given", "surname"].includes(kind) ||
         !/^[1-9][0-9]{0,6}$/.test(page) ||
         Number(page) > 1000000
       )
         throw new HttpError(422, "invalid_input");
+      const filter = JSON.stringify({ name: { $regex: name } });
       const result = await core.request<SearchResult>(
         "/etymolog/public/names",
-        { query: { q: q.trim(), kind, page } },
+        { query: { q: filter, kind, page } },
       );
       if (!Array.isArray(result.items) || !Number.isFinite(result.total))
         throw new HttpError(502, "invalid_backend_response");
