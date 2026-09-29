@@ -45,7 +45,8 @@ export function mountConsentManager() {
       const allowed =
         status?.consentExists === true &&
         data?.tcfcompliant === true &&
-        data.tcfversion === 2 &&
+        // CMP reports 4 for the current TCF EU setup; retain legacy value 2.
+        (data.tcfversion === 2 || data.tcfversion === 4) &&
         typeof data.consentstring === "string" &&
         data.consentstring.length > 0 &&
         granted(data.vendorConsents?.["621"]) &&

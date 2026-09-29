@@ -3,7 +3,7 @@ import { test, expect, cmpScriptUrl } from "./fixtures";
 const approved = {
   consentExists: true,
   tcfcompliant: true,
-  tcfversion: 2,
+  tcfversion: 4,
   consentstring: "mock-approved-tcf",
   vendorConsents: { "621": true },
   purposeConsents: { "1": true },
@@ -90,6 +90,15 @@ test("CMP loads first, requires consent and revokes already loaded ads", async (
   expect(adScripts).toBe(1);
 });
 
+test("legacy CMP version 2 still loads ads after consent", async ({ page }) => {
+  await page.goto("/");
+  await page.evaluate((choice) => window.__cmp!("test-choice", choice), {
+    ...approved,
+    tcfversion: 2,
+  });
+  await expect(page.locator('[data-rendered="true"]')).toHaveCount(3);
+});
+
 test("stored approval is restored on a new document", async ({ page }) => {
   await page.goto("/");
   await page.evaluate(
@@ -103,6 +112,8 @@ test("stored approval is restored on a new document", async ({ page }) => {
 for (const [label, change] of [
   ["disabled TCF", { tcfcompliant: false }],
   ["non-TCF CMP", { tcfversion: 0 }],
+  ["unknown CMP version", { tcfversion: 99 }],
+  ["missing CMP version", { tcfversion: undefined }],
   ["missing Seznam", { vendorConsents: {} }],
   ["missing storage consent", { purposeConsents: {} }],
   ["missing consent string", { consentstring: "" }],
