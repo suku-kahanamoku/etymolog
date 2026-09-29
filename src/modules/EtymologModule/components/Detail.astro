@@ -224,9 +224,7 @@ const sections = [
                 <p>
                   {valueLabel(d.kind)} · {d.country_code}
                 </p>
-                <p>
-                  {d.calendar_title} · {valueLabel(d.system)}
-                </p>
+                <p>{valueLabel(d.system)}</p>
                 <p>
                   {d.tradition}
                   {d.region ? ` · ${d.region}` : ""}
@@ -234,16 +232,9 @@ const sections = [
                     ? ` · ${years(d.year_from, d.year_to)}`
                     : ""}
                 </p>
-                {d.locator && <p>{d.locator}</p>}
-                <a
-                  href={safeWebUrl(d.source_url) ?? `#source-${d.source_id}`}
-                  {...externalLinkAttributes(
-                    safeWebUrl(d.source_url),
-                    Astro.url,
-                  )}
-                >
-                  {source(d.source_id)?.title ?? t.source}
-                </a>
+                {source(d.source_id) && (
+                  <a href={`#source-${d.source_id}`}>{t.source}</a>
+                )}
               </article>
             ))}
           </div>
@@ -270,6 +261,28 @@ const sections = [
                     </a>
                   </p>
                 )}
+                {days
+                  .filter((d) => Number(d.source_id) === Number(s.id))
+                  .map((d) => (
+                    <p>
+                      {d.title}
+                      {d.locator && <span> · {d.locator}</span>}
+                      {safeWebUrl(d.source_url) && d.source_url !== s.url && (
+                        <>
+                          {" · "}
+                          <a
+                            href={safeWebUrl(d.source_url)}
+                            {...externalLinkAttributes(
+                              safeWebUrl(d.source_url),
+                              Astro.url,
+                            )}
+                          >
+                            {t.original}
+                          </a>
+                        </>
+                      )}
+                    </p>
+                  ))}
                 {s.license && (
                   <p>
                     {t.license}:{" "}
