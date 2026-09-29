@@ -20,6 +20,7 @@ import { resolveRoute, resolveName, url, nameUrl } from "../config/routes";
 import { site } from "../config/site";
 import { HttpError } from "../modules/CoreModule/server/errors";
 import type { User } from "../modules/AuthModule/types";
+import { singleResultUrl } from "../modules/EtymologModule/providers/searchNavigation";
 import type { Dossier, SearchResult } from "../modules/EtymologModule/types";
 const route = resolveRoute(Astro.url.pathname);
 const nameRoute = resolveName(Astro.url.pathname);
@@ -71,6 +72,8 @@ if (!error && page === "home" && Astro.url.searchParams.has("q")) {
       "",
       Astro.url.searchParams.get("page") ?? "1",
     );
+    const target = singleResultUrl(result, locale);
+    if (target) return Astro.redirect(target, 302);
   } catch (e) {
     searchError =
       e instanceof HttpError && e.status === 422 ? "invalid" : "unavailable";

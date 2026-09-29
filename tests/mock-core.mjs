@@ -152,7 +152,14 @@ http
     if (url.pathname === "/etymolog/public/names") {
       const q = url.searchParams.get("q") ?? "";
       if (q === "error") return send(503, null);
-      const items = q.toLowerCase().includes("nov") ? [name] : [];
+      const items = q.toLowerCase().includes("nov")
+        ? [name]
+        : q.toLowerCase() === "anna"
+          ? [
+              { ...name, id: 1162, name: "Anna", kind: "given" },
+              { ...name, id: 1164, name: "Anna", kind: "surname" },
+            ]
+          : [];
       return send(200, { items, total: items.length, page: 1, limit: 20 });
     }
     if (
@@ -167,10 +174,15 @@ http
         variants: [],
         calendar_days: [],
       });
+    if (url.pathname === "/etymolog/public/names/1164")
+      return send(200, {
+        ...dossier,
+        name: { ...name, id: 1164, name: "Anna", kind: "surname" },
+      });
     if (url.pathname === "/etymolog/public/names/1163")
       return send(200, {
         ...dossier,
-        name: { ...name, id: 1163, name: "Shared name", kind: "both" },
+        name: { ...name, id: 1163, name: "Shared name", kind: "given" },
         entries: [
           dossier.entries[0],
           {

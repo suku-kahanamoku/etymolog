@@ -1,6 +1,7 @@
 import type { Dictionary } from "../providers/translations";
 import type { SearchResult } from "../types";
 import { nameUrl, url, type Locale } from "../../../config/routes";
+import { singleResultUrl } from "../providers/searchNavigation";
 export function useNameSearch() {
   const form = document.querySelector<HTMLFormElement>("[data-name-search]");
   if (!form) return;
@@ -27,11 +28,11 @@ export function useNameSearch() {
     event.preventDefault();
     const fields = new FormData(form);
     const q = String(fields.get("q") ?? "").trim();
+    active?.abort();
     if (q.length < 2 || q.length > 100) {
       status.textContent = t.invalid;
       return;
     }
-    active?.abort();
     const controller = new AbortController();
     active = controller;
     status.classList.remove("error-text");
@@ -46,6 +47,11 @@ export function useNameSearch() {
       if (!response.ok || !payload.success) throw new Error();
       const data = payload.data as SearchResult;
       if (controller.signal.aborted) return;
+      const target = singleResultUrl(data, locale);
+      if (target) {
+        window.location.assign(target);
+        return;
+      }
       items.replaceChildren();
       pagination.replaceChildren();
       results.querySelector("[data-empty]")?.remove();

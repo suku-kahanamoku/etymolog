@@ -10,7 +10,7 @@ async function login(page: import("@playwright/test").Page, admin = false) {
   await page.getByRole("button", { name: "Sign in", exact: true }).click();
   await expect(page).toHaveURL(/\/en\/admin\/$/);
 }
-test("search updates below form, detail shows every section and sources safely", async ({
+test("single search result opens detail with every section and safe sources", async ({
   page,
   request,
 }) => {
@@ -19,10 +19,6 @@ test("search updates below form, detail shows every section and sources safely",
   await page.goto("/");
   await page.getByLabel("Jméno nebo příjmení", { exact: true }).fill("Novak");
   await page.getByRole("button", { name: "Hledat v archivu" }).click();
-  await expect(page.locator("[data-search-status]")).toHaveText(
-    "Nalezená hesla: 1",
-  );
-  await page.locator(".result-card").click();
   await expect(page).toHaveURL("/jmeno/1/");
   await expect(page.locator("main h1")).toHaveText("Novák");
   for (const id of [
@@ -83,7 +79,8 @@ test("search empty, failure, invalid input and no-JS fallback", async ({
   await nojs.goto("/en/");
   await nojs.getByLabel("Name or surname", { exact: true }).fill("Novak");
   await nojs.getByRole("button", { name: "Search the archive" }).click();
-  await expect(nojs.locator(".result-card")).toContainText("Novák");
+  await expect(nojs).toHaveURL("/en/name/1/");
+  await expect(nojs.locator("main h1")).toHaveText("Novák");
   await context.close();
 });
 test("theme survives navigation and contact uses actual reference data", async ({
@@ -289,14 +286,12 @@ test("old statistical name links redirect to one dossier with honest missing-sou
   });
 });
 
-test("one shared name detail retains multiple etymologies and mythology", async ({
+test("one given-name detail retains multiple etymologies and mythology", async ({
   page,
 }) => {
   await page.goto("/en/name/1163/");
   await expect(page.locator("main h1")).toHaveText("Shared name");
-  await expect(page.locator(".dossier-tags")).toContainText(
-    "Given name and surname",
-  );
+  await expect(page.locator(".dossier-tags")).toContainText("Given name");
   await expect(page.locator("#etymology .entry")).toHaveCount(2);
   await expect(page.locator("#mythology .entry")).toHaveCount(1);
   await expect(page.locator("#sources li")).toHaveCount(1);
@@ -464,4 +459,68 @@ test("bulk publication displays skipped evidence without interpreting HTML", asy
     "#12: Missing citation <img",
   );
   await expect(page.locator("[data-publish-skipped] img")).toHaveCount(0);
+});
+
+test("same spelling as a given name and surname offers two distinct choices", async ({
+  page,
+  request,
+}) => {
+  await page.goto("/");
+  await page.getByLabel("Jméno nebo příjmení", { exact: true }).fill("Anna");
+  await page.getByRole("button", { name: "Hledat v archivu" }).click();
+  await expect(page.locator(".result-card")).toHaveCount(2);
+  await expect(page.locator("[data-search-status]")).toHaveText(
+    "Nalezená hesla: 2",
+  );
+  await expect(page.locator('.result-card[href="/jmeno/1162/"]')).toContainText(
+    "Křestní jméno",
+  );
+  await expect(page.locator('.result-card[href="/jmeno/1164/"]')).toContainText(
+    "Příjmení",
+  );
+  await page.locator('.result-card[href="/jmeno/1164/"]').click();
+  await expect(page).toHaveURL("/jmeno/1164/");
+  await expect(page.locator(".dossier-tags")).toContainText("Příjmení");
+  await page.goto("/en/?q=Anna");
+  await expect(page.locator(".result-card")).toHaveCount(2);
+  await page.locator('.result-card[href="/en/name/1162/"]').click();
+  await expect(page).toHaveURL("/en/name/1162/");
+  await expect(page.locator(".dossier-tags")).toContainText("Given name");
+  const sole = await request.get("/en/?q=Novak", { maxRedirects: 0 });
+  expect(sole.status()).toBe(302);
+  expect(sole.headers().location).toBe("/en/name/1/");
+});
+
+test("an aborted earlier single-result search cannot navigate away from a newer selection", async ({
+  page,
+}) => {
+  let release!: () => void;
+  const gate = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  await page.route("**/api/etymolog/search/?q=Slow", async (route) => {
+    await gate;
+    await route.fulfill({
+      json: {
+        success: true,
+        data: {
+          items: [{ id: 1, name: "Novák", kind: "surname" }],
+          total: 1,
+          page: 1,
+          limit: 20,
+        },
+      },
+    });
+  });
+  await page.goto("/");
+  await page.getByLabel("Jméno nebo příjmení", { exact: true }).fill("Slow");
+  const pending = page.waitForRequest("**/api/etymolog/search/?q=Slow");
+  await page.getByRole("button", { name: "Hledat v archivu" }).click();
+  await pending;
+  await page.getByLabel("Jméno nebo příjmení", { exact: true }).fill("Anna");
+  await page.getByRole("button", { name: "Hledat v archivu" }).click();
+  await expect(page.locator(".result-card")).toHaveCount(2);
+  release();
+  await page.unrouteAll({ behavior: "wait" });
+  await expect(page).toHaveURL(/\/\?q=Anna$/);
 });

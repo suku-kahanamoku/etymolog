@@ -161,13 +161,26 @@ Například `about` má adresy `/o-nas/`, `/en/about/` a `/de/ueber-uns/`. Menu,
 
 Detaily používají `nameUrl(locale, id)`: `/jmeno/123/`, `/en/name/123/`, `/de/name/123/`. Přepnutí jazyka zachová ID záznamu a detail obsahuje odpovídající hreflang.
 
-Pro běh na pozadí aplikujte v php-core migrace `2026-09-28-etymolog-background.sql` a `2026-09-28-etymolog-dictionaries-tenant.sql`. Druhá připravuje 10 dalších úloh pro český a francouzský Wikislovník a prioritní česká hesla v anglickém Wiktionary. Podrobnosti licencí a požadavků na PHP worker jsou v `../../php/php-core/src/Modules/Etymolog/README.md`. Tlačítko i polling vlastní EtymologModule; AdminModule pouze poskytuje rámec administrace.
+Pro běh na pozadí aplikujte v php-core migrace `etymolog_schema.sql` a `etymolog_seed.sql`. Seed obsahuje všech 30 úloh včetně 10 pravidel pro český a francouzský Wikislovník a prioritní česká hesla v anglickém Wiktionary. Podrobnosti licencí a požadavků na PHP worker jsou v `../../php/php-core/src/Modules/Etymolog/README.md`. Tlačítko i polling vlastní EtymologModule; AdminModule pouze poskytuje rámec administrace.
 
-Veřejné vyhledávání slučuje stejné znění jména bez ohledu na jeho druh napříč importními zdroji, jazyky a zeměmi (ignoruje velikost písmen a krajní mezery, zachovává diakritiku). `ANNA` a `Anna` tvoří jedno heslo s předností běžného zápisu. Detail sdružuje pouze zveřejněné podklady zveřejněných členů; původní URL vede přes dočasné přesměrování na aktuální společné heslo. Databázové záznamy a původ jednotlivých zdrojů zůstávají zachované. Etymologie a mytologie mají přednost i s vysvětlením chybějících podkladů; statistiky jsou poslední sekcí.
+Veřejné vyhledávání slučuje stejné znění v rámci jednoho druhu napříč zdroji,
+jazyky a zeměmi. `ANNA` a `Anna` jako křestní jméno tvoří jedno heslo; `Anna`
+jako příjmení má vlastní výsledek a detail. Velikost písmen a krajní mezery se
+ignorují, diakritika zůstává významná. Backend vrací `kind=given|surname`.
 
-Stejný zápis vedený jako křestní jméno i příjmení má také jen jeden veřejný výsledek a jeden detail. Filtr druhu zachovává stejné ID; veřejný štítek `both` se zobrazuje jako „Křestní jméno i příjmení“. Jednotlivé etymologie a kulturní texty se v detailu neslučují do jednoho výkladu.
+Při jediném celkovém výsledku frontend rovnou otevře lokalizovaný detail, přes
+JavaScript i serverové HTTP 302 při odeslání formuláře bez JavaScriptu. Při více
+výsledcích zůstane výběr pod formulářem včetně označení jména/příjmení. Jediná
+položka na poslední stránce většího hledání není důvod k přesměrování.
 
-Migrace `2026-09-28-etymolog-wikipedia-tenant.sql` navíc připravuje dvě úlohy
+Detail sdružuje publikované výklady, mytologii, prameny a další podklady pouze
+stejného druhu. Staré ID duplicitního hesla vede přes dočasné přesměrování na
+aktuální heslo stejného druhu. Etymologie a mytologie mají přednost; statistiky
+jsou poslední sekcí. Importy v php-core zapisují `Anna` a znovu používají existující
+název stejného druhu. Před nasazením importeru aplikovat `etymolog_schema.sql`
+kvůli rozšíření indexu uchovávajícího různé Wikidata zdroje jednoho jména.
+
+Seed `etymolog_seed.sql` zahrnuje i dvě úlohy
 `wikipedia-names`: vybrané etymologie a kulturní texty z české Wikipedie pod
 CC BY-SA 4.0. Katalog obsahuje 15 oddílů pro Annu, Jiřího, Martina, Mikuláše,
 Barboru a Dianu. První úspěšné spuštění nových úloh načte pro Annu etymologii,
@@ -180,7 +193,7 @@ texty; při opakování se nezdvojují ani nepřepisují ruční úpravy.
 Synchronizační úlohy zobrazují `last_status` a `last_error` místo publikačního
 stavu. HTTP 429 má čitelný popis; při odloženém opakování ukazuje panel běhu
 `retry_at` z PHP (UTC převedené do místního času). Oprava vyžaduje backendovou
-migraci `2026-09-28-etymolog-rate-limit.sql` a odpovídající Cloudflare Worker.
+migraci `etymolog_schema.sql` a odpovídající Cloudflare Worker.
 
 Vedle tlačítka synchronizace je pro administrátora „Publikovat vše“.
 Volá autentizované `POST /api/admin/etymolog/publish-all/` a přes serverový provider
