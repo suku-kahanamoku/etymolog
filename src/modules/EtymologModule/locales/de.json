@@ -107,7 +107,7 @@
     "syncStart": "Synchronisierung starten",
     "syncRunning": "Synchronisierung läuft…",
     "syncStarting": "Synchronisierung wird gestartet…",
-    "syncHelp": "Führt alle aktivierten, fälligen Aufgaben im Hintergrund aus. Verarbeitet einen Stapel pro Aufgabe unter Beibehaltung der Intervalle und des Fortschritts. Neue Texte bleiben Entwürfe.",
+    "syncHelp": "Verarbeitet im Hintergrund alle verbleibenden Stapel der aktivierten, fälligen Aufgaben. Weitere Stapel folgen automatisch; das Intervall gilt zwischen vollständigen Durchläufen. Neue Texte bleiben Entwürfe.",
     "syncProcessed": "Verarbeitete Einträge",
     "syncErrors": "Fehlgeschlagene Aufgaben",
     "syncStatusError": "Status konnte nicht geladen werden. Erneuter Versuch folgt.",
@@ -135,7 +135,8 @@
     "publishDone": "Veröffentlichte Einträge",
     "publishSkipped": "Übersprungene Einträge",
     "publishSkippedHelp": "Prüfen Sie die aufgeführten Einträge und ergänzen Sie die erforderlichen Angaben.",
-    "publishError": "Die Veröffentlichung konnte nicht bestätigt werden. Aktualisieren Sie die Liste und prüfen Sie den Status."
+    "publishError": "Die Veröffentlichung konnte nicht bestätigt werden. Aktualisieren Sie die Liste und prüfen Sie den Status.",
+    "syncBatches": "Verarbeitete Stapel"
   },
   "fields": {
     "name": "Name",

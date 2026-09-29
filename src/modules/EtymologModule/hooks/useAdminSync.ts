@@ -5,6 +5,7 @@ type Batch = {
   completed: number;
   failed: number;
   processed: number;
+  step_index?: number;
   retry_at?: string | null;
 };
 export function useAdminSync(
@@ -32,6 +33,9 @@ export function useAdminSync(
     output.textContent = data
       ? `${t.admin.syncStates[data.status]} · ${data.completed}/${data.total} · ${t.admin.syncProcessed}: ${data.processed} · ${t.admin.syncErrors}: ${data.failed}`
       : "";
+    if (data && Number.isInteger(data.step_index)) {
+      output.textContent += ` · ${t.admin.syncBatches}: ${data.step_index}`;
+    }
     if (data?.status === "running" && data.retry_at) {
       const retry = new Date(data.retry_at.replace(" ", "T") + "Z");
       if (retry.getTime() > Date.now())

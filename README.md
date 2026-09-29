@@ -75,7 +75,7 @@ V `EtymologModule/config/resources.json` je explicitní snapshot polí skutečn�
 | `calendar-days` | Jmeniny, svátky, významné dny a lidové tradice |
 | `sync-jobs`     | Konfigurace synchronizací, pouze správce       |
 
-Každá část má seznam, filtr názvu nebo ID, stránkování po 20, vytvoření, načtení, úpravu a smazání. Odkazy mezi daty se zadávají referenčními ID z odpovídajících seznamů. Změny ukládá PATCH. Běžné smazání je backendový soft delete; správce má také potvrzované trvalé smazání, které backend odmítne při závislostech. Importní podklady jsou pouze pro čtení. Správce vidí historii běhů a může resetovat postup úlohy. U synchronizačních úloh je vedle „Nový záznam“ tlačítko „Spustit synchronizaci“. Přes chráněné API spustí PHP worker na pozadí a zobrazuje jeho průběh. Worker používá stejnou službu jako cron: jednu dávku všech zapnutých splatných úloh, bez resetu kurzorů a bez automatického publikování. Opakovaný klik nevytvoří souběžný běh.
+Každá část má seznam, filtr názvu nebo ID, stránkování po 20, vytvoření, načtení, úpravu a smazání. Odkazy mezi daty se zadávají referenčními ID z odpovídajících seznamů. Změny ukládá PATCH. Běžné smazání je backendový soft delete; správce má také potvrzované trvalé smazání, které backend odmítne při závislostech. Importní podklady jsou pouze pro čtení. Správce vidí historii běhů a může resetovat postup úlohy. U synchronizačních úloh je vedle „Nový záznam“ tlačítko „Spustit synchronizaci“. Přes chráněné API spustí PHP worker na pozadí a zobrazuje jeho průběh. Worker používá stejnou službu jako cron: všechny zbývající dávky zapnutých splatných úloh, bez resetu kurzorů a bez automatického publikování. Interval se uplatní mezi celými průchody; administrační stav zobrazuje dokončené úlohy, zpracované dávky a položky. Opakovaný klik nevytvoří souběžný běh.
 
 Publikační pravidla, ověřování vazeb a licence vynucuje php-core. Kulturní texty potřebují doložený webový pramen a citaci. Editor se nepovýší na správce skrytím/změnou HTML: API vždy ověřuje aktuální uživatele a backend znovu kontroluje oprávnění.
 
@@ -184,8 +184,9 @@ Seed `etymolog_seed.sql` zahrnuje i dvě úlohy
 `wikipedia-names`: vybrané etymologie a kulturní texty z české Wikipedie pod
 CC BY-SA 4.0. Katalog obsahuje 15 oddílů pro Annu, Jiřího, Martina, Mikuláše,
 Barboru a Dianu. První úspěšné spuštění nových úloh načte pro Annu etymologii,
-legendu, patronát a pranostiky; další kulturní texty pokračují v dalších dávkách
-(interval 5 minut). Stávající tlačítko spouští jednu dávku každé splatné úlohy.
+legendu, patronát a pranostiky, pokud je příslušný pramen obsahuje.
+Tlačítko spustí všechny zbývající dávky splatných úloh. Krátké PHP požadavky
+na sebe automaticky navazují přes frontu Cloudflare; otevřený prohlížeč není potřeba.
 Importované texty jsou koncepty: před zobrazením na webu je redaktor zkontroluje
 a publikuje v administraci. Odkaz na revizi, licence a autorství doprovázejí
 texty; při opakování se nezdvojují ani nepřepisují ruční úpravy.

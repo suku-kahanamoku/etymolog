@@ -107,7 +107,7 @@
     "syncStart": "Start synchronization",
     "syncRunning": "Synchronization running…",
     "syncStarting": "Starting synchronization…",
-    "syncHelp": "Runs all enabled jobs that are due in the background. Processes one batch per job, preserving intervals and progress. New texts remain drafts.",
+    "syncHelp": "Completes all remaining batches of enabled jobs that are due in the background. Batches continue automatically; the interval applies between complete passes. New texts remain drafts.",
     "syncProcessed": "Processed items",
     "syncErrors": "Failed jobs",
     "syncStatusError": "Could not load status. Retrying shortly.",
@@ -135,7 +135,8 @@
     "publishDone": "Published records",
     "publishSkipped": "Skipped records",
     "publishSkippedHelp": "Check the listed records and complete the information required for publication.",
-    "publishError": "Publication could not be confirmed. Refresh the list and check the status."
+    "publishError": "Publication could not be confirmed. Refresh the list and check the status.",
+    "syncBatches": "Processed batches"
   },
   "fields": {
     "name": "Name",
