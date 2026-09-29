@@ -1,4 +1,5 @@
 ---
+import { externalLinkAttributes } from "../providers/external-links";
 import type { NavigationItem } from "../types";
 interface Props {
   items: NavigationItem[];
@@ -11,6 +12,7 @@ const { items, class: className } = Astro.props;
   <a
     class:list={[className, { active: item.current }]}
     href={item.href}
+    {...externalLinkAttributes(item.href, Astro.url)}
     aria-current={item.current ? "page" : undefined}
   >
     {item.label}

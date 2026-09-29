@@ -1,4 +1,5 @@
 ---
+import { externalLinkAttributes } from "../../UIModule/providers/external-links";
 import EditorialIcon from "../../UIModule/components/EditorialIcon.astro";
 import type { Locale } from "../../LangModule/config";
 import type { Dossier } from "../types";
@@ -133,7 +134,13 @@ const sections = [
                       <span>
                         {" "}
                         ·{" "}
-                        <a href={safeWebUrl(c.url)} rel="noopener noreferrer">
+                        <a
+                          href={safeWebUrl(c.url)}
+                          {...externalLinkAttributes(
+                            safeWebUrl(c.url),
+                            Astro.url,
+                          )}
+                        >
                           {t.original}
                         </a>
                       </span>
@@ -152,7 +159,10 @@ const sections = [
                 <a
                   class="text-link"
                   href={safeWebUrl(entry.source_url)}
-                  rel="noopener noreferrer"
+                  {...externalLinkAttributes(
+                    safeWebUrl(entry.source_url),
+                    Astro.url,
+                  )}
                 >
                   {t.original}
                 </a>
@@ -227,7 +237,10 @@ const sections = [
                 {d.locator && <p>{d.locator}</p>}
                 <a
                   href={safeWebUrl(d.source_url) ?? `#source-${d.source_id}`}
-                  rel="noopener noreferrer"
+                  {...externalLinkAttributes(
+                    safeWebUrl(d.source_url),
+                    Astro.url,
+                  )}
                 >
                   {source(d.source_id)?.title ?? t.source}
                 </a>
@@ -249,7 +262,10 @@ const sections = [
                 {s.author && <span> — {s.author}</span>}
                 {safeWebUrl(s.url) && (
                   <p>
-                    <a href={safeWebUrl(s.url)} rel="noopener noreferrer">
+                    <a
+                      href={safeWebUrl(s.url)}
+                      {...externalLinkAttributes(safeWebUrl(s.url), Astro.url)}
+                    >
                       {t.original}
                     </a>
                   </p>
@@ -260,7 +276,10 @@ const sections = [
                     {safeWebUrl(s.license_url) ? (
                       <a
                         href={safeWebUrl(s.license_url)}
-                        rel="noopener noreferrer"
+                        {...externalLinkAttributes(
+                          safeWebUrl(s.license_url),
+                          Astro.url,
+                        )}
                       >
                         {s.license}
                       </a>

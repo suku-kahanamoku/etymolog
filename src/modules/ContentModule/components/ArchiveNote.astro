@@ -1,4 +1,5 @@
 ---
+import { externalLinkAttributes } from "../../UIModule/providers/external-links";
 import { Image } from "astro:assets";
 import archive from "../assets/archive.png";
 import { dictionary } from "../providers/translations";
@@ -20,7 +21,11 @@ const { locale, title, body, link, href } = Astro.props;
       <p class="eyebrow">ETYMOLOG · EX FONTIBUS</p>
       <h2>{title}</h2>
       <p>{body}</p>
-      <a class="text-link" href={href}>
+      <a
+        class="text-link"
+        href={href}
+        {...externalLinkAttributes(href, Astro.url)}
+      >
         {link}
       </a>
       <small>{dictionary(locale).about.visual}</small>
