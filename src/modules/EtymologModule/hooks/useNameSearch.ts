@@ -27,7 +27,6 @@ export function useNameSearch() {
     event.preventDefault();
     const fields = new FormData(form);
     const q = String(fields.get("q") ?? "").trim();
-    const kind = String(fields.get("kind") ?? "");
     if (q.length < 2 || q.length > 100) {
       status.textContent = t.invalid;
       return;
@@ -38,7 +37,7 @@ export function useNameSearch() {
     status.classList.remove("error-text");
     status.textContent = t.loading;
     results.setAttribute("aria-busy", "true");
-    const params = new URLSearchParams({ q, kind });
+    const params = new URLSearchParams({ q });
     try {
       const response = await fetch(`/api/etymolog/search/?${params}`, {
         signal: controller.signal,

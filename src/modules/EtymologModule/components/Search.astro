@@ -9,12 +9,11 @@ interface Props {
   result?: SearchResult;
   error?: string;
   query?: string;
-  kind?: string;
 }
-const { locale, result, error, query = "", kind = "" } = Astro.props;
+const { locale, result, error, query = "" } = Astro.props;
 const t = dictionary(locale);
 const pageHref = (page: number) =>
-  `${url(locale)}?${new URLSearchParams({ q: query, kind, page: String(page) })}#results`;
+  `${url(locale)}?${new URLSearchParams({ q: query, page: String(page) })}#results`;
 ---
 
 <section class="page-section paper-section">
@@ -58,20 +57,6 @@ const pageHref = (page: number) =>
             aria-describedby="search-hint"
             autocomplete="off"
           />
-        </div>
-        <div class="search-kind">
-          <label for="name-kind">{t.kind}</label>
-          <select id="name-kind" name="kind">
-            <option value="" selected={!kind}>
-              {t.all}
-            </option>
-            <option value="given" selected={kind === "given"}>
-              {t.given}
-            </option>
-            <option value="surname" selected={kind === "surname"}>
-              {t.surname}
-            </option>
-          </select>
         </div>
         <button type="submit" class="btn btn-primary search-button">
           <svg

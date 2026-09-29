@@ -63,13 +63,12 @@ if (!error && nameRoute) {
     error = e instanceof HttpError && e.status === 404 ? 404 : 503;
   }
 }
-const query = (Astro.url.searchParams.get("q") ?? "").slice(0, 101),
-  kind = Astro.url.searchParams.get("kind") ?? "";
+const query = (Astro.url.searchParams.get("q") ?? "").slice(0, 101);
 if (!error && page === "home" && Astro.url.searchParams.has("q")) {
   try {
     result = await Astro.locals.providers.etymolog.search(
       query,
-      kind,
+      "",
       Astro.url.searchParams.get("page") ?? "1",
     );
   } catch (e) {
@@ -123,7 +122,7 @@ const metadata = error
     <Detail {locale} data={detail} />
   ) : page === "home" ? (
     <>
-      <Search {locale} {result} error={searchError} {query} {kind} />
+      <Search {locale} {result} error={searchError} {query} />
       <ArchiveNote
         {locale}
         title={ety.principle}
