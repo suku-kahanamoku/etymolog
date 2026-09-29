@@ -81,6 +81,11 @@ Publikační pravidla, ověřování vazeb a licence vynucuje php-core. Kulturn�
 
 ## Backendový kontrakt a bezpečnost
 
+Hledání a seznamy odesílají do php-core jednotný JSON filtr `q` s operátory
+`$regex`/`$eq` a JSON pole `sort`. Druh jména (`kind`) je součástí `q`;
+veřejná URL formuláře si ponechává čitelný textový parametr a serverový
+provider jej převede na backendový kontrakt.
+
 Nové úzce vymezené GET endpointy php-core:
 
 ```text

@@ -51,10 +51,13 @@ export function createEtymologProvider(core: CoreClient, token?: string) {
         Number(page) > 1000000
       )
         throw new HttpError(422, "invalid_input");
-      const filter = JSON.stringify({ name: { $regex: name } });
+      const filter = JSON.stringify({
+        name: { $regex: name },
+        ...(kind ? { kind: { $eq: kind } } : {}),
+      });
       const result = await core.request<SearchResult>(
         "/etymolog/public/names",
-        { query: { q: filter, kind, page } },
+        { query: { q: filter, page } },
       );
       if (!Array.isArray(result.items) || !Number.isFinite(result.total))
         throw new HttpError(502, "invalid_backend_response");
@@ -85,7 +88,12 @@ export function createEtymologProvider(core: CoreClient, token?: string) {
     },
     list(resource: string, page: string, q: string) {
       return privateRequest<AdminRecord[]>(resourcePath(resource), {
-        query: { page, limit: "20", sort: "id DESC", ...(q ? { q } : {}) },
+        query: {
+          page,
+          limit: "20",
+          sort: JSON.stringify([{ id: -1 }]),
+          ...(q ? { q } : {}),
+        },
       });
     },
     get(resource: string, id: number) {
