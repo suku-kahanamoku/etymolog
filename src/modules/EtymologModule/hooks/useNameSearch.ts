@@ -1,4 +1,16 @@
 import type { Dictionary } from "../providers/translations";
+type SearchLabels = Pick<
+  Dictionary,
+  | "given"
+  | "surname"
+  | "invalid"
+  | "loading"
+  | "empty"
+  | "error"
+  | "results"
+  | "page"
+  | "next"
+>;
 import type { SearchResult } from "../types";
 import { nameUrl, url, type Locale } from "../../../config/routes";
 import { singleResultUrl } from "../providers/searchNavigation";
@@ -7,15 +19,15 @@ import { beginFormPending } from "../../UIModule/hooks/useFormPending";
 /**
  * Napojí veřejný formulář hledání na API `/api/etymolog/search/`.
  *
- * Vedlejší účinky: přepisuje obsah kontejneru výsledků, stavový text a URL
- * (`history.replaceState`); jednoznačný výsledek přesměruje na detail.
+ * Vedlejší účinky: přepisuje obsah výsledků a stavový text. Na homepage
+ * aktualizuje URL; jednoznačný výsledek přesměruje na detail.
  * Po dobu požadavku je formulář zamčený proti opakovanému odeslání.
  * @returns `void`; bez formuláře na stránce se hook tiše ukončí.
  */
 export function useNameSearch() {
   const form = document.querySelector<HTMLFormElement>("[data-name-search]");
   if (!form) return;
-  const t: Dictionary = JSON.parse(form.dataset.text!);
+  const t: SearchLabels = JSON.parse(form.dataset.text!);
   const locale = form.dataset.locale as Locale;
   const results = document.querySelector<HTMLElement>("[data-results]")!;
   const status = results.querySelector<HTMLElement>("[data-search-status]")!;
@@ -74,11 +86,7 @@ export function useNameSearch() {
         card.href = nameUrl(locale, item.id);
         const text = element("div", "");
         text.append(
-          element(
-            "span",
-            `${t[item.kind]}${item.country_code ? ` · ${item.country_code}` : ""}`,
-            "result-meta",
-          ),
+          element("span", t[item.kind], "result-meta"),
           element("h2", item.name),
         );
         if (item.summary)
@@ -106,7 +114,9 @@ export function useNameSearch() {
         params.delete("page");
       }
       status.textContent = `${t.results}: ${data.total}`;
-      history.replaceState(null, "", `${url(locale)}?${params}`);
+      if (window.location.pathname === url(locale)) {
+        history.replaceState(null, "", `${url(locale)}?${params}`);
+      }
     } catch {
       if (!controller.signal.aborted) {
         items.replaceChildren();

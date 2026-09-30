@@ -132,10 +132,17 @@
   margin-top: 0.7rem;
   font-size: 0.8rem;
 }
-.dossier-header .editorial-heading {
-  margin: 1rem 0;
+.dossier-search {
+  padding-top: 1.3rem;
+  padding-bottom: 1.3rem;
 }
-.dossier-header .editorial-lead {
+.dossier-heading {
+  margin-bottom: 2rem;
+}
+.dossier-heading .editorial-heading {
+  margin: 0 0 0.6rem;
+}
+.dossier-heading .editorial-lead {
   max-width: 65ch;
 }
 .dossier-tags {

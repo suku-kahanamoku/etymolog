@@ -1,0 +1,112 @@
+---
+import type { Locale } from "../../LangModule/config";
+import type { TodayNamedays } from "../types";
+import { dictionary } from "../providers/translations";
+import { nameUrl } from "../../../config/routes";
+import { safeWebUrl } from "../providers/links";
+import { externalLinkAttributes } from "../../UIModule/providers/external-links";
+interface Props {
+  locale: Locale;
+  data?: TodayNamedays;
+}
+const { locale, data } = Astro.props;
+const t = dictionary(locale).today;
+const date = data
+  ? new Intl.DateTimeFormat(locale, {
+      dateStyle: "long",
+      timeZone: "Europe/Prague",
+    }).format(new Date(data.date + "T12:00:00Z"))
+  : undefined;
+---
+
+<section class="page-section today-section" aria-labelledby="today-title">
+  <div class="section-inner section-pad today-namedays">
+    <p class="eyebrow">{t.eyebrow}</p>
+    <h2 id="today-title" class="rule-title">
+      {t.title}
+    </h2>
+    {data && <time datetime={data.date}>{date}</time>}
+    <p class="today-intro">{t.intro}</p>
+    {!data ? (
+      <p role="status">{t.error}</p>
+    ) : data.items.length === 0 ? (
+      <p>{t.empty}</p>
+    ) : (
+      <ul class="today-list">
+        {data.items.map((item) => {
+          const sourceUrl =
+            safeWebUrl(item.source_url) ?? safeWebUrl(item.source_fallback_url);
+          return (
+            <li>
+              <a class="today-name" href={nameUrl(locale, item.name_id)}>
+                {item.name}
+              </a>
+              <p>{item.calendar_title}</p>
+              <small>
+                {t.source}:{" "}
+                {sourceUrl ? (
+                  <a
+                    href={sourceUrl}
+                    {...externalLinkAttributes(sourceUrl, Astro.url)}
+                  >
+                    {item.source_title}
+                  </a>
+                ) : (
+                  item.source_title
+                )}
+              </small>
+            </li>
+          );
+        })}
+      </ul>
+    )}
+    <p class="today-note">{t.note}</p>
+  </div>
+</section>
+<style>
+  .today-section {
+    background: #fff;
+  }
+  :global([data-theme="newspaper-dark"]) .today-section {
+    background: var(--color-base-100);
+  }
+  .today-namedays time {
+    display: block;
+    color: var(--muted);
+    margin: 1rem 0;
+  }
+  .today-intro {
+    max-width: 65ch;
+    margin-bottom: 1.5rem;
+  }
+  .today-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+    gap: 1.5rem;
+    list-style: none;
+    padding: 0;
+  }
+  .today-list li {
+    border-top: 1px solid var(--rule);
+    padding-top: 1rem;
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+  .today-name {
+    font-family: Georgia, serif;
+    font-size: 2rem;
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+  .today-list p {
+    margin: 0.7rem 0;
+  }
+  .today-list small,
+  .today-note {
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+  .today-note {
+    margin-top: 1.5rem;
+  }
+</style>

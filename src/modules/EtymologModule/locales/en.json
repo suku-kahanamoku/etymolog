@@ -38,7 +38,7 @@
   "downloadData": "Download source data",
   "year": "Year",
   "count": "Count",
-  "place": "Country / region",
+  "place": "Region",
   "measure": "Measure",
   "sex": "Sex",
   "culturalNotice": "Legends, mythology and fiction reflect narratives from the cited sources. They do not automatically establish a name’s origin.",
@@ -213,5 +213,14 @@
   },
   "quotation": "Quoted passage",
   "missingEtymology": "We do not yet have a published, sourced etymology for this name.",
-  "missingMythology": "We do not yet have published sources documenting mythological connections for this name."
+  "missingMythology": "We do not yet have published sources documenting mythological connections for this name.",
+  "today": {
+    "eyebrow": "CZECH NAME-DAY CALENDAR",
+    "title": "Who celebrates a name day today",
+    "intro": "Today’s name days from published calendar records in our archive. Choose a name to discover its story.",
+    "empty": "There is no published name-day record for today yet.",
+    "error": "Today’s name days could not be loaded. Please try again later.",
+    "source": "Source",
+    "note": "Name days may differ between calendars. We identify the calendar and source."
+  }
 }

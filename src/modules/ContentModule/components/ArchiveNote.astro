@@ -1,91 +1,46 @@
 ---
-import { externalLinkAttributes } from "../../UIModule/providers/external-links";
-import { Image } from "astro:assets";
-import archive from "../assets/archive.png";
 import { dictionary } from "../providers/translations";
 import type { Locale } from "../../LangModule/config";
-/**
- * Poznámka k archivu (ContentModule) se staronovou ilustrací a volitelným odkazem.
- *
- * Texty i odkaz přicházejí přes props, aby komponenta zůstala bez doménové
- * znalosti; odkaz mimo origin se otevře bezpečně přes `externalLinkAttributes`.
- * Props: položky bez `?` jsou povinné, u volitelných uvádí popis výchozí hodnotu.
- */
+/** Dvousloupcové představení projektu a práce s prameny na domovské stránce. */
 interface Props {
-  /** Jazyk, ve kterém se vykreslí popisek ilustrace. */
   locale: Locale;
-  /** Nadpis poznámky. */
-  title: string;
-  /** Tělo poznámky (1–2 věty). */
-  body: string;
-  /** Text odkazu. */
-  link: string;
-  /** Cílová adresa odkazu. */
-  href: string;
 }
-const { locale, title, body, link, href } = Astro.props;
+const { locale } = Astro.props;
+const about = dictionary(locale).about;
 ---
 
-<section class="page-section">
+<section class="page-section paper-section">
   <div class="section-inner section-pad archive-note">
-    <Image src={archive} width={420} alt="" class="archive-note-image" />
-    <div>
-      <p class="eyebrow">ETYMOLOG · EX FONTIBUS</p>
-      <h2>{title}</h2>
-      <p>{body}</p>
-      <a
-        class="text-link"
-        href={href}
-        {...externalLinkAttributes(href, Astro.url)}
-      >
-        {link}
-      </a>
-      <small>{dictionary(locale).about.visual}</small>
-    </div>
+    <article>
+      <h2 class="rule-title">{about.title}</h2>
+      <p>{about.description}</p>
+      <p>{about.visual}</p>
+    </article>
+    <article>
+      <h2 class="rule-title">{about.method}</h2>
+      <p>{about.body}</p>
+    </article>
   </div>
 </section>
 <style>
   .archive-note {
     display: grid;
-    grid-template-columns: 240px 1fr;
-    gap: 3rem;
-    align-items: center;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: clamp(2rem, 5vw, 4rem);
   }
-  .archive-note-image {
-    width: 100%;
-    height: auto;
-    mix-blend-mode: multiply;
+  .archive-note article {
+    min-width: 0;
   }
-  .archive-note h2 {
-    font-size: 2rem;
-    line-height: 1.2;
-    margin-bottom: 1rem;
+  .archive-note .rule-title {
+    white-space: normal;
   }
-  .archive-note p:not(.eyebrow) {
-    color: var(--muted);
-    font-size: 0.9rem;
-    max-width: 65ch;
+  .archive-note p {
+    font-family: Georgia, serif;
+    font-size: 1.05rem;
   }
-  .archive-note small {
-    display: block;
-    color: var(--muted);
-    font-size: 0.6rem;
-  }
-  .archive-note .eyebrow {
-    margin-bottom: 0.8rem;
-  }
-  :global([data-theme="newspaper-dark"]) .archive-note-image {
-    mix-blend-mode: normal;
-    opacity: 0.8;
-  }
-  @media (max-width: 640px) {
+  @media (max-width: 767px) {
     .archive-note {
       grid-template-columns: 1fr;
-      gap: 1.5rem;
-    }
-    .archive-note-image {
-      max-width: 220px;
-      justify-self: center;
     }
   }
 </style>

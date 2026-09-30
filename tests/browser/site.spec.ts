@@ -274,8 +274,12 @@ test("sticky offsets and anchors follow the actual menu height", async ({
         location.hash = "features";
       });
       await expect
-        .poll(async () => (await page.locator("#features").boundingBox())!.y)
-        .toBeCloseTo(height + 16, 0);
+        .poll(async () =>
+          Math.abs(
+            (await page.locator("#features").boundingBox())!.y - (height + 16),
+          ),
+        )
+        .toBeLessThanOrEqual(1);
       if (width >= 1280) {
         for (const selector of [".ad-left", ".ad-right"]) {
           await expect

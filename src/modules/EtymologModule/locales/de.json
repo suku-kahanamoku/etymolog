@@ -38,7 +38,7 @@
   "downloadData": "Quelldaten herunterladen",
   "year": "Jahr",
   "count": "Anzahl",
-  "place": "Land / Region",
+  "place": "Region",
   "measure": "Art der Angabe",
   "sex": "Geschlecht",
   "culturalNotice": "Sagen, Mythologie und Fiktion geben Erzählungen aus den genannten Quellen wieder. Sie belegen nicht automatisch die Herkunft des Namens.",
@@ -143,7 +143,7 @@
     "name": "Name",
     "kind": "Art",
     "language": "Sprache",
-    "country_code": "Ländercode (CZ, SK…)",
+    "country_code": "Ländercode",
     "summary": "Zusammenfassung",
     "published": "Veröffentlichen",
     "title": "Titel",
@@ -213,5 +213,14 @@
   },
   "quotation": "Zitierter Auszug",
   "missingEtymology": "Für diesen Namen liegt noch keine veröffentlichte Etymologie mit Quellenangabe vor.",
-  "missingMythology": "Mythologische Bezüge dieses Namens sind bei uns noch nicht durch veröffentlichte Quellen belegt."
+  "missingMythology": "Mythologische Bezüge dieses Namens sind bei uns noch nicht durch veröffentlichte Quellen belegt.",
+  "today": {
+    "eyebrow": "TSCHECHISCHER NAMENSTAGSKALENDER",
+    "title": "Wer hat heute Namenstag",
+    "intro": "Heutige Namenstage aus veröffentlichten Kalendereinträgen unseres Archivs. Wählen Sie einen Namen und entdecken Sie seine Geschichte.",
+    "empty": "Für heute ist noch kein Namenstag veröffentlicht.",
+    "error": "Die heutigen Namenstage konnten nicht geladen werden. Bitte versuchen Sie es später erneut.",
+    "source": "Quelle",
+    "note": "Namenstage können je nach Kalender abweichen. Wir nennen den Kalender und die Quelle."
+  }
 }

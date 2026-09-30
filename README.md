@@ -208,3 +208,5 @@ texty a kalendářní údaje, které splní stávající pravidla publikace; zob
 publikovaných a přeskočených záznamů. Během synchronizace je tlačítko vypnuté.
 Nezapíná automatické publikování dalších importů. Před nasazením frontendu
 nasaďte odpovídající změny PHP API/service/repository; nová migrace není potřeba.
+
+Homepage pod vyhledáváním načítá `GET /etymolog/public/today` přes serverový provider. Endpoint vrací přehled dne podle `Europe/Prague` z publikovaných českých gregoriánských jmenin, včetně názvu kalendáře a pramene. Prázdná databáze i nedostupný backend mají odlišný stav; žádná jména se nedoplňují napevno. Homepage má `Cache-Control: no-store`, aby nepřenášela včerejší datum. Před frontendem je nutné nasadit php-core s tímto endpointem; nová migrace není potřeba. Sekce EX FONTIBUS sdílí texty metody a mezí archivu se stránkou O nás.

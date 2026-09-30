@@ -57,6 +57,49 @@ test("single search result opens detail with every section and safe sources", as
   expect((await request.get("/jmeno/999/")).status()).toBe(404);
   await page.screenshot({ path: "test-results/detail.png", fullPage: true });
 });
+test("detail starts with search and keeps the name in etymology without country codes", async ({
+  page,
+  browser,
+}) => {
+  await page.goto("/jmeno/1/");
+  await expect(page.locator(".paper-section [data-name-search]")).toBeVisible();
+  await expect(page.locator(".paper-section h1")).toHaveCount(0);
+  await expect(page.locator("#etymology h1")).toHaveText("Novák");
+  await expect(page.locator(".dossier-tags")).toContainText("Příjmení");
+  for (const selector of [
+    ".dossier-tags",
+    ".entry-meta",
+    ".calendar-card",
+    "#sources p",
+    "#occurrences tbody",
+  ]) {
+    await expect(page.locator(selector).first()).not.toContainText(
+      /\b(?:CS|CZ)\b/,
+    );
+  }
+  await page.getByLabel("Jméno nebo příjmení", { exact: true }).fill("Anna");
+  await page.getByRole("button", { name: "Hledat v archivu" }).click();
+  await expect(page.locator(".result-card")).toHaveCount(2);
+  await expect(page).toHaveURL("/jmeno/1/");
+  await expect(
+    page.locator(".result-card .result-meta").first(),
+  ).not.toContainText(/\b(?:CS|CZ)\b/);
+  await page.getByLabel("Jméno nebo příjmení", { exact: true }).fill("Novak");
+  await page.getByRole("button", { name: "Hledat v archivu" }).click();
+  await expect(page).toHaveURL("/jmeno/1/");
+  await expect(page.locator(".result-card")).toHaveCount(0);
+
+  const context = await browser.newContext({ javaScriptEnabled: false });
+  await blockExternalCmp(context);
+  const nojs = await context.newPage();
+  await nojs.goto("/jmeno/1/");
+  await nojs.getByLabel("Jméno nebo příjmení", { exact: true }).fill("Anna");
+  await nojs.getByRole("button", { name: "Hledat v archivu" }).click();
+  await expect(nojs).toHaveURL(/\/\?q=Anna$/);
+  await expect(nojs.locator(".result-card")).toHaveCount(2);
+  await context.close();
+});
+
 test("search empty, failure, invalid input and no-JS fallback", async ({
   page,
   browser,
@@ -680,4 +723,69 @@ test("pending single-result search blocks another submit until navigation", asyn
   await expect(page).toHaveURL("/jmeno/1/");
   await page.goBack();
   await expect(input).toBeEnabled();
+});
+
+test("homepage alternates white namedays and concise paper introduction", async ({
+  page,
+}) => {
+  await page.goto("/");
+  const section = page.locator(".today-namedays");
+  await expect(section.locator("time")).toHaveAttribute(
+    "datetime",
+    "2026-09-30",
+  );
+  await expect(
+    section.getByRole("link", { name: "Testovací jmeniny" }),
+  ).toHaveAttribute("href", "/jmeno/1/");
+  await expect(
+    section.getByRole("link", { name: "Kalendář z testovací databáze" }),
+  ).toHaveAttribute("target", "_blank");
+  const todaySection = page.locator("main > .today-section");
+  const archiveSection = page.locator("main > .page-section").last();
+  await expect(todaySection).toHaveCSS(
+    "background-color",
+    "rgb(255, 255, 255)",
+  );
+  await expect(archiveSection).toHaveClass(/paper-section/);
+  const columns = page.locator(".archive-note article");
+  await expect(columns).toHaveCount(2);
+  await expect(columns.nth(0).locator("h2")).toHaveText(
+    "Jména mají paměť. My jí nasloucháme.",
+  );
+  await expect(columns.nth(1).locator("h2")).toHaveText(
+    "Pramen před domněnkou",
+  );
+  await expect(columns.nth(0)).toContainText(
+    "Obrazový doprovod je novodobá dekorativní ilustrace",
+  );
+  await expect(columns.nth(1)).toContainText(
+    "Rozlišujeme doloženou etymologii",
+  );
+  await expect(page.locator(".archive-note img, .archive-note a")).toHaveCount(
+    0,
+  );
+  const first = (await columns.nth(0).boundingBox())!;
+  const second = (await columns.nth(1).boundingBox())!;
+  expect(Math.abs(first.y - second.y)).toBeLessThan(2);
+  expect(Math.abs(first.width - second.width)).toBeLessThan(2);
+  const titles = await columns.locator("h2").evaluateAll((elements) =>
+    elements.map((element) => {
+      const style = getComputedStyle(element);
+      return [style.fontFamily, style.fontSize, style.fontWeight];
+    }),
+  );
+  expect(titles[0]).toEqual(titles[1]);
+  await page.setViewportSize({ width: 390, height: 844 });
+  const mobileFirst = (await columns.nth(0).boundingBox())!;
+  const mobileSecond = (await columns.nth(1).boundingBox())!;
+  expect(mobileSecond.y).toBeGreaterThan(mobileFirst.y + mobileFirst.height);
+  expect(
+    await section.evaluate(
+      (el) =>
+        !!(
+          el.compareDocumentPosition(document.querySelector(".archive-note")!) &
+          Node.DOCUMENT_POSITION_FOLLOWING
+        ),
+    ),
+  ).toBe(true);
 });

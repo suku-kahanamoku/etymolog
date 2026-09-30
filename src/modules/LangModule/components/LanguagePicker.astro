@@ -28,12 +28,12 @@ const { locale, href } = Astro.props;
 const t = dictionary(locale);
 /** Optimalizované importované vlajky pro jednotlivé jazyky. */
 const flags = { cs: csFlag, en: enFlag, de: deFlag };
-/** Kód země pro `aria-label` přepínače; `cs` používá kód `CZ`. */
-const languageCode = locale === "cs" ? "CZ" : locale.toUpperCase();
+/** Plný název aktuálního jazyka pro přístupný popisek přepínače. */
+const languageName = t.name;
 ---
 
 <details class="language-picker">
-  <summary aria-label={`${t.label}: ${languageCode}`}>
+  <summary aria-label={`${t.label}: ${languageName}`}>
     <span class="language-current">
       <img
         class="language-flag"

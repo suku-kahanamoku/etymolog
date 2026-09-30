@@ -1,7 +1,13 @@
 import type { CoreClient } from "../../CoreModule/server/php-core";
 import { HttpError } from "../../CoreModule/server/errors";
 import { resourceDefinition } from "../config/resources";
-import type { NameRecord, SearchResult, Dossier, AdminRecord } from "../types";
+import type {
+  NameRecord,
+  SearchResult,
+  Dossier,
+  AdminRecord,
+  TodayNamedays,
+} from "../types";
 
 /**
  * Projekce odpovědi backendu na záměrně vybraná pole.
@@ -82,6 +88,27 @@ export function createEtymologProvider(core: CoreClient, token?: string) {
     return resource + (id === undefined ? "" : `/${id}`);
   };
   return {
+    async today(): Promise<TodayNamedays> {
+      const result = await core.request<TodayNamedays>(
+        "/etymolog/public/today",
+      );
+      if (
+        !/^\d{4}-\d{2}-\d{2}$/.test(result.date) ||
+        result.timezone !== "Europe/Prague" ||
+        !Array.isArray(result.items)
+      )
+        throw new HttpError(502, "invalid_backend_response");
+      return {
+        date: result.date,
+        timezone: result.timezone,
+        items: result.items.map((item) =>
+          pick<TodayNamedays["items"][number]>(
+            item,
+            "name_id name source_url source_title source_fallback_url calendar_title",
+          ),
+        ),
+      };
+    },
     /**
      * Veřejné hledání jmen.
      * @param q Hledaný řetězec (2–100 znaků), používá se jako regulární výraz backendu.

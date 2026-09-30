@@ -198,3 +198,17 @@ export type AdminRecord = Record<string, string | number | null> & {
   /** Primární klíč záznamu. */
   id: number;
 };
+
+/** Published Czech calendar overview for the current Prague date. */
+export interface TodayNamedays {
+  date: string;
+  timezone: string;
+  items: {
+    name_id: number;
+    name: string;
+    source_url: string | null;
+    source_title: string;
+    source_fallback_url: string | null;
+    calendar_title: string;
+  }[];
+}

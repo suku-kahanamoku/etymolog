@@ -38,7 +38,7 @@
   "downloadData": "Stáhnout zdrojová data",
   "year": "Rok",
   "count": "Počet",
-  "place": "Země / oblast",
+  "place": "Oblast",
   "measure": "Druh údaje",
   "sex": "Pohlaví",
   "culturalNotice": "Pověsti, mytologie a fikce zachycují vyprávění z uvedených pramenů. Nejde automaticky o doložený původ jména.",
@@ -143,7 +143,7 @@
     "name": "Jméno",
     "kind": "Druh",
     "language": "Jazyk",
-    "country_code": "Kód země (CZ, SK…)",
+    "country_code": "Kód země",
     "summary": "Shrnutí",
     "published": "Publikovat",
     "title": "Název",
@@ -213,5 +213,14 @@
   },
   "quotation": "Citovaný úryvek",
   "missingEtymology": "K tomuto jménu zatím nemáme zveřejněný etymologický výklad s uvedeným pramenem.",
-  "missingMythology": "Mytologické souvislosti tohoto jména zatím nemáme doložené zveřejněným pramenem."
+  "missingMythology": "Mytologické souvislosti tohoto jména zatím nemáme doložené zveřejněným pramenem.",
+  "today": {
+    "eyebrow": "ČESKÝ JMENNÝ KALENDÁŘ",
+    "title": "Kdo má dnes svátek",
+    "intro": "Dnešní jmeniny podle publikovaných kalendářních záznamů našeho archivu. Vyberte jméno a objevte jeho příběh.",
+    "empty": "Pro dnešní den zatím nemáme zveřejněný záznam jmenin.",
+    "error": "Dnešní svátky se nyní nepodařilo načíst. Zkuste to prosím později.",
+    "source": "Pramen",
+    "note": "Jmeniny se mohou mezi kalendáři lišit. Uvádíme konkrétní kalendář a pramen."
+  }
 }

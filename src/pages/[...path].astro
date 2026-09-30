@@ -1,5 +1,7 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+import TodayNamedays from "../modules/EtymologModule/components/TodayNamedays.astro";
+import type { TodayNamedays as TodayData } from "../modules/EtymologModule/types";
 import Search from "../modules/EtymologModule/components/Search.astro";
 import Detail from "../modules/EtymologModule/components/Detail.astro";
 import AdminEditor from "../modules/EtymologModule/components/AdminEditor.astro";
@@ -99,6 +101,15 @@ if (!error && page === "home" && Astro.url.searchParams.has("q")) {
       e instanceof HttpError && e.status === 422 ? "invalid" : "unavailable";
   }
 }
+let today: TodayData | undefined;
+if (!error && page === "home") {
+  Astro.response.headers.set("Cache-Control", "no-store");
+  try {
+    today = await Astro.locals.providers.etymolog.today();
+  } catch {
+    /* Show an honest unavailable state; keep search usable. */
+  }
+}
 if (error) Astro.response.status = error;
 // Titulek a popis stránky se odvozují z nejrelevantnějšího dostupného zdroje.
 const metadata = error
@@ -147,13 +158,8 @@ const metadata = error
   ) : page === "home" ? (
     <>
       <Search {locale} {result} error={searchError} {query} />
-      <ArchiveNote
-        {locale}
-        title={ety.principle}
-        body={ety.principleText}
-        link={ety.aboutLink}
-        href={url(locale, "about")}
-      />
+      <TodayNamedays {locale} data={today} />
+      <ArchiveNote {locale} />
     </>
   ) : page === "about" ? (
     <About {locale} />

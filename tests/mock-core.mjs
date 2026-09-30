@@ -165,6 +165,21 @@ http
       });
       return send(200, { ...user, token, expires_at: "2026-12-01 12:00:00" });
     }
+    if (url.pathname === "/etymolog/public/today")
+      return send(200, {
+        date: "2026-09-30",
+        timezone: "Europe/Prague",
+        items: [
+          {
+            name_id: 1,
+            name: "Testovací jmeniny",
+            source_title: "Kalendář z testovací databáze",
+            source_url: "https://example.org/calendar",
+            source_fallback_url: null,
+            calendar_title: "Český kalendář",
+          },
+        ],
+      });
     if (url.pathname === "/etymolog/public/names") {
       const filter = parseFilter(url.searchParams.get("q"));
       if (filter?.value === "error") return send(503, null);
