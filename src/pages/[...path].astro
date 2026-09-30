@@ -1,6 +1,7 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import TodayNamedays from "../modules/EtymologModule/components/TodayNamedays.astro";
+import TodayProverb from "../modules/EtymologModule/components/TodayProverb.astro";
 import type {
   Entry,
   TodayNamedays as TodayData,
@@ -176,6 +177,7 @@ const metadata = error
     <>
       <Search {locale} {result} error={searchError} {query} />
       <TodayNamedays {locale} data={today} narratives={todayNarratives} />
+      <TodayProverb {locale} data={today} />
       <ArchiveNote {locale} />
     </>
   ) : page === "about" ? (

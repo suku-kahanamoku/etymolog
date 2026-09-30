@@ -401,7 +401,8 @@ test("admin starts background synchronization and sees progress without leaving 
   );
   await start.click();
   expect((await response).status()).toBe(202);
-  await expect(page.locator("[data-sync-start]")).toBeDisabled();
+  await expect(page.locator("[data-sync-start]")).toHaveText("Stop synchronization");
+  await expect(page.locator("[data-sync-start]")).toBeEnabled();
   await expect(page.locator("[data-publish-all]")).toBeDisabled();
   await expect(page.locator("[data-sync-status]")).toContainText("Completed", {
     timeout: 10000,
@@ -549,8 +550,27 @@ test("sync jobs show source errors and cooldown instead of a dash", async ({
   await expect(page.locator("[data-sync-status]")).toContainText(
     "Next attempt no earlier than",
   );
-  await expect(page.locator("[data-sync-start]")).toBeDisabled();
+  await expect(page.locator("[data-sync-start]")).toHaveText("Stop synchronization");
+  await expect(page.locator("[data-sync-start]")).toBeEnabled();
   await expect(page.locator("[data-publish-all]")).toBeDisabled();
+});
+
+test("admin stops the current synchronization from the same button", async ({
+  page,
+}) => {
+  await login(page, true);
+  await page.locator('[data-resource="sync-jobs"]').click();
+  const button = page.locator("[data-sync-start]");
+  await button.click();
+  await expect(button).toHaveText("Stop synchronization");
+  const response = page.waitForResponse(
+    (r) => r.url().includes("/sync/stop") && r.request().method() === "POST",
+  );
+  await button.click();
+  expect((await response).status()).toBe(200);
+  await expect(page.locator("[data-sync-status]")).toContainText("Stopped");
+  await expect(button).toHaveText("Start synchronization");
+  await expect(button).toBeEnabled();
 });
 
 test("admin publishes all current drafts through the adjacent toolbar button", async ({
@@ -745,20 +765,23 @@ test("homepage alternates white namedays and concise paper introduction", async 
     section.getByRole("heading", { name: "Etymologie" }),
   ).toBeVisible();
   await expect(section).toContainText("Testovací citovaný text");
-  await expect(section).toContainText(
+  const proverbSection = page.locator("main > .proverb-section");
+  await expect(proverbSection).toBeVisible();
+  await expect(
+    proverbSection.getByRole("heading", { name: "Pranostika", exact: true }),
+  ).toBeVisible();
+  await expect(proverbSection).toContainText(
     "Na dnešní den připadá doložená testovací pranostika.",
   );
   await expect(
-    section.getByRole("heading", { name: "Pranostika dne" }),
-  ).toBeVisible();
-  await expect(
-    section.locator('.today-proverb a[href="https://example.org/proverb"]'),
+    proverbSection.locator('a[href="https://example.org/proverb"]'),
   ).toHaveText("Doložený pramen");
+  await expect(section).not.toContainText("testovací pranostika");
   await expect(section).not.toContainText("Kalendář z testovací databáze");
   await expect(section).not.toContainText(
     "Jmeniny se mohou mezi kalendáři lišit",
   );
-  await expect(section.locator('a[href^="http"]')).toHaveCount(1);
+  await expect(section.locator('a[href^="http"]')).toHaveCount(0);
   await expect(section.locator(".eyebrow, .rule-title")).toHaveCount(0);
   expect(
     await section

@@ -286,6 +286,13 @@ export function createEtymologProvider(core: CoreClient, token?: string) {
     startSync() {
       return privateRequest("sync/start", { method: "POST", body: {} });
     },
+    /** Zastaví konkrétní běh po dokončení rozpracované dávky. */
+    stopSync(requestId: string) {
+      return privateRequest("sync/stop", {
+        method: "POST",
+        body: { request_id: requestId },
+      });
+    },
     /**
      * Načte stav probíhající synchronizace.
      * @returns Stav dávky, nebo `null` když žádná neprobíhá.

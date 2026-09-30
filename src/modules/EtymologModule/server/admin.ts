@@ -52,13 +52,22 @@ export const adminHandler: APIRoute = async ({
         const body = await readFields(request, 1024);
         if (Object.keys(body).length) throw new HttpError(422, "invalid_input");
         data = await locals.providers.etymolog.startSync();
+      } else if (rawId === "stop" && request.method === "POST") {
+        const body = await readFields(request, 1024);
+        if (
+          Object.keys(body).length !== 1 ||
+          typeof body.request_id !== "string" ||
+          !/^[a-f0-9]{32}$/.test(body.request_id)
+        )
+          throw new HttpError(422, "invalid_input");
+        data = await locals.providers.etymolog.stopSync(body.request_id);
       } else if (rawId === "status" && request.method === "GET") {
         data = await locals.providers.etymolog.syncStatus();
       } else throw new HttpError(405, "method_not_allowed");
       return Response.json(
         { success: true, data },
         {
-          status: request.method === "POST" ? 202 : 200,
+          status: rawId === "start" ? 202 : 200,
           headers: { "Cache-Control": "private, no-store" },
         },
       );

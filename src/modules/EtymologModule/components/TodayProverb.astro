@@ -1,0 +1,138 @@
+---
+import type { Locale } from "../../LangModule/config";
+import type { TodayNamedays } from "../types";
+import { dictionary } from "../providers/translations";
+import { safeWebUrl } from "../providers/links";
+import { externalLinkAttributes } from "../../UIModule/providers/external-links";
+
+interface Props {
+  locale: Locale;
+  data?: TodayNamedays;
+}
+
+const { locale, data } = Astro.props;
+const t = dictionary(locale);
+const proverb = data?.proverb;
+const sourceUrl = proverb ? safeWebUrl(proverb.source_url) : null;
+const upcomingDate =
+  proverb && data && proverb.date > data.date
+    ? new Intl.DateTimeFormat(locale, {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+        timeZone: "Europe/Prague",
+      }).format(new Date(proverb.date + "T12:00:00Z"))
+    : undefined;
+---
+
+{proverb && (
+  <section
+    class="page-section proverb-section"
+    aria-labelledby="today-proverb-heading"
+  >
+    <div class="section-inner section-pad">
+      <div class="proverb-panel today-proverb">
+        <div class="proverb-content">
+          <h2 id="today-proverb-heading">{t.today.proverb}</h2>
+          {upcomingDate && (
+            <p class="proverb-date">
+              <time datetime={proverb.date}>{upcomingDate}</time>
+            </p>
+          )}
+          <p class="proverb-body">{proverb.body}</p>
+          <p class="proverb-source">
+            {t.today.source}:{" "}
+            {sourceUrl ? (
+              <a
+                href={sourceUrl}
+                {...externalLinkAttributes(sourceUrl, Astro.url)}
+              >
+                {proverb.source_title}
+              </a>
+            ) : (
+              proverb.source_title
+            )}
+          </p>
+        </div>
+        <div class="proverb-orbits" aria-hidden="true">
+          <i></i>
+          <i></i>
+          <i></i>
+        </div>
+      </div>
+    </div>
+  </section>
+)}
+
+<style>
+  .proverb-section {
+    background: var(--paper);
+  }
+  .proverb-panel {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid var(--rule);
+    background: var(--color-base-200);
+    padding: clamp(2rem, 5vw, 4rem);
+  }
+  .proverb-content {
+    position: relative;
+    z-index: 1;
+    max-width: 70ch;
+  }
+  .proverb-panel h2 {
+    margin: 0 0 1.25rem;
+    padding-bottom: 0.6rem;
+    border-bottom: 3px double var(--ink);
+    font-size: clamp(2rem, 4vw, 3.2rem);
+  }
+  .proverb-date {
+    margin: 0 0 0.75rem;
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+  .proverb-body {
+    margin: 0 0 1.5rem;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(1.2rem, 2.4vw, 1.7rem);
+    line-height: 1.5;
+    white-space: pre-line;
+    overflow-wrap: anywhere;
+  }
+  .proverb-source {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+  .proverb-source a {
+    color: inherit;
+    text-decoration: underline;
+  }
+  .proverb-orbits {
+    position: absolute;
+    right: -7rem;
+    top: 50%;
+    width: 24rem;
+    height: 24rem;
+    transform: translateY(-50%);
+    opacity: 0.28;
+    pointer-events: none;
+  }
+  .proverb-orbits i {
+    position: absolute;
+    inset: 0;
+    border: 1px solid var(--rule);
+    border-radius: 50%;
+  }
+  .proverb-orbits i:nth-child(2) {
+    inset: 3rem;
+  }
+  .proverb-orbits i:nth-child(3) {
+    inset: 6rem;
+  }
+  @media (max-width: 640px) {
+    .proverb-orbits {
+      right: -15rem;
+    }
+  }
+</style>

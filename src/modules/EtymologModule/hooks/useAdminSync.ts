@@ -2,7 +2,8 @@ import type { Dictionary } from "../providers/translations";
 
 /** Stav jedné dávky synchronizace tak, jak jej vrací php-core. */
 type Batch = {
-  status: "queued" | "running" | "complete" | "partial" | "failed";
+  status: "queued" | "running" | "stopping" | "stopped" | "complete" | "partial" | "failed";
+  request_id: string;
   total: number;
   completed: number;
   failed: number;
@@ -14,7 +15,7 @@ type Batch = {
 /**
  * Obsluha spuštění a sledování synchronizace dat v administraci.
  *
- * Vedlejší účinky: spouští `POST sync/start/`, poté každé 3 s dotazuje
+ * Vedlejší účinky: spouští `POST sync/start/` nebo `POST sync/stop/`, poté každé 3 s dotazuje
  * `sync/status`, zapisuje stav do `[data-sync-status]`, volá `refresh()` po
  * dokončení dávky a při `pagehide` ukončí dotazování.
  * @param root Kořen administrace, ve kterém se hledají prvky UI.
@@ -38,9 +39,13 @@ export function useAdminSync(
     busy = false,
     timer: ReturnType<typeof setTimeout> | undefined;
   let reading = false;
+  let pending = false;
+  let current: Batch | null = null;
   /** @param data Stav dávky; `null` znamená žádnou rozpracovanou dávku. */
   const active = (data: Batch | null) =>
-    data?.status === "queued" || data?.status === "running";
+    data?.status === "queued" ||
+    data?.status === "running" ||
+    data?.status === "stopping";
   /**
    * Vypíše stav dávky a podle něj nastaví tlačítko a blokování publikace.
    * @param data Stav dávky vrácený backendem.
@@ -48,10 +53,17 @@ export function useAdminSync(
    */
   function render(data: Batch | null) {
     if (!button || !output) return;
+    current = data;
     busy = active(data);
     onBusy(busy);
-    button.disabled = busy;
-    button.textContent = busy ? t.admin.syncRunning : t.admin.syncStart;
+    button.disabled =
+      pending || data?.status === "stopping" || (busy && !data?.request_id);
+    button.textContent =
+      data?.status === "stopping"
+        ? t.admin.syncStopping
+        : busy
+          ? t.admin.syncStop
+          : t.admin.syncStart;
     output.textContent = data
       ? `${t.admin.syncStates[data.status]} · ${data.completed}/${data.total} · ${t.admin.syncProcessed}: ${data.processed} · ${t.admin.syncErrors}: ${data.failed}`
       : "";
@@ -84,19 +96,32 @@ export function useAdminSync(
     }
   }
   button?.addEventListener("click", async () => {
-    if (busy || !output) return;
-    busy = true;
+    if (pending || !output || current?.status === "stopping") return;
+    const stopping = busy;
+    const requestId = current?.request_id;
+    if (stopping && !requestId) return;
+    pending = true;
     onBusy(true);
     button.disabled = true;
     clearTimeout(timer);
-    output.textContent = t.admin.syncStarting;
+    output.textContent = stopping
+      ? t.admin.syncStopping
+      : t.admin.syncStarting;
     try {
-      render((await api("sync/start/", "POST", {})) as Batch);
+      const state = (await api(
+        stopping ? "sync/stop/" : "sync/start/",
+        "POST",
+        stopping ? { request_id: requestId } : {},
+      )) as Batch;
+      pending = false;
+      render(state);
+      if (stopping && !busy) await refresh();
     } catch {
-      busy = false;
-      onBusy(false);
-      button.disabled = false;
-      output.textContent = t.admin.syncStartError;
+      pending = false;
+      render(current);
+      output.textContent = stopping
+        ? t.admin.syncStopError
+        : t.admin.syncStartError;
     }
     if (visible) timer = setTimeout(() => void poll(), 1000);
   });

@@ -266,6 +266,7 @@ http
       if (url.pathname === "/etymolog/sync/start" && req.method === "POST") {
         if (!session.batch || session.batch.status === "complete") {
           session.batch = {
+            request_id: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
             status: "queued",
             total: 2,
             completed: 0,
@@ -276,8 +277,15 @@ http
         }
         return send(202, session.batch);
       }
+      if (url.pathname === "/etymolog/sync/stop" && req.method === "POST") {
+        const payload = JSON.parse(body || "{}");
+        if (!session.batch || payload.request_id !== session.batch.request_id)
+          return send(409, null);
+        session.batch = { ...session.batch, status: "stopped" };
+        return send(200, session.batch);
+      }
       if (url.pathname === "/etymolog/sync/status" && req.method === "GET") {
-        if (session.batch && ++session.batchPolls > 1)
+        if (session.batch && ["queued", "running"].includes(session.batch.status) && ++session.batchPolls > 1)
           session.batch = {
             status: "complete",
             total: 2,
