@@ -126,6 +126,26 @@ test("sticky side ads stay above full-width section backgrounds", async ({
   }
 });
 
+test("side ads stay by viewport edges on wide screens", async ({ page }) => {
+  for (const width of [1280, 1536, 1920, 2560]) {
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto("/");
+    const left = (await page.locator(".ad-left").boundingBox())!;
+    const right = (await page.locator(".ad-right").boundingBox())!;
+    const content = (await page
+      .locator(".section-inner")
+      .first()
+      .boundingBox())!;
+    expect(left.x).toBeLessThanOrEqual(24);
+    expect(width - right.x - right.width).toBeLessThanOrEqual(24);
+    expect(left.x + left.width).toBeLessThan(content.x);
+    expect(right.x).toBeGreaterThan(content.x + content.width);
+    expect(
+      await page.evaluate(() => document.documentElement.scrollWidth),
+    ).toBeLessThanOrEqual(width);
+  }
+});
+
 test("Seznam zones use supplied IDs and sizes only after consent and with enough space", async ({
   page,
 }) => {

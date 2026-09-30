@@ -57,6 +57,14 @@
       --content-max: 1096px;
       --ad-width: 160px;
       --ad-gap: 16px;
+      grid-template-columns:
+        [full-start] var(--frame-gutter)
+        [left-ad-start] var(--ad-width) [left-ad-end]
+        minmax(var(--ad-gap), 1fr)
+        [content-start] minmax(0, var(--content-max)) [content-end]
+        minmax(var(--ad-gap), 1fr)
+        [right-ad-start] var(--ad-width) [right-ad-end]
+        var(--frame-gutter) [full-end];
     }
     .ad-left,
     .ad-right {
