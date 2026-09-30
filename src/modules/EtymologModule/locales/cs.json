@@ -28,6 +28,8 @@
   "speechPlay": "Přehrát sekci {section}",
   "speechPause": "Pozastavit sekci {section}",
   "speechResume": "Pokračovat v sekci {section}",
+  "speechLoading": "Načítám český hlas…",
+  "speechNoCzechVoice": "Na tomto zařízení není dostupný český hlas. Přidejte češtinu do hlasů systému nebo prohlížeče a zkuste to znovu.",
   "speechError": "Čtení se nepodařilo spustit. Zkontrolujte hlasový výstup prohlížeče.",
   "contents": "V tomto hesle",
   "noDetails": "K tomuto heslu zatím nejsou zveřejněny další podklady.",

@@ -158,6 +158,8 @@ const sections = [
                   group.label,
                 )}
                 data-speech-error={t.speechError}
+                data-speech-no-czech-voice={t.speechNoCzechVoice}
+                data-speech-loading={t.speechLoading}
                 aria-label={t.speechPlay.replace("{section}", group.label)}
                 title={t.speechPlay.replace("{section}", group.label)}
                 hidden
@@ -191,16 +193,6 @@ const sections = [
           )}
           {group.items.map((entry) => (
             <article class="entry">
-              <div class="entry-meta">
-                <span class="certainty">
-                  {(t.certainty as Record<string, string>)[entry.certainty] ??
-                    entry.certainty}
-                </span>
-                {entry.region && <span>{entry.region}</span>}
-                {(entry.year_from !== null || entry.year_to !== null) && (
-                  <span>{years(entry.year_from, entry.year_to)}</span>
-                )}
-              </div>
               <h3>{entry.title}</h3>
               <p class="prose-copy entry-body" lang={entry.language}>
                 {entry.body}

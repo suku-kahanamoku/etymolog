@@ -28,6 +28,8 @@
   "speechPlay": "Play section {section}",
   "speechPause": "Pause section {section}",
   "speechResume": "Resume section {section}",
+  "speechLoading": "Loading Czech voice…",
+  "speechNoCzechVoice": "No Czech voice is available on this device. Add a Czech voice in your system or browser settings and try again.",
   "speechError": "Speech could not start. Check your browser audio output.",
   "contents": "In this entry",
   "noDetails": "No further material has been published for this entry yet.",

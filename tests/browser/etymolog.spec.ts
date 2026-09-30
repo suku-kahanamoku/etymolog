@@ -66,9 +66,12 @@ test("detail starts with search and keeps the name in etymology without country 
   await expect(page.locator(".paper-section h1")).toHaveCount(0);
   await expect(page.locator("#etymology h1")).toHaveText("Novák");
   await expect(page.locator(".dossier-tags")).toContainText("Příjmení");
+  await expect(page.locator(".entry-meta")).toHaveCount(0);
+  await expect(page.locator("#etymology")).not.toContainText(
+    /Neověřeno|Doloženo|Hypotéza|Fikce/,
+  );
   for (const selector of [
     ".dossier-tags",
-    ".entry-meta",
     ".calendar-card",
     "#sources p",
     "#occurrences tbody",
@@ -818,12 +821,13 @@ test("detail reads only the selected section and controls playback", async ({
 }) => {
   await page.addInitScript(() => {
     const calls: Array<{ text: string; lang: string }> = [];
+    const selectedVoices: string[] = [];
     let cancelCount = 0;
     let current: MockUtterance | null = null;
     class MockUtterance {
       text: string;
       lang = "";
-      voice: unknown = null;
+      voice: { lang: string } | null = null;
       onend: (() => void) | null = null;
       onerror: (() => void) | null = null;
       constructor(text: string) {
@@ -835,6 +839,7 @@ test("detail reads only the selected section and controls playback", async ({
       speak: (utterance: MockUtterance) => {
         current = utterance;
         calls.push({ text: utterance.text, lang: utterance.lang });
+        selectedVoices.push(utterance.voice?.lang ?? "");
       },
       pause: () => {},
       resume: () => {},
@@ -853,6 +858,7 @@ test("detail reads only the selected section and controls playback", async ({
     Object.defineProperty(window, "__speechTest", {
       value: {
         calls,
+        selectedVoices,
         advance() {
           current?.onend?.();
         },
@@ -907,6 +913,16 @@ test("detail reads only the selected section and controls playback", async ({
     "Testovací citovaný text <script>alert('unsafe')</script>",
   ]);
   expect(spokenEtymology.every((call) => call.lang === "cs-CZ")).toBe(true);
+  expect(
+    await page.evaluate(
+      () =>
+        (
+          window as typeof window & {
+            __speechTest: { selectedVoices: string[] };
+          }
+        ).__speechTest.selectedVoices,
+    ),
+  ).toEqual(["cs-CZ", "cs-CZ", "cs-CZ", "cs-CZ"]);
   await etymology.click();
   await expect(etymology).toHaveAttribute(
     "aria-label",
@@ -953,4 +969,115 @@ test("detail hides speech controls without browser speech support", async ({
   await page.goto("/jmeno/1/");
   await expect(page.locator("#etymology [data-speech-button]")).toBeHidden();
   await expect(page.locator("#etymology .entry-body")).toBeVisible();
+});
+
+test("detail does not fall back to an English voice when Czech is unavailable", async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    let speakCount = 0;
+    class MockUtterance {
+      constructor(_text: string) {}
+    }
+    const synthesis = {
+      getVoices: () => [{ lang: "en-US", name: "English" }],
+      speak: () => {
+        speakCount++;
+      },
+      cancel: () => {},
+      addEventListener: () => {},
+      removeEventListener: () => {},
+    };
+    Object.defineProperty(window, "SpeechSynthesisUtterance", {
+      configurable: true,
+      value: MockUtterance,
+    });
+    Object.defineProperty(window, "speechSynthesis", {
+      configurable: true,
+      value: synthesis,
+    });
+    Object.defineProperty(window, "__speechCount", {
+      value: () => speakCount,
+    });
+  });
+
+  await page.goto("/jmeno/1/");
+  const button = page.locator("#etymology [data-speech-button]");
+  await button.click();
+  await expect(page.locator("#etymology [data-speech-feedback]")).toContainText(
+    "není dostupný český hlas",
+  );
+  await expect(button).toHaveAttribute(
+    "aria-label",
+    "Přehrát sekci Etymologie",
+  );
+  expect(
+    await page.evaluate(() =>
+      (
+        window as typeof window & { __speechCount: () => number }
+      ).__speechCount(),
+    ),
+  ).toBe(0);
+});
+
+test("detail waits for Czech voices to load before speaking", async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    let voices: Array<{ lang: string; name: string }> = [];
+    const listeners = new Set<() => void>();
+    let scheduled = false;
+    let spokenVoice = "";
+    class MockUtterance {
+      lang = "";
+      voice: { lang: string } | null = null;
+      constructor(_text: string) {}
+    }
+    const synthesis = {
+      getVoices: () => {
+        if (!scheduled) {
+          scheduled = true;
+          window.setTimeout(() => {
+            voices = [{ lang: "cs-CZ", name: "Czech" }];
+            for (const listener of listeners) listener();
+          }, 100);
+        }
+        return voices;
+      },
+      addEventListener: (_type: string, listener: () => void) =>
+        listeners.add(listener),
+      removeEventListener: (_type: string, listener: () => void) =>
+        listeners.delete(listener),
+      speak: (utterance: MockUtterance) => {
+        spokenVoice = utterance.voice?.lang ?? "";
+      },
+      cancel: () => {},
+    };
+    Object.defineProperty(window, "SpeechSynthesisUtterance", {
+      configurable: true,
+      value: MockUtterance,
+    });
+    Object.defineProperty(window, "speechSynthesis", {
+      configurable: true,
+      value: synthesis,
+    });
+    Object.defineProperty(window, "__spokenVoice", {
+      value: () => spokenVoice,
+    });
+  });
+
+  await page.goto("/jmeno/1/");
+  const button = page.locator("#etymology [data-speech-button]");
+  await button.click();
+  await expect(button).toHaveAttribute(
+    "aria-label",
+    "Pozastavit sekci Etymologie",
+  );
+  expect(
+    await page.evaluate(() =>
+      (
+        window as typeof window & { __spokenVoice: () => string }
+      ).__spokenVoice(),
+    ),
+  ).toBe("cs-CZ");
 });

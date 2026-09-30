@@ -28,6 +28,8 @@
   "speechPlay": "Abschnitt {section} vorlesen",
   "speechPause": "Abschnitt {section} pausieren",
   "speechResume": "Abschnitt {section} fortsetzen",
+  "speechLoading": "Tschechische Stimme wird geladen…",
+  "speechNoCzechVoice": "Auf diesem Gerät ist keine tschechische Stimme verfügbar. Fügen Sie eine tschechische Stimme in den System- oder Browsereinstellungen hinzu und versuchen Sie es erneut.",
   "speechError": "Die Sprachausgabe konnte nicht gestartet werden. Prüfen Sie die Audioausgabe Ihres Browsers.",
   "contents": "In diesem Eintrag",
   "noDetails": "Für diesen Eintrag sind noch keine weiteren Unterlagen veröffentlicht.",

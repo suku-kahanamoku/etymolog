@@ -1,8 +1,7 @@
-type SpeechPart = { text: string; lang: string };
-type SpeechState = "idle" | "playing" | "paused";
+type SpeechState = "idle" | "loading" | "playing" | "paused";
 
-const wordsToParts = (text: string, lang: string): SpeechPart[] => {
-  const parts: SpeechPart[] = [];
+const wordsToParts = (text: string): string[] => {
+  const parts: string[] = [];
   for (const sentence of text
     .replace(/\s+/gu, " ")
     .trim()
@@ -11,17 +10,17 @@ const wordsToParts = (text: string, lang: string): SpeechPart[] => {
     for (const word of sentence.split(/\s+/u)) {
       if (!word) continue;
       if (chunk && chunk.length + word.length + 1 > 240) {
-        parts.push({ text: chunk, lang });
+        parts.push(chunk);
         chunk = "";
       }
       chunk = chunk ? `${chunk} ${word}` : word;
     }
-    if (chunk) parts.push({ text: chunk, lang });
+    if (chunk) parts.push(chunk);
   }
   return parts;
 };
 
-/** Čte pouze viditelné nadpisy a výklady z jedné sekce detailu. */
+/** Čte pouze viditelné nadpisy a výklady z jedné sekce detailu českým hlasem. */
 export function useSectionSpeech() {
   const buttons = document.querySelectorAll<HTMLButtonElement>(
     "[data-speech-button]",
@@ -34,21 +33,57 @@ export function useSectionSpeech() {
     typeof window.SpeechSynthesisUtterance !== "function"
   )
     return;
+
   let active: HTMLButtonElement | null = null;
-  let parts: SpeechPart[] = [];
+  let voice: SpeechSynthesisVoice | null = null;
+  let parts: string[] = [];
   let partIndex = 0;
   let run = 0;
+
+  const findCzechVoice = () => {
+    const voices = synthesis.getVoices();
+    return (
+      voices.find(
+        (candidate) =>
+          candidate.lang.toLowerCase().replace("_", "-") === "cs-cz",
+      ) ??
+      voices.find((candidate) => /^cs(?:[-_]|$)/i.test(candidate.lang)) ??
+      null
+    );
+  };
+
+  const waitForCzechVoice = (): Promise<SpeechSynthesisVoice | null> => {
+    const ready = findCzechVoice();
+    if (ready) return Promise.resolve(ready);
+    return new Promise((resolve) => {
+      const finish = (available: SpeechSynthesisVoice | null) => {
+        window.clearTimeout(timeout);
+        synthesis.removeEventListener("voiceschanged", onVoicesChanged);
+        resolve(available);
+      };
+      const onVoicesChanged = () => {
+        const available = findCzechVoice();
+        if (available) finish(available);
+      };
+      const timeout = window.setTimeout(() => finish(findCzechVoice()), 2000);
+      synthesis.addEventListener("voiceschanged", onVoicesChanged);
+      onVoicesChanged();
+    });
+  };
 
   const setState = (button: HTMLButtonElement, state: SpeechState) => {
     button.dataset.speechState = state;
     const label =
-      state === "playing"
-        ? button.dataset.speechPause
-        : state === "paused"
-          ? button.dataset.speechResume
-          : button.dataset.speechPlay;
+      state === "loading"
+        ? button.dataset.speechLoading
+        : state === "playing"
+          ? button.dataset.speechPause
+          : state === "paused"
+            ? button.dataset.speechResume
+            : button.dataset.speechPlay;
     button.setAttribute("aria-label", label ?? "");
     button.title = label ?? "";
+    button.setAttribute("aria-busy", String(state === "loading"));
   };
 
   const stop = () => {
@@ -56,28 +91,32 @@ export function useSectionSpeech() {
     synthesis.cancel();
     if (active) setState(active, "idle");
     active = null;
+    voice = null;
     parts = [];
     partIndex = 0;
   };
 
+  const showError = (button: HTMLButtonElement, message: string) => {
+    stop();
+    const feedback = button
+      .closest("[data-speech-section]")
+      ?.querySelector<HTMLElement>("[data-speech-feedback]");
+    if (feedback) {
+      feedback.textContent = message;
+      feedback.hidden = false;
+    }
+  };
+
   const speakNext = (currentRun: number) => {
-    if (currentRun !== run || !active) return;
+    if (currentRun !== run || !active || !voice) return;
     const part = parts[partIndex];
     if (!part) {
       stop();
       return;
     }
-    const utterance = new SpeechSynthesisUtterance(part.text);
-    utterance.lang = part.lang === "cs" ? "cs-CZ" : part.lang;
-    const language = utterance.lang.toLowerCase();
-    const voices = synthesis.getVoices();
-    const voice =
-      voices.find((candidate) => candidate.lang.toLowerCase() === language) ??
-      voices.find(
-        (candidate) =>
-          candidate.lang.toLowerCase().split("-")[0] === language.split("-")[0],
-      );
-    if (voice) utterance.voice = voice;
+    const utterance = new SpeechSynthesisUtterance(part);
+    utterance.lang = "cs-CZ";
+    utterance.voice = voice;
     utterance.onend = () => {
       if (currentRun !== run) return;
       partIndex++;
@@ -89,36 +128,21 @@ export function useSectionSpeech() {
         stop();
         return;
       }
-      const button = active;
-      stop();
-      const feedback = button
-        ?.closest("[data-speech-section]")
-        ?.querySelector<HTMLElement>("[data-speech-feedback]");
-      if (feedback) {
-        feedback.textContent = button?.dataset.speechError ?? "";
-        feedback.hidden = false;
-      }
+      showError(active!, active!.dataset.speechError ?? "");
     };
     try {
       synthesis.speak(utterance);
     } catch {
-      const button = active;
-      stop();
-      const feedback = button
-        ?.closest("[data-speech-section]")
-        ?.querySelector<HTMLElement>("[data-speech-feedback]");
-      if (feedback) {
-        feedback.textContent = button?.dataset.speechError ?? "";
-        feedback.hidden = false;
-      }
+      showError(active, active.dataset.speechError ?? "");
     }
   };
 
   for (const button of buttons) {
     button.hidden = false;
     setState(button, "idle");
-    button.addEventListener("click", () => {
+    button.addEventListener("click", async () => {
       if (active === button) {
+        if (button.dataset.speechState === "loading") return;
         if (button.dataset.speechState === "playing") {
           synthesis.pause();
           setState(button, "paused");
@@ -140,27 +164,33 @@ export function useSectionSpeech() {
         feedback.textContent = "";
       }
       const sectionLabel = section.querySelector<HTMLElement>(".rule-title");
-      const lang = document.documentElement.lang || "cs";
-      parts = wordsToParts(sectionLabel?.textContent ?? "", lang);
+      parts = wordsToParts(sectionLabel?.textContent ?? "");
       const summary = section.querySelector<HTMLElement>(
         ".dossier-heading .editorial-lead",
       );
       if (summary?.textContent)
-        parts.push(...wordsToParts(summary.textContent, lang));
+        parts.push(...wordsToParts(summary.textContent));
       for (const entry of section.querySelectorAll<HTMLElement>(".entry")) {
         const title = entry.querySelector<HTMLElement>("h3");
         const body = entry.querySelector<HTMLElement>(".entry-body");
-        const entryLang = body?.lang || lang;
-        if (title?.textContent)
-          parts.push(...wordsToParts(title.textContent, entryLang));
-        if (body?.textContent)
-          parts.push(...wordsToParts(body.textContent, entryLang));
+        if (title?.textContent) parts.push(...wordsToParts(title.textContent));
+        if (body?.textContent) parts.push(...wordsToParts(body.textContent));
       }
       if (!parts.length) return;
+
       active = button;
       partIndex = 0;
+      setState(button, "loading");
+      const currentRun = run;
+      const czechVoice = await waitForCzechVoice();
+      if (currentRun !== run || active !== button) return;
+      if (!czechVoice) {
+        showError(button, button.dataset.speechNoCzechVoice ?? "");
+        return;
+      }
+      voice = czechVoice;
       setState(button, "playing");
-      speakNext(run);
+      speakNext(currentRun);
     });
   }
 

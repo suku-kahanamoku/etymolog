@@ -181,18 +181,6 @@
   line-height: 1.3;
   margin-bottom: 0.8rem;
 }
-.entry-meta {
-  display: flex;
-  gap: 0.6rem;
-  flex-wrap: wrap;
-  font-size: 0.68rem;
-  color: var(--muted);
-  margin-bottom: 1rem;
-}
-.certainty {
-  border: 1px solid var(--rule);
-  padding: 0.1rem 0.5rem;
-}
 .entry-body {
   font-family: Georgia, serif;
   font-size: 1.06rem;
@@ -392,6 +380,10 @@
   color: var(--ink);
   background: transparent;
   cursor: pointer;
+}
+.speech-button[data-speech-state="loading"] {
+  opacity: 0.65;
+  cursor: progress;
 }
 .speech-button:hover,
 .speech-button:focus-visible {
