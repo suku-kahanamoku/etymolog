@@ -204,6 +204,7 @@ export interface TodayNamedays {
   date: string;
   timezone: string;
   proverb: {
+    date: string;
     body: string;
     source_url: string | null;
     source_title: string;

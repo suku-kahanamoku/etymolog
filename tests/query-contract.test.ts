@@ -32,3 +32,23 @@ test("public and admin lists use the shared php-core q/sort wire contract", asyn
     name: { $regex: "Novák" },
   });
 });
+
+test("daily provider retains the next dated proverb for homepage display", async () => {
+  const core = {
+    request: async () => ({
+      date: "2040-12-31",
+      timezone: "Europe/Prague",
+      items: [],
+      proverb: {
+        date: "2041-01-02",
+        body: "Next sourced proverb",
+        source_url: "https://example.org/proverb",
+        source_title: "Calendar source",
+        name_id: null,
+      },
+    }),
+  } as CoreClient;
+  const overview = await createEtymologProvider(core).today();
+  assert.equal(overview.proverb?.date, "2041-01-02");
+  assert.equal(overview.proverb?.body, "Next sourced proverb");
+});

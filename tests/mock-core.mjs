@@ -170,6 +170,7 @@ http
         date: "2026-09-30",
         timezone: "Europe/Prague",
         proverb: {
+          date: "2026-09-30",
           body: "Na dnešní den připadá doložená testovací pranostika.",
           source_url: "https://example.org/proverb",
           source_title: "Doložený pramen",

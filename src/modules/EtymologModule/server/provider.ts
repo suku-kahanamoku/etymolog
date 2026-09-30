@@ -102,6 +102,9 @@ export function createEtymologProvider(core: CoreClient, token?: string) {
       if (
         proverb != null &&
         (typeof proverb.body !== "string" ||
+          (proverb.date !== undefined &&
+            (typeof proverb.date !== "string" ||
+              !/^\d{4}-\d{2}-\d{2}$/.test(proverb.date))) ||
           typeof proverb.source_title !== "string" ||
           (proverb.source_url !== null &&
             typeof proverb.source_url !== "string") ||
@@ -113,10 +116,13 @@ export function createEtymologProvider(core: CoreClient, token?: string) {
         date: result.date,
         timezone: result.timezone,
         proverb: proverb
-          ? pick<TodayNamedays["proverb"]>(
-              proverb,
-              "body source_url source_title name_id",
-            )
+          ? {
+              ...pick<NonNullable<TodayNamedays["proverb"]>>(
+                proverb,
+                "body source_url source_title name_id",
+              ),
+              date: proverb.date ?? result.date,
+            }
           : null,
         items: result.items.map((item) =>
           pick<TodayNamedays["items"][number]>(
