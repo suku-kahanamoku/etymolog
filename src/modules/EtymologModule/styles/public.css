@@ -365,6 +365,70 @@
   align-items: center;
   gap: 0.8rem;
 }
+.dossier-title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  border-top: 3px double var(--ink);
+  border-bottom: 1px solid var(--rule);
+  margin-bottom: 1.7rem;
+}
+.dossier-title-row .rule-title {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  margin: 0;
+}
+.speech-button {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  margin-right: 0.2rem;
+  border: 1px solid var(--rule);
+  border-radius: 50%;
+  color: var(--ink);
+  background: transparent;
+  cursor: pointer;
+}
+.speech-button:hover,
+.speech-button:focus-visible {
+  background: var(--ink);
+  color: var(--paper);
+}
+.speech-button:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+.speech-button[hidden],
+.speech-feedback[hidden],
+.speech-button svg[data-speech-pause],
+.speech-button[data-speech-state="playing"] svg[data-speech-play] {
+  display: none;
+}
+.speech-button[data-speech-state="playing"] svg[data-speech-pause] {
+  display: block;
+}
+.speech-button svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.speech-button svg[data-speech-pause] {
+  fill: currentColor;
+  stroke: none;
+}
+.speech-feedback {
+  color: var(--color-error-content);
+  font-size: 0.8rem;
+  margin: -1rem 0 1.3rem;
+}
 .dossier-group .rule-title svg {
   flex-shrink: 0;
 }

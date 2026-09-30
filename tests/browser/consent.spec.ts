@@ -90,6 +90,83 @@ test("CMP loads first, requires consent and revokes already loaded ads", async (
   expect(adScripts).toBe(1);
 });
 
+test("Google slot requires Google vendor 755, not Seznam vendor 621", async ({
+  page,
+}) => {
+  let googleRequests = 0;
+  await page.route("https://pagead2.googlesyndication.com/**", (route) => {
+    googleRequests++;
+    return route.fulfill({
+      contentType: "application/javascript",
+      body: "window.adsbygoogle = [];",
+    });
+  });
+  await page.goto("/");
+  await page.evaluate(() => {
+    document.getElementById("ad-top")!.dataset.adUnit = JSON.stringify({
+      provider: "google",
+      client: "ca-pub-5191551009181826",
+      slot: "12345",
+    });
+  });
+  await page.evaluate(
+    (choice) => window.__cmp!("test-choice", choice),
+    approved,
+  );
+  await expect(page.locator('[data-rendered="true"]')).toHaveCount(2);
+  expect(googleRequests).toBe(0);
+});
+
+test("Google slot loads only after Google vendor and purpose 1 consent", async ({
+  page,
+}) => {
+  let googleRequests = 0;
+  await page.route("https://pagead2.googlesyndication.com/**", (route) => {
+    googleRequests++;
+    return route.fulfill({
+      contentType: "application/javascript",
+      body: "window.adsbygoogle = [];",
+    });
+  });
+  await page.goto("/");
+  await page.evaluate(() => {
+    document.getElementById("ad-top")!.dataset.adUnit = JSON.stringify({
+      provider: "google",
+      client: "ca-pub-5191551009181826",
+      slot: "12345",
+    });
+  });
+  await page.evaluate((choice) => window.__cmp!("test-choice", choice), {
+    ...approved,
+    vendorConsents: { "755": true },
+    purposeConsents: {},
+  });
+  expect(googleRequests).toBe(0);
+  await page.evaluate((choice) => window.__cmp!("test-choice", choice), {
+    ...approved,
+    vendorConsents: { "755": true },
+  });
+  await expect(page.locator("#ad-top ins.adsbygoogle")).toHaveCount(1);
+  expect(googleRequests).toBe(1);
+});
+
+test("Google consent alone does not load Auto ads without a Google slot", async ({
+  page,
+}) => {
+  let googleRequests = 0;
+  page.on("request", (request) => {
+    if (request.url().includes("pagead2.googlesyndication.com"))
+      googleRequests++;
+  });
+  await page.goto("/");
+  await page.evaluate((choice) => window.__cmp!("test-choice", choice), {
+    ...approved,
+    vendorConsents: { "621": true, "755": true },
+  });
+  await expect(page.locator('[data-rendered="true"]')).toHaveCount(3);
+  expect(googleRequests).toBe(0);
+});
+
 test("legacy CMP version 2 still loads ads after consent", async ({ page }) => {
   await page.goto("/");
   await page.evaluate((choice) => window.__cmp!("test-choice", choice), {

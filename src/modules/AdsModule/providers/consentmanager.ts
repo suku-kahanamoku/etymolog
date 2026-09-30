@@ -60,27 +60,31 @@ export function mountConsentManager() {
         { consentExists?: boolean } | undefined;
       const data = currentApi?.("getCMPData", null, null, false) as
         CmpData | undefined;
-      const allowed =
+      const validConsent =
         status?.consentExists === true &&
         data?.tcfcompliant === true &&
         // CMP hlásí pro současné TCF EU nastavení 4; starší hodnota 2 zůstává podporována.
         (data.tcfversion === 2 || data.tcfversion === 4) &&
         typeof data.consentstring === "string" &&
         data.consentstring.length > 0 &&
-        granted(data.vendorConsents?.["621"]) &&
         granted(data.purposeConsents?.["1"]);
-      // Jakákoli změna rozhodnutí musí platit i pro vendor(y) již načtené SSP.
-      if (
-        previousString &&
-        data?.consentstring !== previousString &&
-        consentProvider.advertising
-      ) {
-        consentProvider.setAdvertising(false);
+      // Změna TCF řetězce ruší i dříve vydané požadavky obou sítí.
+      if (previousString && data?.consentstring !== previousString) {
+        consentProvider.setProviderConsent("seznam", false);
+        consentProvider.setProviderConsent("google", false);
       }
       previousString = data?.consentstring;
-      consentProvider.setAdvertising(allowed);
+      consentProvider.setProviderConsent(
+        "seznam",
+        validConsent && granted(data.vendorConsents?.["621"]),
+      );
+      consentProvider.setProviderConsent(
+        "google",
+        validConsent && granted(data.vendorConsents?.["755"]),
+      );
     } catch {
-      consentProvider.setAdvertising(false);
+      consentProvider.setProviderConsent("seznam", false);
+      consentProvider.setProviderConsent("google", false);
     }
   };
   const connect = () => {

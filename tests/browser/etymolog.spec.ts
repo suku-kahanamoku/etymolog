@@ -812,3 +812,145 @@ test("homepage alternates white namedays and concise paper introduction", async 
     ),
   ).toBe(true);
 });
+
+test("detail reads only the selected section and controls playback", async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    const calls: Array<{ text: string; lang: string }> = [];
+    let cancelCount = 0;
+    let current: MockUtterance | null = null;
+    class MockUtterance {
+      text: string;
+      lang = "";
+      voice: unknown = null;
+      onend: (() => void) | null = null;
+      onerror: (() => void) | null = null;
+      constructor(text: string) {
+        this.text = text;
+      }
+    }
+    const synthesis = {
+      getVoices: () => [{ lang: "cs-CZ", name: "Czech" }],
+      speak: (utterance: MockUtterance) => {
+        current = utterance;
+        calls.push({ text: utterance.text, lang: utterance.lang });
+      },
+      pause: () => {},
+      resume: () => {},
+      cancel: () => {
+        cancelCount++;
+      },
+    };
+    Object.defineProperty(window, "SpeechSynthesisUtterance", {
+      configurable: true,
+      value: MockUtterance,
+    });
+    Object.defineProperty(window, "speechSynthesis", {
+      configurable: true,
+      value: synthesis,
+    });
+    Object.defineProperty(window, "__speechTest", {
+      value: {
+        calls,
+        advance() {
+          current?.onend?.();
+        },
+        get cancelCount() {
+          return cancelCount;
+        },
+      },
+    });
+  });
+
+  await page.goto("/jmeno/1/");
+  const etymology = page.locator("#etymology [data-speech-button]");
+  const mythology = page.locator("#mythology [data-speech-button]");
+  await expect(etymology).toBeVisible();
+  await etymology.click();
+  await expect(etymology).toHaveAttribute(
+    "aria-label",
+    "Pozastavit sekci Etymologie",
+  );
+  await expect
+    .poll(() =>
+      page.evaluate(
+        () =>
+          (
+            window as typeof window & {
+              __speechTest: { calls: Array<{ text: string; lang: string }> };
+            }
+          ).__speechTest.calls,
+      ),
+    )
+    .toEqual([{ text: "Etymologie", lang: "cs-CZ" }]);
+  await page.evaluate(() => {
+    const speech = (
+      window as typeof window & { __speechTest: { advance: () => void } }
+    ).__speechTest;
+    speech.advance(); // summary
+    speech.advance(); // entry title
+    speech.advance(); // entry body
+  });
+  const spokenEtymology = await page.evaluate(
+    () =>
+      (
+        window as typeof window & {
+          __speechTest: { calls: Array<{ text: string; lang: string }> };
+        }
+      ).__speechTest.calls,
+  );
+  expect(spokenEtymology.map((call) => call.text)).toEqual([
+    "Etymologie",
+    "Testovací heslo pro ověření rozhraní.",
+    "Test etymology",
+    "Testovací citovaný text <script>alert('unsafe')</script>",
+  ]);
+  expect(spokenEtymology.every((call) => call.lang === "cs-CZ")).toBe(true);
+  await etymology.click();
+  await expect(etymology).toHaveAttribute(
+    "aria-label",
+    "Pokračovat v sekci Etymologie",
+  );
+  await etymology.click();
+  await expect(etymology).toHaveAttribute(
+    "aria-label",
+    "Pozastavit sekci Etymologie",
+  );
+  await mythology.click();
+  await expect(etymology).toHaveAttribute(
+    "aria-label",
+    "Přehrát sekci Etymologie",
+  );
+  await expect(mythology).toHaveAttribute(
+    "aria-label",
+    "Pozastavit sekci Mytologie",
+  );
+  const state = await page.evaluate(
+    () =>
+      (
+        window as typeof window & {
+          __speechTest: {
+            calls: Array<{ text: string; lang: string }>;
+            cancelCount: number;
+          };
+        }
+      ).__speechTest,
+  );
+  expect(state.calls.at(-1)).toEqual({ text: "Mytologie", lang: "cs-CZ" });
+  expect(state.cancelCount).toBeGreaterThan(0);
+});
+
+test("detail hides speech controls without browser speech support", async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(window, "speechSynthesis", {
+      configurable: true,
+      value: undefined,
+    });
+  });
+  await page.goto("/jmeno/1/");
+  await expect(page.locator("#etymology [data-speech-button]")).toBeHidden();
+  await expect(page.locator("#etymology .entry-body")).toBeVisible();
+});

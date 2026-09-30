@@ -13,6 +13,9 @@ export type AdUnit =
   | { provider: "google"; client: string; slot: string }
   | { provider: "seznam"; zoneId: number; width: number; height: number };
 
+/** Vlastní účet AdSense; pro konkrétní pozici je ještě nutné ID jednotky `data-ad-slot`. */
+export const googleAdSenseClient = "ca-pub-5191551009181826";
+
 /**
  * Reklamní jednotky pro jednotlivé sloty rozvržení.
  *

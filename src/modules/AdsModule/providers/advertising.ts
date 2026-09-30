@@ -1,5 +1,5 @@
 import type { AdUnit } from "../../../config/ads";
-import { consentProvider } from "./consent";
+import { consentProvider, type AdProvider } from "./consent";
 
 declare global {
   interface Window {
@@ -70,7 +70,8 @@ async function renderAd(target: HTMLElement, unit: AdUnit) {
     await loadScript(
       `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${unit.client}`,
     );
-    if (!consentProvider.advertising || !target.getClientRects().length) return;
+    if (!consentProvider.isAllowed("google") || !target.getClientRects().length)
+      return;
     const ad = document.createElement("ins");
     ad.className = "adsbygoogle";
     ad.style.display = "block";
@@ -84,7 +85,8 @@ async function renderAd(target: HTMLElement, unit: AdUnit) {
     if (!Number.isInteger(unit.zoneId) || unit.zoneId <= 0)
       throw new Error("Invalid ad configuration");
     await loadScript("https://ssp.seznam.cz/static/js/ssp.js");
-    if (!consentProvider.advertising || !target.getClientRects().length) return;
+    if (!consentProvider.isAllowed("seznam") || !target.getClientRects().length)
+      return;
     if (!window.sssp) throw new Error("Ad provider unavailable");
     if (target.clientWidth < unit.width) return;
     const zone = document.createElement("div");
@@ -114,7 +116,7 @@ async function renderAd(target: HTMLElement, unit: AdUnit) {
 export function mountAds(root: ParentNode = document) {
   const slots = [...root.querySelectorAll<HTMLElement>("[data-ad-unit]")];
   const requested = new Set<HTMLElement>();
-  let issued = false;
+  const issued = new Set<AdProvider>();
   const observer = new IntersectionObserver(
     (entries) => {
       for (const entry of entries) {
@@ -122,16 +124,19 @@ export function mountAds(root: ParentNode = document) {
         if (
           !entry.isIntersecting ||
           !target.getClientRects().length ||
-          !consentProvider.advertising ||
           requested.has(target)
         )
           continue;
         const unit = JSON.parse(target.dataset.adUnit ?? "{}") as AdUnit;
-        if (unit.provider === "placeholder") continue;
+        if (
+          unit.provider === "placeholder" ||
+          !consentProvider.isAllowed(unit.provider)
+        )
+          continue;
         if (unit.provider === "seznam" && target.clientWidth < unit.width)
           continue;
         requested.add(target);
-        issued = true;
+        issued.add(unit.provider);
         void renderAd(target, unit).catch(() => {
           target.dataset.adState = "unavailable";
         });
@@ -141,22 +146,45 @@ export function mountAds(root: ParentNode = document) {
   );
   // Znovu prověříme sloty, které dosud nebyly požadovány, jakmile viewport umožní jejich formát.
   const resizeObserver = new ResizeObserver((entries) => {
-    if (!consentProvider.advertising) return;
     for (const { target } of entries) {
       if (requested.has(target as HTMLElement)) continue;
+      const unit = JSON.parse(
+        (target as HTMLElement).dataset.adUnit ?? "{}",
+      ) as AdUnit;
+      if (
+        unit.provider === "placeholder" ||
+        !consentProvider.isAllowed(unit.provider)
+      )
+        continue;
       observer.unobserve(target);
       observer.observe(target);
     }
   });
   slots.forEach((slot) => resizeObserver.observe(slot));
-  const unsubscribe = consentProvider.subscribe((allowed) => {
+  const onConsent = (provider: AdProvider, allowed: boolean) => {
     observer.disconnect();
-    if (allowed) slots.forEach((slot) => observer.observe(slot));
     // Kód třetí strany nelze bezpečně odebrat. Nový dokument začíná se stavem odepřeno.
-    else if (issued) window.location.reload();
-  });
+    if (!allowed && issued.has(provider)) {
+      window.location.reload();
+      return;
+    }
+    if (
+      consentProvider.isAllowed("seznam") ||
+      consentProvider.isAllowed("google")
+    )
+      slots.forEach((slot) => observer.observe(slot));
+  };
+  const unsubscribeSeznam = consentProvider.subscribeProvider(
+    "seznam",
+    (allowed) => onConsent("seznam", allowed),
+  );
+  const unsubscribeGoogle = consentProvider.subscribeProvider(
+    "google",
+    (allowed) => onConsent("google", allowed),
+  );
   return () => {
-    unsubscribe();
+    unsubscribeSeznam();
+    unsubscribeGoogle();
     observer.disconnect();
     resizeObserver.disconnect();
   };

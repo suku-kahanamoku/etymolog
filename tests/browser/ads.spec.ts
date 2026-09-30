@@ -38,10 +38,15 @@ test("ad providers wait for consent and request side slots only when visible", a
     // This is the same Vite module a project's CMP imports; no test-only global in the app.
     const modulePath = "/src/modules/AdsModule/providers/consent.ts";
     const { consentProvider } = await import(/* @vite-ignore */ modulePath);
-    consentProvider.setAdvertising(true);
+    consentProvider.setProviderConsent("google", true);
   });
   await expect(page.locator('#ad-top [data-rendered="google"]')).toHaveCount(1);
   expect(scripts).toEqual(["google"]);
+  await page.evaluate(async () => {
+    const modulePath = "/src/modules/AdsModule/providers/consent.ts";
+    const { consentProvider } = await import(/* @vite-ignore */ modulePath);
+    consentProvider.setProviderConsent("seznam", true);
+  });
   await page.setViewportSize({ width: 1440, height: 1000 });
   await expect(page.locator("#ssp-zone-12345")).toHaveAttribute(
     "data-rendered",
@@ -175,7 +180,7 @@ test("Seznam zones use supplied IDs and sizes only after consent and with enough
   await page.evaluate(async () => {
     const modulePath = "/src/modules/AdsModule/providers/consent.ts";
     const { consentProvider } = await import(/* @vite-ignore */ modulePath);
-    consentProvider.setAdvertising(true);
+    consentProvider.setProviderConsent("seznam", true);
   });
   // Let visibility/resize observers run before asserting that mobile does not request desktop ads.
   await page.evaluate(

@@ -115,7 +115,7 @@ const sections = [
     <div>
       {!sections.length && <p class="notice">{t.noDetails}</p>}
       {groups.map((group) => (
-        <section class="dossier-group" id={group.type}>
+        <section class="dossier-group" id={group.type} data-speech-section>
           {group.type === "etymology" && (
             <div class="dossier-heading">
               <h1 class="editorial-heading">{name.name}</h1>
@@ -127,18 +127,58 @@ const sections = [
               )}
             </div>
           )}
-          <h2 class="rule-title">
-            <EditorialIcon
-              name={
-                culture.includes(group.type)
-                  ? "story"
-                  : group.type === "etymology"
-                    ? "book"
-                    : "history"
-              }
+          <div class="dossier-title-row">
+            <h2 class="rule-title">
+              <EditorialIcon
+                name={
+                  culture.includes(group.type)
+                    ? "story"
+                    : group.type === "etymology"
+                      ? "book"
+                      : "history"
+                }
+              />
+              {group.label}
+            </h2>
+            {group.items.length > 0 && (
+              <button
+                type="button"
+                class="speech-button"
+                data-speech-button
+                data-speech-play={t.speechPlay.replace(
+                  "{section}",
+                  group.label,
+                )}
+                data-speech-pause={t.speechPause.replace(
+                  "{section}",
+                  group.label,
+                )}
+                data-speech-resume={t.speechResume.replace(
+                  "{section}",
+                  group.label,
+                )}
+                data-speech-error={t.speechError}
+                aria-label={t.speechPlay.replace("{section}", group.label)}
+                title={t.speechPlay.replace("{section}", group.label)}
+                hidden
+              >
+                <svg data-speech-play viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M4 9v6h4l5 4V5L8 9H4Zm12-1a5 5 0 0 1 0 8m2.5-11a9 9 0 0 1 0 14" />
+                </svg>
+                <svg data-speech-pause viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M7 5h3v14H7zm7 0h3v14h-3z" />
+                </svg>
+              </button>
+            )}
+          </div>
+          {group.items.length > 0 && (
+            <p
+              class="speech-feedback"
+              data-speech-feedback
+              role="status"
+              hidden
             />
-            {group.label}
-          </h2>
+          )}
           {!group.items.length && (
             <p class="notice">
               {group.type === "etymology"
@@ -402,3 +442,7 @@ const sections = [
     </div>
   </div>
 </section>
+<script>
+  import { useSectionSpeech } from "../hooks/useSectionSpeech";
+  useSectionSpeech();
+</script>
