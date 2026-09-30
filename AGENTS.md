@@ -17,3 +17,13 @@
 - UIModule, CoreModule a RealtimeModule jsou nezávislé základy. LangModule může používat UI; ostatní moduly sdílejí UI, Lang a případně Core bez vzájemných importů doménových modulů. Povolené hranice a cykly hlídá `tests/architecture.test.ts`.
 - UIModule vlastní theme. LangModule vlastní výčet jazyků, vlajky a locale helpery; modulové slovníky se neslévají do globálního registru. Menu dostává texty/odkazy přes props, jazykový přepínač tvorbu URL přes `href`.
 - Browser hooky a providery nesmějí tranzitivně importovat serverovou logiku. Kompozice serverových providerů zůstává v `src/server/providers.ts`; API routy exportují handlery z `server/` příslušného modulu.
+
+## graphify
+
+The project code graph is at `graphify-out/graph.json`. It is a navigation aid; verify findings in the source files. Graphify may parse `.astro` components only partially, so inspect the relevant `.astro` templates directly after locating them through the graph.
+
+- When the user types `$graphify`, use the installed Graphify skill.
+- For every codebase task, start from this project's root and use a targeted `graphify query "<question>"`. Use `graphify path "<A>" "<B>"` for relationships and `graphify explain "<concept>"` for focused concepts. Inspect only relevant source files identified by the graph. Do not scan, list, or read all project files to discover the structure. If the query misses, refine it with code symbols or use a narrowly scoped search.
+- If code may have changed since the graph was built, run `graphify update .` before relying on graph results. After every completed code change, including additions, deletions, and renames, run `graphify update .` before another graph query or the final response. Do not leave changed code with a stale graph.
+- Generated files in `graphify-out/` may change after updates; this is expected. If `graphify-out/wiki/index.md` exists, use it for broad navigation. Read `graphify-out/GRAPH_REPORT.md` for broad architecture review or when targeted queries are insufficient.
+- If the task concerns a wrong or stale graph, diagnose the graph against source files. If the user explicitly asks not to use Graphify, follow that request.
