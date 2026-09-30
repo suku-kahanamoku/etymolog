@@ -1,3 +1,4 @@
+/* Novinářské typografické a barevné konstanty UIModule (písmo, linky, akcenty). */
 :root {
   --ink: var(--color-base-content);
   --muted: #716757;

@@ -3,7 +3,9 @@ import { consentProvider } from "./consent";
 
 declare global {
   interface Window {
+    /** Queue naplněná jednotkami AdSense po vložení značky `<ins class="adsbygoogle">`. */
     adsbygoogle?: Record<string, never>[];
+    /** API českého SSP pro vykreslení jednotek podle `zoneId`. */
     sssp?: {
       getAds: (
         config: {
@@ -16,7 +18,16 @@ declare global {
     };
   }
 }
+
+/** Memoizace načtených skriptů, aby se značka vložila do stránky jen jednou. */
 const scripts = new Map<string, Promise<void>>();
+
+/**
+ * Načte externí skript reklamního providera.
+ * @param src URL skriptu poskytovatele.
+ * @returns Promise splněná po načtení skriptu.
+ * @throws Error `Ad script timeout` po 10 s nebo `Ad script unavailable` při chybě sítě.
+ */
 function loadScript(src: string): Promise<void> {
   const existing = scripts.get(src);
   if (existing) return existing;
@@ -43,6 +54,15 @@ function loadScript(src: string): Promise<void> {
   scripts.set(src, pending);
   return pending;
 }
+
+/**
+ * Vykreslí jednu reklamní jednotku do cílového kontejneru.
+ * @param target Kontejner slotu, jehož obsah se nahradí jednotkou.
+ * @param unit Definice jednotky z konfigurace webu.
+ * @returns Promise po vložení jednotky.
+ * @throws Error Při neplatné konfiguraci jednotky nebo chybějícím API SSP.
+ * Bez souhlasu nebo při skrytém/s úzkým kontejnerem se jednotka přeskočí.
+ */
 async function renderAd(target: HTMLElement, unit: AdUnit) {
   if (unit.provider === "google") {
     if (!/^ca-pub-\d+$/.test(unit.client) || !/^\d+$/.test(unit.slot))
@@ -81,6 +101,16 @@ async function renderAd(target: HTMLElement, unit: AdUnit) {
   }
 }
 
+/**
+ * Napojí reklamní sloty na souhlas, viditelnost a rozměr viewportu.
+ *
+ * Bezpečnostní záměr: skripty třetích stran se nikdy nenačítají bez kladného
+ * rozhodnutí CMP a jednotka se požaduje jen pro slot, který je viditelný
+ * (nastavení `rootMargin` předběžně načítá těsně nad okrajem viewportu) a jehož
+ * kontejner má dostatečnou šířku pro daný formát.
+ * @param root Kořen, ve kterém se hledají sloty (`[data-ad-unit]`).
+ * @returns Funkce uvolňující všechny pozorovatele a odběratele souhlasu.
+ */
 export function mountAds(root: ParentNode = document) {
   const slots = [...root.querySelectorAll<HTMLElement>("[data-ad-unit]")];
   const requested = new Set<HTMLElement>();
@@ -109,7 +139,7 @@ export function mountAds(root: ParentNode = document) {
     },
     { rootMargin: "100px" },
   );
-  // Recheck unrequested slots when the viewport makes room for their format.
+  // Znovu prověříme sloty, které dosud nebyly požadovány, jakmile viewport umožní jejich formát.
   const resizeObserver = new ResizeObserver((entries) => {
     if (!consentProvider.advertising) return;
     for (const { target } of entries) {
@@ -122,7 +152,7 @@ export function mountAds(root: ParentNode = document) {
   const unsubscribe = consentProvider.subscribe((allowed) => {
     observer.disconnect();
     if (allowed) slots.forEach((slot) => observer.observe(slot));
-    // Third-party code cannot be unloaded safely. A fresh document starts denied.
+    // Kód třetí strany nelze bezpečně odebrat. Nový dokument začíná se stavem odepřeno.
     else if (issued) window.location.reload();
   });
   return () => {

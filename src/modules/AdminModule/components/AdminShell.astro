@@ -4,10 +4,21 @@ import en from "../locales/en.json";
 import de from "../locales/de.json";
 import type { Locale } from "../../LangModule/config";
 import { url } from "../../../config/routes";
+/**
+ * Rámec stránky administrace AdminModule.
+ *
+ * Zajišťuje hlavičku sekce s názvem, popisem a e-mailem přihlášeného uživatele;
+ * vlastní obsah (např. tabulkový editor EtymologModule) se vkládá přes slot.
+ * Props: položky bez `?` jsou povinné, u volitelných uvádí popis výchozí hodnotu.
+ */
 interface Props {
+  /** Jazyk, ve kterém se vykreslí popisky a odkaz na účet. */
   locale: Locale;
+  /** Nadpis stránky administrace. */
   title: string;
+  /** Krátký popis pod nadpisem. */
   description: string;
+  /** E-mail přihlášeného uživatele (zobrazuje se jako kontakt pro opravy). */
   email: string;
 }
 const { locale, title, description, email } = Astro.props;

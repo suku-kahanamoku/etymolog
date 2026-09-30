@@ -4,14 +4,30 @@ import type { Locale } from "../../LangModule/config";
 import type { SearchResult } from "../types";
 import { url, nameUrl } from "../../../config/routes";
 import "../styles/public.css";
+/**
+ * Hledací formulář a výsledky EtymologModule (domovská stránka webu).
+ *
+ * Výsledky se vykreslí ze serverového dotazu `q`; po odeslání formuláře přebírá
+ * načítání, překreslování a adresu v prohlížeči `useNameSearch()`, takže hledání
+ * funguje i bez JavaScriptu (běžný GET na stránku).
+ * Props: položky bez `?` jsou povinné, u volitelných uvádí popis výchozí hodnotu.
+ */
 interface Props {
+  /** Jazyk výsledků a návratových adres. */
   locale: Locale;
+  /** Výsledek vyhledání z routy; `undefined` při chybě nebo bez dotazu. */
   result?: SearchResult;
+  /** Kód chyby hledání (`invalid` nebo `unavailable`); `undefined` = bez chyby. */
   error?: string;
+  /** Aktuální hledaný řetězec (pro pole a odkazy na další stránky). */
   query?: string;
 }
 const { locale, result, error, query = "" } = Astro.props;
 const t = dictionary(locale);
+/**
+ * @param page Číslo stránky výsledků.
+ * @returns URL stránky se zachovaným dotazem a kotvou výsledků.
+ */
 const pageHref = (page: number) =>
   `${url(locale)}?${new URLSearchParams({ q: query, page: String(page) })}#results`;
 ---

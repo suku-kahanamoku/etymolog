@@ -1,4 +1,14 @@
+/**
+ * Chyba veřejného API vrstvy webu.
+ *
+ * `code` je krátký, bezpečný identifikátor, který se propíše do JSON odpovědi;
+ * nikdy neobsahuje detail ze zbytkové chyby sítě nebo backendu.
+ */
 export class ApiError extends Error {
+  /**
+   * @param status HTTP stav, který se vrátí klientovi.
+   * @param code Strojový kód chyby (např. `unauthorized`).
+   */
   constructor(
     public status: number,
     public code: string,
@@ -6,6 +16,15 @@ export class ApiError extends Error {
     super(code);
   }
 }
+
+/**
+ * Volání vlastního API webe z prohlížeče (relace jde v cookie `same-origin`).
+ * @param path Cesta začínající `/api/`.
+ * @param options Volitelná metoda (`GET`/`POST`), tělo požadavku a signál zrušení.
+ * @returns Rozbalený payload `data` z odpovědi `{ success, data }`.
+ * @throws ApiError Při chybovém HTTP stavu nebo `success: false`.
+ * @throws Error Při cestě mimo `/api/` nebo s Backslashem.
+ */
 export async function api<T>(
   path: `/api/${string}`,
   options: {

@@ -1,3 +1,11 @@
+/*
+ * Globální styly webu.
+
+ * Pořadí importů je záměrné: nejdřív utility Tailwind, pak daisyUI motivy
+ * (`theme.css`), univerzální rozvržení (`base.css`) a nakonec barevné konstanty
+ * projektu (`newspaper.css`). Modulové styly se importují v jednotlivých
+ * komponentách, aby se načítaly jen tam, kde jsou potřeba.
+ */
 @import "tailwindcss";
 @import "../modules/UIModule/styles/theme.css";
 @import "../modules/UIModule/styles/base.css";

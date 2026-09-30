@@ -2,7 +2,15 @@
 import { site } from "../../../config/site";
 import { dictionary } from "../providers/translations";
 import type { Locale } from "../../LangModule/config";
+/**
+ * Kontaktní stránka (ContactModule) s údaji provozovatele z `src/config/site.ts`.
+ *
+ * Telefon se v `href` zapisuje bez mezer (`tel:`), IČO a adresa se zobrazují
+ * jako text; žádné údaje se netahají z externího API.
+ * Props: položky bez `?` jsou povinné, u volitelných uvádí popis výchozí hodnotu.
+ */
 interface Props {
+  /** Jazyk, ve kterém se vykreslí popisky sekcí. */
   locale: Locale;
 }
 const t = dictionary(Astro.props.locale);

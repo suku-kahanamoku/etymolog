@@ -1,3 +1,10 @@
+/*
+  Motivy UIModule.
+
+  První blok je výchozí světlý motiv `newspaper` (používá se i bez JavaScriptu),
+  druhý jeho tmavá varianta. Níže jsou doplňující paleta a barvy textu, které se
+  přepínají atributem `data-theme-mode` na `<html>` podle volby návštěvníka.
+*/
 @plugin "daisyui" {
   themes: false;
 }

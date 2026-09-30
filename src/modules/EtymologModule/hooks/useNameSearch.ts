@@ -2,6 +2,15 @@ import type { Dictionary } from "../providers/translations";
 import type { SearchResult } from "../types";
 import { nameUrl, url, type Locale } from "../../../config/routes";
 import { singleResultUrl } from "../providers/searchNavigation";
+
+/**
+ * Napojí veřejný formulář hledání na API `/api/etymolog/search/`.
+ *
+ * Vedlejší účinky: přepisuje obsah kontejneru výsledků, stavový text a URL
+ * (`history.replaceState`); jednoznačný výsledek přesměruje na detail,
+ * neprobíhající požadavek se zruší při novém hledání (`AbortController`).
+ * @returns `void`; bez formuláře na stránce se hook tiše ukončí.
+ */
 export function useNameSearch() {
   const form = document.querySelector<HTMLFormElement>("[data-name-search]");
   if (!form) return;
@@ -14,6 +23,7 @@ export function useNameSearch() {
     "[data-result-pagination]",
   )!;
   let active: AbortController | undefined;
+  /** Vytvoří element s textem a volitelnou třídou (bez vložení do DOM). */
   const element = <K extends keyof HTMLElementTagNameMap>(
     tag: K,
     text: string,

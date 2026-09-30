@@ -7,8 +7,19 @@ import { dictionary } from "../providers/translations";
 import { safeWebUrl } from "../providers/links";
 import { url, nameUrl } from "../../../config/routes";
 import "../styles/public.css";
+/**
+ * Veřejný detail jednoho jména (EtymologModule).
+ *
+ * Komponenta pouze seskupuje již projektovaná data z php-core do sekcí:
+ * výklady podle typu, varianty, kalendářní tradice, zdroje a tabulku výskytů.
+ * Odkazy ze zdrojů procházejí přes `safeWebUrl()`, takže se vykreslí jen
+ * bezpečná `http(s)` URL, a u vnějších odkazů se přidává `noopener noreferrer`.
+ * Props: položky bez `?` jsou povinné, u volitelných uvádí popis výchozí hodnotu.
+ */
 interface Props {
+  /** Jazyk textů a návratových adres. */
   locale: Locale;
+  /** Kompletní projektovaný detail záznamu z php-core. */
   data: Dossier;
 }
 const { locale, data } = Astro.props;
@@ -22,6 +33,7 @@ const {
   sources,
   citations,
 } = data;
+/** Pořadí sekcí výkladů; pořadí je záměrné a odpovídá významu jednotlivých typů. */
 const narrativeOrder = [
   "etymology",
   "mythology",
@@ -32,6 +44,7 @@ const narrativeOrder = [
   "tradition",
   "proverb",
 ] as const;
+/** Výklady rozdělené podle typu, prázdné skupiny se vynechají (kromě základních). */
 const groups = narrativeOrder
   .map((type) => ({
     type,
@@ -41,7 +54,9 @@ const groups = narrativeOrder
   .filter(
     (g) => g.items.length || g.type === "etymology" || g.type === "mythology",
   );
+/** Typy výkladů, které se označují jako kulturně podmíněné. */
 const culture = ["legend", "mythology", "fiction", "tradition", "proverb"];
+/** Odkazy ve výkladech, které nejsou pokryté žádným zdrojem ani citací. */
 const extraEntrySources = entries.filter((entry) => {
   const link = safeWebUrl(entry.source_url);
   return (
@@ -50,11 +65,22 @@ const extraEntrySources = entries.filter((entry) => {
     !citations.some((c) => safeWebUrl(c.url) === link)
   );
 });
+/** `true`, pokud má záznam vlastní zdroje nebo odkazy ve výkladech mimo zdroje. */
 const hasSources = sources.length > 0 || extraEntrySources.length > 0;
+/**
+ * @param key Klíč slovníku hodnot (např. druh svátku).
+ * @returns Překlad hodnoty, nebo `—` pro prázdnou hodnotu.
+ */
 const valueLabel = (key: string | null) =>
   key ? ((t.values as Record<string, string>)[key] ?? key) : "—";
+/**
+ * @param from Počátek období.
+ * @param to Konec období.
+ * @returns Formátované rozmezí let, případně prázdný řetězec.
+ */
 const years = (from: number | null, to: number | null) =>
   [from, to].filter((v) => v !== null).join("–");
+/** Obsah odkazového menu na začátku detailu. */
 const sections = [
   ...groups.map((g) => ({ id: g.type, label: g.label })),
   ...(variants.length ? [{ id: "variants", label: t.variants }] : []),

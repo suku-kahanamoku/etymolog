@@ -2,7 +2,16 @@ import { defineMiddleware } from "astro:middleware";
 import { assertSameOrigin } from "./request";
 import { errorResponse } from "./errors";
 
-// Shared request/response lifecycle. Add tracing here without logging cookies or request bodies.
+/**
+ * Sdílený životní cyklus requestu a odpovědi.
+ *
+ * Přiřadí `requestId`, u zápisových požadavků pod `/api/` ověří origin a všechny
+ * odpovědi opatří bezpečnostními hlavičkami. Trasování zde přidávejte bez logování
+ * cookies a těl požadavků.
+ * @param context Kontext Astro požadavku.
+ * @param next Pokračování zpracování v dalších middlewarerch a routě.
+ * @returns Odpověď routy s doplněnými hlavičkami; při chybě originu chybová JSON odpověď.
+ */
 export const requestHook = defineMiddleware(async (context, next) => {
   context.locals.requestId = crypto.randomUUID();
   if (

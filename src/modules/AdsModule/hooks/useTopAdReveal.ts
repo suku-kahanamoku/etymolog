@@ -1,4 +1,8 @@
-/** Move the creative at half the page scroll speed inside its clipped window. */
+/**
+ * Posune kreativu rychlostí poloviny scrollu uvnitř oříznutého okna banneru.
+ * @param root Kořen, ve kterém se hledá okno `[data-top-ad-reveal]` s `.ad-top`.
+ * @returns Uvolňující funkce rušící pozorovatele, listenery a CSS proměnnou.
+ */
 export function mountTopAdReveal(root: ParentNode = document) {
   const windowElement = root.querySelector<HTMLElement>("[data-top-ad-reveal]");
   const banner = windowElement?.querySelector<HTMLElement>(".ad-top");
@@ -9,7 +13,7 @@ export function mountTopAdReveal(root: ParentNode = document) {
   const render = () => {
     frame = undefined;
     const bounds = windowElement.getBoundingClientRect();
-    // Stop updating the translation once the entire reserved window is offscreen.
+    // Překlad se přestane aktualizovat, jakmile celé okno banneru zajede mimo viewport.
     const distance = Math.max(
       0,
       Math.min(window.scrollY, bounds.bottom + window.scrollY),

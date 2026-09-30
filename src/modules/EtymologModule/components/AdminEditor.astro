@@ -3,8 +3,18 @@ import type { Locale } from "../../LangModule/config";
 import { dictionary } from "../providers/translations";
 import { resources } from "../config/resources";
 import "../styles/admin.css";
+/**
+ * Administrativní tabulkový editor EtymologModule.
+ *
+ * Komponenta vykreslí obrys UI (volba zdroje, filtr, tabulka, dialog editoru a
+ * panel důkazních podkladů); veškerou logiku a komunikaci s API přebírá
+ * `useAdminEditor()`. Slovník se předá do `data-text`, role do `data-admin-role`.
+ * Props: položky bez `?` jsou povinné, u volitelných uvádí popis výchozí hodnotu.
+ */
 interface Props {
+  /** Jazyk, ve kterém se vykreslí popisky administrace. */
   locale: Locale;
+  /** `true` pro roli `admin` (navíc synchronizace, publikace, reset a kaskádové mazání). */
   isAdmin: boolean;
 }
 const { locale, isAdmin } = Astro.props;

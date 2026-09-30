@@ -8,13 +8,25 @@ import { site } from "../../../config/site";
 import { dictionary } from "../providers/translations";
 import { type Locale } from "../../LangModule/providers/locale";
 import { url, nameUrl, resolveName, type PageId } from "../../../config/routes";
+/**
+ * Hlavička webu (SiteModule) sestavená nad `MainMenu` UIModule.
+ *
+ * Odkazy navigace se generují z překladů a helperu `url()`; přepínač jazyků
+ * si ponechává aktuální stránku i detail jména. Slot `action` (tlačítko
+ * administrace) se vykreslí jen při zapnutém modulu autentizace.
+ * Props: položky bez `?` jsou povinné, u volitelných uvádí popis výchozí hodnotu.
+ */
 interface Props {
+  /** Aktuální jazyk webu. */
   locale: Locale;
+  /** Aktuální stránka; výchozí `home` (slouží ke zvýraznění aktivní položky). */
   page?: PageId;
 }
 const { locale, page = "home" } = Astro.props;
 const t = dictionary(locale);
+/** ID detailu jména z adresy; `undefined` mimo stránku jména. */
 const detailId = resolveName(Astro.url.pathname)?.id;
+/** Položky hlavní navigace s příznakem aktivní stránky. */
 const links: NavigationItem[] = [
   { href: url(locale), label: t.nav.home, current: page === "home" },
   { href: url(locale, "about"), label: t.nav.about, current: page === "about" },
@@ -24,6 +36,10 @@ const links: NavigationItem[] = [
     current: page === "contact",
   },
 ];
+/**
+ * Odkazy mobilního panelu. Odkaz na administraci se přidává pouze při zapnutém
+ * modulu autentizace; oprávnění se ale řeší až na serveru, jde jen o zobrazení.
+ */
 const mobileLinks: NavigationItem[] = site.modules.auth
   ? [
       ...links,

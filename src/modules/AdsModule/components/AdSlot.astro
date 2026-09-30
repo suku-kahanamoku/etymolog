@@ -3,8 +3,18 @@ import "../styles/components.css";
 import { ads, type AdPosition } from "../../../config/ads";
 import { dictionary } from "../providers/translations";
 import { type Locale } from "../../LangModule/providers/locale";
+/**
+ * Jeden reklamní slot AdsModule.
+ *
+ * Slot pouze vykreslí kontejner s konfigurací jednotky v `data-ad-unit`; skutečné
+ * vykreslení reklamy zajistí `mountAds()` až po souhlasu CMP a pouze když je
+ * slot viditelný a dostatečně široký pro formát.
+ * Props: položky bez `?` jsou povinné, u volitelných uvádí popis výchozí hodnotu.
+ */
 interface Props {
+  /** Pozice slotu v rozvržení (`top`, `left`, `right`). */
   position: AdPosition;
+  /** Jazyk, ve kterém se vykreslí popisky slotu. */
   locale: Locale;
 }
 const { position, locale } = Astro.props;

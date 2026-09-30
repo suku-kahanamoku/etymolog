@@ -3,15 +3,32 @@ import "../styles/main-menu.css";
 import ThemeToggle from "./ThemeToggle.astro";
 import NavigationLinks from "./NavigationLinks.astro";
 import type { NavigationItem } from "../types";
+/**
+ * Hlavní menu webu: značka, desktopová navigace, motiv, jazyk, akce a mobilní panel.
+ *
+ * Texty a odkazy dostává výhradně přes props a sloty, takže UIModule nezná
+ * žádný doménový obsah. Chování bez JavaScriptu zajišťuje blok `<noscript>`,
+ * který mobilní panel vypíše staticky.
+ * Props: položky bez `?` jsou povinné, u volitelných uvádí popis výchozí hodnotu.
+ */
 interface Props {
+  /** Jazyk předávaný přepínači motivu. */
   locale: string;
+  /** Přístupnostní popisky navigace (`aria-label` obou panelů). */
   label: string;
+  /** Položky desktopové navigace. */
   items: NavigationItem[];
+  /** Položky mobilního panelu; výchozí hodnotou je `items`. */
   mobileItems?: NavigationItem[];
+  /** `id` mobilního panelu, na který odkazuje tlačítko přes `aria-controls`. */
   menuId?: string;
+  /** `aria-label` tlačítka v zavřeném stavu. */
   openLabel?: string;
+  /** `aria-label` tlačítka v otevřeném stavu. */
   closeLabel?: string;
+  /** Přidá vizuální rámeček kolem hlavičky. */
   framed?: boolean;
+  /** Vykreslit obsah slotu `action` v pravé části hlavičky. */
   showAction?: boolean;
 }
 const {

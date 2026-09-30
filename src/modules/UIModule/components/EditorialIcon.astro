@@ -1,7 +1,16 @@
 ---
+/**
+ * Dekorativní ikona sekce (inline SVG, vždy `aria-hidden`).
+ *
+ * Značka se volí propem `name`; neznámý název se tiše nahradí výchozí knihou,
+ * aby se nezobrazila prázdná ikona.
+ * Props: položky bez `?` jsou povinné, u volitelných uvádí popis výchozí hodnotu.
+ */
 interface Props {
+  /** Název ikony (`book`, `history`, `story`, `calendar`, `branch`); výchozí `book`. */
   name?: string;
 }
+/** Cesty SVG pro jednotlivé ikony; klíč odpovídá propu `name`. */
 const paths: Record<string, string> = {
   book: "M3 4h6l3 2 3-2h6v15h-6l-3 2-3-2H3V4Zm9 2v15",
   history: "M12 8v5l3 2M4 5v5h5M4 10a8 8 0 1 1 0 5",
@@ -9,6 +18,7 @@ const paths: Record<string, string> = {
   calendar: "M5 5h14v16H5V5Zm3-3v6m8-6v6M5 10h14m-10 4h1m4 0h1m-6 3h1m4 0h1",
   branch: "M6 3v15a3 3 0 0 0 3 3h3M6 8h7a4 4 0 0 0 4-4V3M6 14h10",
 };
+/** Cesta zvolené ikony; neznámý název tiše padá na výchozí knihu. */
 const d = paths[Astro.props.name ?? "book"] ?? paths.book;
 ---
 

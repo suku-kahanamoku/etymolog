@@ -1,8 +1,18 @@
 import { themeConfig } from "../config/theme";
 
+/** Uklidní předchozí instanci při opakovaném spuštění skriptu (Astro navigace). */
 let dispose: (() => void) | undefined;
 
-/** Follow the system until the visitor explicitly chooses a theme. */
+/**
+ * Sleduje systémové nastavení, dokud si návštěvník výslovně nevybere motiv.
+ *
+ * Vedlejší účinky: přepisuje `data-theme`, `data-theme-mode` a meta `theme-color`
+ * na `<html>` a ukládá volbu do `localStorage`; odposlouchává události změny
+ * systémového motivu, `storage` (jiná karta), `pageshow` (návrat z bfcache) a
+ * `astro:before-swap`.
+ * @returns Uvolňující funkce, která odpojí všechny listenery; volá se automaticky
+ * při opětovném spuštění hooku a při zániku dokumentu.
+ */
 export function useTheme() {
   dispose?.();
   const abort = new AbortController();
@@ -17,7 +27,7 @@ export function useTheme() {
   try {
     preference = validPreference(localStorage.getItem(themeConfig.storageKey));
   } catch {
-    /* Storage is optional. */
+    /* Úložiště je volitelné. */
   }
   const apply = () => {
     const dark = preference
@@ -45,7 +55,7 @@ export function useTheme() {
         try {
           localStorage.setItem(themeConfig.storageKey, preference);
         } catch {
-          /* Keep the choice for this page. */
+          /* Volba zůstane pouze pro tuto stránku. */
         }
         apply();
       },
@@ -75,7 +85,7 @@ export function useTheme() {
           localStorage.getItem(themeConfig.storageKey),
         );
       } catch {
-        /* Storage is optional. */
+        /* Úložiště je volitelné. */
       }
       apply();
     },

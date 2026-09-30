@@ -4,11 +4,23 @@ import { Image } from "astro:assets";
 import archive from "../assets/archive.png";
 import { dictionary } from "../providers/translations";
 import type { Locale } from "../../LangModule/config";
+/**
+ * Poznámka k archivu (ContentModule) se staronovou ilustrací a volitelným odkazem.
+ *
+ * Texty i odkaz přicházejí přes props, aby komponenta zůstala bez doménové
+ * znalosti; odkaz mimo origin se otevře bezpečně přes `externalLinkAttributes`.
+ * Props: položky bez `?` jsou povinné, u volitelných uvádí popis výchozí hodnotu.
+ */
 interface Props {
+  /** Jazyk, ve kterém se vykreslí popisek ilustrace. */
   locale: Locale;
+  /** Nadpis poznámky. */
   title: string;
+  /** Tělo poznámky (1–2 věty). */
   body: string;
+  /** Text odkazu. */
   link: string;
+  /** Cílová adresa odkazu. */
   href: string;
 }
 const { locale, title, body, link, href } = Astro.props;

@@ -1,3 +1,7 @@
+/*
+  Základ UIModule: reset pro `html`/`body` a mřížka rozvržení stránky
+  (`.site-frame` se sloty pro reklamy a `.section-inner` pro obsah sekce).
+*/
 @layer base {
   html {
     --site-header-height: 89px;

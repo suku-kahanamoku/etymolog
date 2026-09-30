@@ -143,6 +143,7 @@
   margin-top: 1rem;
 }
 @media (max-width: 900px) {
+  /* Tabulkový administrativní editor EtymologModule (výběr zdroje, dialog, důkazní panel). */
   .etymolog-admin {
     grid-template-columns: 1fr;
     gap: 1rem;

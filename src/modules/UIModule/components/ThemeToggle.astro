@@ -2,10 +2,20 @@
 import cs from "../locales/cs.json";
 import en from "../locales/en.json";
 import de from "../locales/de.json";
+/**
+ * Tlačítko pro přepnutí světlého a tmavého motivu.
+ *
+ * Tlačítko je skryté (`hidden`), dokud jej neodhalí `useTheme()` – tím se
+ * vyhneme blikání a chybnému `aria-pressed` před načtením skriptu.
+ * Props: položky bez `?` jsou povinné, u volitelných uvádí popis výchozí hodnotu.
+ */
 interface Props {
+  /** Jazyk, ve kterém se vykreslí `aria-label` a `title` tlačítka. */
   locale: string;
 }
+/** Překlady tlačítka podle jazyka; neznámý jazyk padá na český. */
 const dictionaries = { cs, en, de };
+/** Text `aria-label` a `title` tlačítka pro předaný jazyk. */
 const label =
   dictionaries[Astro.props.locale as keyof typeof dictionaries]?.themeToggle ??
   cs.themeToggle;

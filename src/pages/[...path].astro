@@ -22,6 +22,18 @@ import { HttpError } from "../modules/CoreModule/server/errors";
 import type { User } from "../modules/AuthModule/types";
 import { singleResultUrl } from "../modules/EtymologModule/providers/searchNavigation";
 import type { Dossier, SearchResult } from "../modules/EtymologModule/types";
+/*
+ * Hlavní router veřejných stránek webu (`/`).
+ *
+ * Frontmatter nejprve přeloží cestu na jazyk a stránku (nebo detail jména),
+ * rozhodne o neveřejných stránkách, načte relaci a data z php-core a teprve
+ * potom vybere komponentu. Chybové stavy 404 a 503 se zobrazí ve společné
+ * komponentě; neznámá cesta vrátí 404, nedostupný backend 503.
+ *
+ * Bezpečnostní záměr: role a autorizaci neurčuje routa, údaje čte jen ze
+ * serverových providerů; neveřejné stránky (`login`, `account`, `admin`) se
+ * označí jako `privatePage`, což vypne reklamu a zakáže cacheování.
+ */
 const route = resolveRoute(Astro.url.pathname);
 const nameRoute = resolveName(Astro.url.pathname);
 const locale =
@@ -32,6 +44,10 @@ const t = dictionary(locale),
   ety = etymologDictionary(locale),
   contact = contactDictionary(locale),
   { auth } = authDictionary(locale);
+/**
+ * Stav zpracování požadavku a data pro komponentu. `error` přebíjí vše ostatní,
+ * `detail` a `result` zůstávají `undefined`, pokud je stránka nepřístupná.
+ */
 let error: 404 | 503 | undefined,
   user: User | null = null,
   detail: Dossier | undefined,
@@ -55,6 +71,8 @@ if (!error && (page === "account" || page === "login" || page === "admin")) {
   if (!error && page === "login" && user)
     return Astro.redirect(url(locale, "admin"), 302);
 }
+// Detail jména: neexistující ID skončí 404, výpadek backendu 503.
+// Když backend vrátí jiné ID (např. po přesunu), návštěvník se přesměruje.
 if (!error && nameRoute) {
   try {
     detail = await Astro.locals.providers.etymolog.detail(nameRoute.id);
@@ -64,6 +82,8 @@ if (!error && nameRoute) {
     error = e instanceof HttpError && e.status === 404 ? 404 : 503;
   }
 }
+// Hledání na domovské stránce; jednoznačný výsledek přesměruje přímo na detail,
+// chyba se zobrazí u formuláře a stránka zůstává dostupná.
 const query = (Astro.url.searchParams.get("q") ?? "").slice(0, 101);
 if (!error && page === "home" && Astro.url.searchParams.has("q")) {
   try {
@@ -80,6 +100,7 @@ if (!error && page === "home" && Astro.url.searchParams.has("q")) {
   }
 }
 if (error) Astro.response.status = error;
+// Titulek a popis stránky se odvozují z nejrelevantnějšího dostupného zdroje.
 const metadata = error
   ? {
       title: error === 404 ? t.errors.notFound : t.errors.unavailable,

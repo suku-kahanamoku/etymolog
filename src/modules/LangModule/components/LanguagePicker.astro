@@ -5,13 +5,30 @@ import deFlag from "../assets/flags/de.svg?url";
 import { dictionary } from "../providers/translations";
 import { locales, type Locale } from "../providers/locale";
 import DisclosureChevron from "../../UIModule/components/DisclosureChevron.astro";
+/**
+ * Přepínač jazyků LangModule.
+ *
+ * Odkazy si volající komponenta sestavuje přes prop `href`, takže přepínač
+ * zachovává aktuální stránku i detail záznamu. Funguje i bez JavaScriptu díky
+ * nativnímu prvku `details`; skript navíc doplňuje zavírání klávesou Escape
+ * a kliknutím mimo.
+ * Props: položky bez `?` jsou povinné, u volitelných uvádí popis výchozí hodnotu.
+ */
 interface Props {
+  /** Aktuálně zobrazený jazyk (určuje zvýrazněnou položku a vlajku). */
   locale: Locale;
+  /**
+   * Tvůrce cílové adresy pro daný jazyk.
+   * @param locale Jazyk, pro který se sestavuje URL.
+   * @returns Absolutní cesta odpovídající téže stránce v daném jazyce.
+   */
   href: (locale: Locale) => string;
 }
 const { locale, href } = Astro.props;
 const t = dictionary(locale);
+/** Optimalizované importované vlajky pro jednotlivé jazyky. */
 const flags = { cs: csFlag, en: enFlag, de: deFlag };
+/** Kód země pro `aria-label` přepínače; `cs` používá kód `CZ`. */
 const languageCode = locale === "cs" ? "CZ" : locale.toUpperCase();
 ---
 

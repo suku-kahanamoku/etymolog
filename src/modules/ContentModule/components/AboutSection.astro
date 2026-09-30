@@ -4,7 +4,12 @@ import archive from "../assets/archive.png";
 import { dictionary } from "../providers/translations";
 import type { Locale } from "../../LangModule/config";
 import { url } from "../../../config/routes";
+/**
+ * Sekce „O nás“ (ContentModule) s popisem metody, mezí a odkazem na kontakt.
+ * Props: položky bez `?` jsou povinné, u volitelných uvádí popis výchozí hodnotu.
+ */
 interface Props {
+  /** Jazyk, ve kterém se vykreslí texty a odkaz na kontakt. */
   locale: Locale;
 }
 const { locale } = Astro.props;

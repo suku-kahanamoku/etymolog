@@ -1,7 +1,17 @@
 ---
+/**
+ * Obalová sekce stránky UIModule.
+ *
+ * Slot se vkládá do vnitřního kontejneru `section-inner`; volitelná
+ * `background` se přepisuje do CSS proměnné `--section-background`.
+ * Props: položky bez `?` jsou povinné, u volitelných uvádí popis výchozí hodnotu.
+ */
 interface Props {
+  /** Volitelná třída navíc ke `page-section`. */
   class?: string;
+  /** Třída vnitřního kontejneru `section-inner`. */
   contentClass?: string;
+  /** Barva pozadí sekce (CSS hodnota) předaná jako `--section-background`. */
   background?: string;
 }
 const { class: className, contentClass, background } = Astro.props;

@@ -1,3 +1,9 @@
+<!--
+  In-line značka CMP (Consentmanager) vložená do `<head>` každé stránky.
+  Načítá se synchronně ještě před vykreslením obsahu, aby automatické
+  blokování znemožnilo spustit reklamní skripty před získáním souhlasu.
+  Skript je `is:inline` záměrně – nesmí se bundlovat ani posouvat.
+-->
 <script
   is:inline
   type="text/javascript"

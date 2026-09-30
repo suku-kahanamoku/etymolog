@@ -1,4 +1,14 @@
 import { HttpError } from "./errors";
+
+/**
+ * Ověří, že zápis pochází ze stejného originu jako stránka webu.
+ *
+ * Ochrana proti cross-site POST z neznámého webu; volá se v middlewaru pro
+ * všechny zápisové metody pod `/api/`.
+ * @param request Příchozí požadavek (hledá hlavičky `Origin` a `Sec-Fetch-Site`).
+ * @param expectedOrigin Origin, proti kterému se porovnává.
+ * @throws HttpError 403 `invalid_origin` při jiném originu nebo `cross-site` požadavku.
+ */
 export function assertSameOrigin(request: Request, expectedOrigin: string) {
   if (
     request.headers.get("origin") !== expectedOrigin ||
@@ -6,6 +16,18 @@ export function assertSameOrigin(request: Request, expectedOrigin: string) {
   )
     throw new HttpError(403, "invalid_origin");
 }
+
+/**
+ * Načte a zvaliduje tělo požadavku objektem.
+ *
+ * Podporuje pouze JSON a formulářová data, čte tělo po dávkách a při překročení
+ * limitu přeruší čtení, aby se nestahoval neomezeně velký payload.
+ * @param request Požadavek s tělem (`application/json` nebo `x-www-form-urlencoded`).
+ * @param maxBytes Maximální velikost těla v bajtech; výchozí 16 KiB.
+ * @returns Objekt s políčkami požadavku.
+ * @throws HttpError 415 pro nepodporovaný typ obsahu, 413 pro příliš velké tělo,
+ * 422 pro chybějící tělo, neplatný JSON nebo neobjektové pole.
+ */
 export async function readFields(
   request: Request,
   maxBytes = 16_384,

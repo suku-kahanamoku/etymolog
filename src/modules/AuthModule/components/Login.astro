@@ -3,11 +3,20 @@ import "../styles/components.css";
 import Section from "../../UIModule/components/Section.astro";
 import { dictionary } from "../providers/translations";
 import { type Locale } from "../../LangModule/providers/locale";
+/**
+ * Přihlašovací formulář AuthModule.
+ *
+ * Formulář se odesílá přímo metodou POST na `/api/auth/login/`, takže funguje i
+ * bez JavaScriptu; server pak přesměruje zpět na stránku s kódem chyby.
+ * Props: položky bez `?` jsou povinné, u volitelných uvádí popis výchozí hodnotu.
+ */
 interface Props {
+  /** Jazyk, ve kterém se vykreslí popisky a vrací se přesměrování po úspěchu. */
   locale: Locale;
 }
 const { locale } = Astro.props;
 const t = dictionary(locale);
+/** Kód chyby z dotazu (`invalid` nebo `unavailable`), jinak `null`. */
 const error = Astro.url.searchParams.get("error");
 ---
 

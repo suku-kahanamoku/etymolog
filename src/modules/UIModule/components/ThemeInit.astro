@@ -2,6 +2,12 @@
 import { themeConfig } from "../config/theme";
 ---
 
+<!--
+  Nastaví motiv ještě před vykreslením stránky, aby nedošlo k blikání.
+  Skript je `is:inline` a běží synchronně v `<head>`; konfigurace se předá
+  přes `define:vars`, protože nesmí být součástí bundlu. Rozhoduje uložená
+  volba v `localStorage`, jinak systémové `prefers-color-scheme`.
+-->
 <script is:inline define:vars={{ config: themeConfig }}>
   (() => {
     let preference;

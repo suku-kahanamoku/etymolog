@@ -1,8 +1,18 @@
 ---
 import { externalLinkAttributes } from "../providers/external-links";
 import type { NavigationItem } from "../types";
+/**
+ * Vykreslí seznam navigačních odkazů UIModule.
+ *
+ * Odkazy směřující mimo origin se otevírají v novém okně s `noopener noreferrer`
+ * (viz `externalLinkAttributes`); aktivní položka dostane třídu `active`
+ * a `aria-current="page"`.
+ * Props: položky bez `?` jsou povinné, u volitelných uvádí popis výchozí hodnotu.
+ */
 interface Props {
+  /** Položky k vykreslení. */
   items: NavigationItem[];
+  /** Volitelná třída společná všem odkazům (např. `nav-link`). */
   class?: string;
 }
 const { items, class: className } = Astro.props;

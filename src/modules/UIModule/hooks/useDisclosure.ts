@@ -1,8 +1,14 @@
-/** Native details stay usable without JavaScript. Returns listener cleanup. */
+/** Nativní prvek `details` funguje i bez JavaScriptu. Vrací funkci pro odpojení listenerů. */
 export function useDisclosure(selector: string, root: Document = document) {
+  /**
+   * @param selector Selektor otevřených rozbalovacích prvků (např. `.language-picker`).
+   * @param root Kořen dokumentu, ve kterém se hledají prvky a registrují listenery.
+   * @returns Funkce, která odpojí všechny přidané listenery.
+   */
   const controller = new AbortController();
   const options = { signal: controller.signal };
 
+  // Escape zavře všechny otevřené rozklady a vrátí fokus na jejich `summary`.
   root.addEventListener(
     "keydown",
     (event) => {
@@ -16,6 +22,7 @@ export function useDisclosure(selector: string, root: Document = document) {
     },
     options,
   );
+  // Kliknutí mimo otevřený rozbalovací prvek jej zavře.
   root.addEventListener(
     "click",
     (event) => {

@@ -1,6 +1,13 @@
 import type { CoreConfig } from "./php-core";
 
-/** Same server environment contract as nuxt/fann; never derive tenant from request headers. */
+/**
+ * Sestaví konfiguraci klienta php-core ze serverového prostředí.
+ *
+ * Stejný smluvný kontrakt prostředí jako v projektu nuxt/fann; tenanta se nikdy
+ * neodvozuje z hlaviček požadavku (např. `X-Forwarded-Host` od klienta).
+ * @param env Hodnoty z `astro:env/server`; všechny jsou volitelné.
+ * @returns `CoreConfig` s adresou backendu, klíčem API a hostem tenanta.
+ */
 export function coreConfigFromEnv(env: {
   PHP_API_BASE_URL?: string;
   INTERNAL_API_KEY?: string;
@@ -20,7 +27,7 @@ export function coreConfigFromEnv(env: {
       tenantHost = frontend.hostname;
     }
   } catch {
-    // Public static pages still work without backend configuration.
+    // Veřejné statické stránky fungují i bez konfigurace backendu.
   }
   return {
     baseUrl: env.PHP_API_BASE_URL ?? "",

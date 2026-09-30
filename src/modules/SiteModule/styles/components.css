@@ -1,3 +1,4 @@
+/* Zápatí, značka a navigace hlavičky SiteModule. */
 @layer components {
   .site-footer {
     min-width: 0;

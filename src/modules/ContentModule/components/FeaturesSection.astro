@@ -4,7 +4,12 @@ import Section from "../../UIModule/components/Section.astro";
 import FeatureCard from "./FeatureCard.astro";
 import { dictionary } from "../providers/translations";
 import type { Locale } from "../../LangModule/config";
+/**
+ * Sekce s přehledem funkcí (ContentModule); karty čerpá ze slovníku ContentModule.
+ * Props: položky bez `?` jsou povinné, u volitelných uvádí popis výchozí hodnotu.
+ */
 interface Props {
+  /** Jazyk, ve kterém se vykreslí nadpis a popis sekce. */
   locale: Locale;
 }
 const t = dictionary(Astro.props.locale);

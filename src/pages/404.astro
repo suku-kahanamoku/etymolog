@@ -3,6 +3,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import ErrorPage from "../modules/SiteModule/components/ErrorSection.astro";
 import { dictionary } from "../modules/SiteModule/providers/translations";
 import { localeFromPath } from "../modules/LangModule/providers/locale";
+/** Jazyk chybové stránky z prefixu cesty, jinak výchozí jazyk. */
 const locale = localeFromPath(Astro.url.pathname);
 const t = dictionary(locale);
 Astro.response.status = 404;

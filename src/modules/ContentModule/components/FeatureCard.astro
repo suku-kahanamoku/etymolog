@@ -1,8 +1,15 @@
 ---
 import "../styles/components.css";
+/**
+ * Karta jedné funkce webu (ContentModule) s pořadovým číslem.
+ * Props: položky bez `?` jsou povinné, u volitelných uvádí popis výchozí hodnotu.
+ */
 interface Props {
+  /** Název funkce. */
   title: string;
+  /** Krátký popis funkce. */
   text: string;
+  /** Pořadí karty v sekci (zobrazí se jako dvojčíslí). */
   number: number;
 }
 const { title, text, number } = Astro.props;

@@ -1,8 +1,13 @@
-/** Shared offset for sticky content and native fragment navigation. */
+/** Sdílený odsaz pro přilepený obsah a nativní navigaci na kotvy stránky. */
 export function useHeaderOffset(
   header: HTMLElement,
   root = document.documentElement,
 ) {
+  /**
+   * @param header Změřovaný element hlavičky.
+   * @param root Element, na který se zapisuje CSS proměnná (obvykle `<html>`).
+   * @returns Uvolňující funkce rušící pozorovatel a listener.
+   */
   const update = () =>
     root.style.setProperty(
       "--site-header-height",

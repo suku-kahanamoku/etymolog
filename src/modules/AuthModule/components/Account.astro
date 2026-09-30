@@ -5,8 +5,16 @@ import Section from "../../UIModule/components/Section.astro";
 import { dictionary } from "../providers/translations";
 import { type Locale } from "../../LangModule/providers/locale";
 import type { User } from "../types";
+/**
+ * Přehled účtu přihlášeného uživatele s formulářem pro odhlášení.
+ *
+ * Odhlášení probíhá klasickým POSTem na `/api/auth/logout/`, tedy bez JavaScriptu.
+ * Props: položky bez `?` jsou povinné, u volitelných uvádí popis výchozí hodnotu.
+ */
 interface Props {
+  /** Jazyk, ve kterém se vykreslí popisky. */
   locale: Locale;
+  /** Již ověřený profil uživatele z `Astro.locals.getUser()`. */
   user: User;
 }
 const { locale, user } = Astro.props;

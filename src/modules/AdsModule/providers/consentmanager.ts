@@ -1,12 +1,17 @@
 import { consentProvider } from "./consent";
 
+/** Obsluha události CMP bez dalších argumentů. */
 type CmpEventHandler = () => void;
+
+/** Volitelná funkce `window.__cmp` poskytovaná projektovou CMP. */
 type CmpApi = (
   command: string,
   parameter?: unknown,
   callback?: unknown,
   async?: boolean,
 ) => unknown;
+
+/** Část dat, která CMP vrací v `getCMPData` (TCF metadata a vendor souhlasy). */
 interface CmpData {
   tcfcompliant?: boolean;
   tcfversion?: number;
@@ -16,10 +21,12 @@ interface CmpData {
 }
 declare global {
   interface Window {
+    /** API projektové CMP propojené přes `ConsentScript.astro`. */
     __cmp?: CmpApi;
   }
 }
 
+/** Události CMP, na nichž se souhlas přepočítává. */
 const events = [
   "settings",
   "consent",
@@ -27,9 +34,20 @@ const events = [
   "consentrejected",
   "consentcustom",
 ];
+
+/** CMP vrací `true` i číslo `1`; obě hodnoty znamenají kladný souhlas. */
 const granted = (value: unknown) => value === true || value === 1;
 
-// Read the real CMP choice. Never create consent or treat closing the dialog as approval.
+/**
+ * Přečítá skutečné rozhodnutí projektové CMP a předává ho reklamnímu mostu.
+ *
+ * Vedlejší účinky: registruje CMP události, periodicky kontroluje načtení
+ * `window.__cmp` a při události `astro:before-swap` zruší všechny listenery,
+ * aby se neduplikovaly. Souhlas se nikdy nevytváří a zavření dialogu se nikdy
+ * nepovažuje za schválení.
+ *
+ * @returns Funkci pro odpojení všech listenerů a zastavení časovače.
+ */
 export function mountConsentManager() {
   let api: CmpApi | undefined;
   let previousString: string | undefined;
@@ -45,13 +63,13 @@ export function mountConsentManager() {
       const allowed =
         status?.consentExists === true &&
         data?.tcfcompliant === true &&
-        // CMP reports 4 for the current TCF EU setup; retain legacy value 2.
+        // CMP hlásí pro současné TCF EU nastavení 4; starší hodnota 2 zůstává podporována.
         (data.tcfversion === 2 || data.tcfversion === 4) &&
         typeof data.consentstring === "string" &&
         data.consentstring.length > 0 &&
         granted(data.vendorConsents?.["621"]) &&
         granted(data.purposeConsents?.["1"]);
-      // Any changed choice must also take effect for vendors already loaded by SSP.
+      // Jakákoli změna rozhodnutí musí platit i pro vendor(y) již načtené SSP.
       if (
         previousString &&
         data?.consentstring !== previousString &&

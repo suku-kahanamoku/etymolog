@@ -10,11 +10,22 @@ import { dictionary } from "../modules/SiteModule/providers/translations";
 import { type Locale } from "../modules/LangModule/providers/locale";
 import { type PageId } from "../config/routes";
 import { site } from "../config/site";
+/**
+ * Základní rozvržení webu: hlavička s přepínačem motivu, SEO hlavička, zápatí
+ * a reklamní rám. Obsah stránky se vkládá do výchozího slotu, doplňující
+ * prvky do `<head>` přes slot `head`.
+ * Props: položky bez `?` jsou povinné, u volitelných uvádí popis výchozí hodnotu.
+ */
 interface Props {
+  /** Jazyk stránky; zároveň se vypisuje do `lang` a `data-theme`. */
   locale: Locale;
+  /** Aktuální stránka pro menu a hlavičky SEO; u detailu a chyb se vynechá. */
   page?: PageId;
+  /** Titulek stránky (kombinuje se se značkou webu v SEO hlavičce). */
   title: string;
+  /** Popis stránky pro vyhledávače a sociální sítě. */
   description: string;
+  /** Zakáže indexování stránky; výchozí `false`. */
   noindex?: boolean;
 }
 const { locale, page, title, description, noindex = false } = Astro.props;

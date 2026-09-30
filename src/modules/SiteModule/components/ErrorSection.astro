@@ -4,8 +4,17 @@ import Section from "../../UIModule/components/Section.astro";
 import { dictionary } from "../providers/translations";
 import { type Locale } from "../../LangModule/providers/locale";
 import { url } from "../../../config/routes";
+/**
+ * Chybová stránka pro stavy 404 a 503 (SiteModule).
+ *
+ * Texty se volí podle propu `status`; komponenta sama nenastavuje HTTP stav
+ * odpovědi, to dělá routa v `src/pages/[...path].astro`.
+ * Props: položky bez `?` jsou povinné, u volitelných uvádí popis výchozí hodnotu.
+ */
 interface Props {
+  /** Jazyk, ve kterém se vykreslí popisky. */
   locale: Locale;
+  /** Kód chyby (`404` nebo `503`). */
   status: 404 | 503;
 }
 const { locale, status } = Astro.props;

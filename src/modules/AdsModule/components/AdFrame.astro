@@ -3,8 +3,18 @@ import "../styles/components.css";
 import AdSlot from "./AdSlot.astro";
 import { site } from "../../../config/site";
 import type { Locale } from "../../LangModule/config";
+/**
+ * Reklamní rám AdsModule.
+ *
+ * Rozmístí sloty kolem obsahu stránky a spustí načítání jednotek přes `useAds()`.
+ * Při vypnutí reklam (`enabled: false`, vypnutý modul nebo neveřejná stránka)
+ * se sloty vůbec nevykreslí a žádný skript se nespouští.
+ * Props: položky bez `?` jsou povinné, u volitelných uvádí popis výchozí hodnotu.
+ */
 interface Props {
+  /** Jazyk, ve kterém se vykreslí popisky slotů. */
   locale: Locale;
+  /** Zapnout reklamní sloty; výchozí hodnota se řídí přepínačem `site.modules.ads`. */
   enabled?: boolean;
 }
 const { locale, enabled = site.modules.ads } = Astro.props;

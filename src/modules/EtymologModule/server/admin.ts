@@ -3,6 +3,22 @@ import { HttpError, errorResponse } from "../../CoreModule/server/errors";
 import { readFields } from "../../CoreModule/server/request";
 import { resourceDefinition } from "../config/resources";
 import { site } from "../../../config/site";
+
+/**
+ * `GET|POST|PATCH|DELETE /api/admin/etymolog/[...path]` – univerzální API administrace.
+ *
+ * Vstup: cesta tvaru `/<resource>/[/<id>[/<action>]]`, dotaz `page` a `q`,
+ * u `DELETE` parametr `force`; tělo `POST`/`PATCH` ve formátu JSON s klíči
+ * odpovídajícími definici zdroje.
+ * Návrat: `{ success: true, data }` s `Cache-Control: private, no-store`;
+ * `POST` bez podakce vrací 201, spuštění synchronizace 202.
+ * Bezpečnostní záměr: vyžaduje přihlášenou relaci, zdroje i podakce se
+ * kontrolují proti allowlistu v `config/resources.json`, tělo se limituje velikostí,
+ * neznámá pole se odmítají a kaskádové mazání je vyhrazeno roli `admin`.
+ * Chyby: 401, 403, 404, 405, 413, 415, 422, 502, 503 přes `errorResponse`.
+ * @param context Kontext Astro API routy (`params`, `request`, `url`, `locals`).
+ * @returns JSON odpověď s daty, nebo chybová JSON odpověď.
+ */
 export const adminHandler: APIRoute = async ({
   params,
   request,
@@ -15,6 +31,7 @@ export const adminHandler: APIRoute = async ({
     if (!user) throw new HttpError(401, "unauthorized");
     const parts = (params.path ?? "").split("/").filter(Boolean);
     const [resource, rawId, action] = parts;
+    // Publikace všeho je globální akce omezená na administrátora.
     if (resource === "publish-all" && parts.length === 1) {
       if (user.role !== "admin") throw new HttpError(403, "forbidden");
       if (request.method !== "POST")
@@ -27,6 +44,7 @@ export const adminHandler: APIRoute = async ({
         { headers: { "Cache-Control": "private, no-store" } },
       );
     }
+    // Spuštění a stav synchronizace jsou jen pro administrátora.
     if (resource === "sync" && parts.length === 2) {
       if (user.role !== "admin") throw new HttpError(403, "forbidden");
       let data: unknown;
@@ -77,6 +95,7 @@ export const adminHandler: APIRoute = async ({
     } else if (request.method === "GET") {
       const search = url.searchParams.get("q")?.trim() ?? "";
       if (search.length > 255) throw new HttpError(422, "invalid_input");
+      // Zdroj bez textového pole filtruje pouze podle přesného ID.
       const field = Object.hasOwn(definition.fields, "name")
         ? "name"
         : Object.hasOwn(definition.fields, "title")

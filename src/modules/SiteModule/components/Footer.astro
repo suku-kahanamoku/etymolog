@@ -4,7 +4,13 @@ import { site } from "../../../config/site";
 import { dictionary } from "../providers/translations";
 import { type Locale } from "../../LangModule/providers/locale";
 import { url } from "../../../config/routes";
+/**
+ * Zápatí webu (SiteModule) se značkou, kontaktním e-mailem a rokem.
+ * Slot je určen pro doplňující odkazy jednotlivých modulů.
+ * Props: položky bez `?` jsou povinné, u volitelných uvádí popis výchozí hodnotu.
+ */
 interface Props {
+  /** Jazyk, ve kterém se vykreslí popisky. */
   locale: Locale;
 }
 const { locale } = Astro.props;

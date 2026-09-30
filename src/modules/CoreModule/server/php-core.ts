@@ -1,22 +1,55 @@
 import { HttpError } from "./errors";
 
+/**
+ * Konfigurace jednoho klienta php-core.
+ *
+ * `apiKey` i `tenantHost` jsou důvěrné serverové hodnoty; vznikají výhradně
+ * z prostředí, nikdy z požadavku prohlížeče.
+ */
 export interface CoreConfig {
+  /** Základní URL php-core, např. `https://api.example.cz`. */
   baseUrl: string;
+  /** Interní klíč posílaný v hlavičce `X-Internal-Key`. */
   apiKey: string;
+  /** Pevný host tenanta posílaný v hlavičce `X-Forwarded-Host`. */
   tenantHost: string;
 }
+
+/** Obálka odpovědi php-core: `{ success, data }`. */
 interface Envelope<T> {
+  /** Příznak úspěchu; `false` se vyhodnotí jako `HttpError 502`. */
   success: boolean;
+  /** Data odpovědi rozbalená z obálky. */
   data: T;
 }
+
+/** Typ klienta vytvořeného funkcí `createCoreClient`. */
 export type CoreClient = ReturnType<typeof createCoreClient>;
 
-// Instantiate per request. Never accept an upstream URL, tenant or headers from the browser.
+/**
+ * Vytvoří klienta php-core pro jeden požadavek.
+ *
+ * Klient se vytváří per request. Od prohlížeče se nikdy nepřijímá URL
+ * upstreamu, tenant ani hlavičky – vše pochází z konfigurace prostředí.
+ *
+ * @param config Doporučené `coreConfigFromEnv()`; obsahuje origin, timeout a host tenanta.
+ * @param fetcher Volitelná náhrada `fetch` pro testy; výchozí je globální `fetch`.
+ * @returns Objekt s metodou `request` pro volání php-core včetně tenanta.
+ */
 export function createCoreClient(
   config: CoreConfig,
   fetcher: typeof fetch = fetch,
 ) {
   return {
+    /**
+     * Provede jeden ověřený požadavek do php-core a vrátí rozbalená `data`.
+     * @param path Cesta začínající lomítkem, např. `/etymolog/public/names`.
+     * @param options Metoda, tělo, nepovinný Bearer token uživatele a dotaz.
+     * @returns Data z obálky `{ success: true, data }`.
+     * @throws HttpError 503 při neúplné či neplatné konfiguraci, 500 pro neplatnou cestu,
+     * 502 při nedostupnosti nebo nečitelném/vyhovujícím rozkladu odpovědi;
+     * známé stavy 401/403/404/409/422/429 se propíší návštěvníkovi.
+     */
     async request<T>(
       path: string,
       options: {
@@ -74,7 +107,7 @@ export function createCoreClient(
       } catch {
         throw new HttpError(502, "backend_unavailable");
       }
-      // Do not reflect upstream messages, HTML exception pages or secrets to visitors.
+      // Neprodrážujeme návštěvníkovi zprávy, HTML stránky s výjimkou ani tajné údaje z upstreamu.
       if (!response.ok) {
         const status = [401, 403, 404, 409, 422, 429].includes(response.status)
           ? response.status

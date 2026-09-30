@@ -10,6 +10,17 @@ import {
 } from "../../LangModule/providers/locale";
 import { url } from "../../../config/routes";
 
+/**
+ * `POST /api/auth/login/` – přihlášení uživatele.
+ *
+ * Vstup: JSON nebo formulářová data s `email`, `password` a volitelným `locale`.
+ * Formulářové odeslání vrací přesměrování 303 na administraci (resp. zpět na
+ * přihlášení s kódem `invalid`/`unavailable`), JSON volání vrací
+ * `{ success: true, data: user }` bez tokenu (ten zůstává v cookie).
+ * Vedlejší účinek: uloží Bearer token do session cookie (`httpOnly`).
+ * @param context Kontext Astro API routy.
+ * @returns Přesměrování 303 nebo JSON odpověď; chyby přes `errorResponse` (404, 415, 413, 422, 401, 502, 503).
+ */
 export const loginHandler: APIRoute = async (context) => {
   const form = context.request.headers
     .get("content-type")

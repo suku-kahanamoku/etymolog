@@ -1,3 +1,4 @@
+/* Rozvržení reklamního rámu a styl slotů AdsModule (sloty se plní až po souhlasu CMP). */
 @layer components {
   .site-frame.with-ads {
     grid-template-rows: auto minmax(auto, 1fr);

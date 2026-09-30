@@ -1,4 +1,6 @@
 import type { Dictionary } from "../providers/translations";
+
+/** Stav jedné dávky synchronizace tak, jak jej vrací php-core. */
 type Batch = {
   status: "queued" | "running" | "complete" | "partial" | "failed";
   total: number;
@@ -8,6 +10,20 @@ type Batch = {
   step_index?: number;
   retry_at?: string | null;
 };
+
+/**
+ * Obsluha spuštění a sledování synchronizace dat v administraci.
+ *
+ * Vedlejší účinky: spouští `POST sync/start/`, poté každé 3 s dotazuje
+ * `sync/status`, zapisuje stav do `[data-sync-status]`, volá `refresh()` po
+ * dokončení dávky a při `pagehide` ukončí dotazování.
+ * @param root Kořen administrace, ve kterém se hledají prvky UI.
+ * @param t Slovník EtymologModule pro aktuální jazyk.
+ * @param api Volající funkce pro požadavek na administrativní API.
+ * @param refresh Obnovení seznamu záznamů po dokončení synchronizace.
+ * @param onBusy Volitelný callback, který informuje publikaci o běžící synchronizaci.
+ * @returns Objekt s `select`, které přepíná viditelnost panelu podle vybraného zdroje.
+ */
 export function useAdminSync(
   root: HTMLElement,
   t: Dictionary,
@@ -22,8 +38,14 @@ export function useAdminSync(
     busy = false,
     timer: ReturnType<typeof setTimeout> | undefined;
   let reading = false;
+  /** @param data Stav dávky; `null` znamená žádnou rozpracovanou dávku. */
   const active = (data: Batch | null) =>
     data?.status === "queued" || data?.status === "running";
+  /**
+   * Vypíše stav dávky a podle něj nastaví tlačítko a blokování publikace.
+   * @param data Stav dávky vrácený backendem.
+   * @returns `void`
+   */
   function render(data: Batch | null) {
     if (!button || !output) return;
     busy = active(data);
@@ -42,6 +64,10 @@ export function useAdminSync(
         output.textContent += ` · ${t.admin.syncRetryAt}: ${retry.toLocaleString(document.documentElement.lang)}`;
     }
   }
+  /**
+   * Načte stav synchronizace a naplánuje další dotaz.
+   * @returns `void`; dotaz se přeskakuje, když panel není viditelný nebo už probíhá.
+   */
   async function poll() {
     if (!visible || reading || !button || !output) return;
     reading = true;
@@ -51,7 +77,7 @@ export function useAdminSync(
       if (wasBusy && !busy) await refresh();
     } catch {
       output.textContent = t.admin.syncStatusError;
-      // Failed polling must not automatically repeat the POST.
+      // Selhání dotazování nesmí automaticky zopakovat POST.
     } finally {
       reading = false;
       if (visible) timer = setTimeout(() => void poll(), 3000);
@@ -79,6 +105,10 @@ export function useAdminSync(
     clearTimeout(timer);
   });
   return {
+    /**
+     * @param resource Aktuálně vybraný zdroj administrace.
+     * @returns `void`; panel a tlačítko se zobrazí jen pro `sync-jobs` a spustí se dotazování.
+     */
     select(resource: string) {
       visible = resource === "sync-jobs";
       if (button) button.hidden = !visible;

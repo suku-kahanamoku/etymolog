@@ -1,7 +1,16 @@
 import { useNavigation } from "./useNavigation";
 import { useHeaderOffset } from "./useHeaderOffset";
 import { onDocumentDispose } from "./onDocumentDispose";
+/** Uklidí předchozí instanci při opakovaném spuštění skriptu (Astro navigace). */
 let dispose: (() => void) | undefined;
+
+/**
+ * Napojí všechna hlavní menu na stránce (offset hlavičky, přepínač, panel).
+ *
+ * Vedlejší účinky: registruje DOM listenery; při opakovaném spuštění nejprve
+ * uvolní předchozí instanci a při zániku dokumentu (mimo bfcache) vše uklidí.
+ * @returns `void`; uvolnění probíhá automaticky při `pagehide`.
+ */
 export function useMainMenu() {
   dispose?.();
   const cleanups: (() => void)[] = [];

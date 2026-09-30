@@ -1,9 +1,25 @@
 import type { Dictionary } from "../providers/translations";
+
+/** Souhrn jedné hromadné publikace vrácený backendem. */
 type Publication = {
   published: number;
   skipped: number;
   skipped_records: { resource: string; id: number; reason: string }[];
 };
+
+/**
+ * Obsluha tlačítka „publikovat vše“ v administraci.
+ *
+ * Vedlejší účinky: mění text a stav tlačítka, zapisuje stav do
+ * `[data-publish-status]`, vypisuje přeskočené záznamy a po dokončení volá
+ * `refresh()`. Tlačítko se blokuje během běhu i během probíhající synchronizace.
+ * @param root Kořen administrace, ve kterém se hledají prvky UI.
+ * @param t Slovník EtymologModule pro aktuální jazyk.
+ * @param api Volající funkce pro požadavek na administrativní API.
+ * @param refresh Obnovení seznamu záznamů po dokončení akce.
+ * @returns Objekt s `select` (zobrazení tlačítka jen pro `sync-jobs`)
+ * a `setSyncBusy` (blokování tlačítka během synchronizace).
+ */
 export function useAdminPublish(
   root: HTMLElement,
   t: Dictionary,
@@ -15,6 +31,7 @@ export function useAdminPublish(
   const skipped = root.querySelector<HTMLElement>("[data-publish-skipped]");
   let publishing = false,
     syncBusy = false;
+  /** Zobrazí správný stav tlačítka podle probíhajících akcí. */
   function render() {
     if (!button) return;
     button.disabled = publishing || syncBusy;
@@ -45,9 +62,17 @@ export function useAdminPublish(
     }
   });
   return {
+    /**
+     * @param resource Aktuálně vybraný zdroj administrace.
+     * @returns `void`; tlačítko je viditelné pouze u zdroje `sync-jobs`.
+     */
     select(resource: string) {
       if (button) button.hidden = resource !== "sync-jobs";
     },
+    /**
+     * @param value `true`, když právě běží synchronizace.
+     * @returns `void`; tlačítko publikace se při běžící synchronizaci zablokuje.
+     */
     setSyncBusy(value: boolean) {
       syncBusy = value;
       render();

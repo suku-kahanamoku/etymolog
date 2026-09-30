@@ -1,5 +1,10 @@
 ---
+/**
+ * Šipka označující rozbalovací prvek `details` (dekorativní, `aria-hidden`).
+ * Props: položky bez `?` jsou povinné, u volitelných uvádí popis výchozí hodnotu.
+ */
 interface Props {
+  /** Volitelná třída navíc ke `disclosure-chevron`. */
   class?: string;
 }
 const { class: className } = Astro.props;

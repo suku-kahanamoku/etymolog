@@ -4,7 +4,14 @@ import BrandMark from "./BrandMark.astro";
 import Section from "../../UIModule/components/Section.astro";
 import { dictionary } from "../providers/translations";
 import { type Locale } from "../../LangModule/providers/locale";
+/**
+ * Tenký pás s logem uprostřed obsahu (SiteModule).
+ *
+ * Barevný odstín pozadí lze přepsat proměnnou `--brand-strip-background`.
+ * Props: položky bez `?` jsou povinné, u volitelných uvádí popis výchozí hodnotu.
+ */
 interface Props {
+  /** Jazyk, ve kterém se vykreslí texty pásu. */
   locale: Locale;
 }
 const t = dictionary(Astro.props.locale).brandStrip;

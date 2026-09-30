@@ -3,6 +3,10 @@ import { Image } from "astro:assets";
 import emblem from "../assets/emblem.png";
 ---
 
+<!--
+  Značka webu (SiteModule) jako optimalizovaný obrázek přes `astro:assets`.
+  `alt` je prázdné, protože text značky se vykresluje vedle obrázku jako odkaz.
+-->
 <Image
   src={emblem}
   width={60}

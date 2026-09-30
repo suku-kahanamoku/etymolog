@@ -7,7 +7,14 @@ import { dictionary } from "../providers/translations";
 import { type Locale } from "../../LangModule/providers/locale";
 import { url } from "../../../config/routes";
 import { site } from "../../../config/site";
+/**
+ * Úvodní sekce (ContentModule) s hlavním nadpisem, ilustrací a výzvami k akci.
+ *
+ * Odkaz na účet se vykreslí pouze při zapnutém modulu autentizace.
+ * Props: položky bez `?` jsou povinné, u volitelných uvádí popis výchozí hodnotu.
+ */
 interface Props {
+  /** Jazyk, ve kterém se vykreslí texty a odkazy. */
   locale: Locale;
 }
 const { locale } = Astro.props;

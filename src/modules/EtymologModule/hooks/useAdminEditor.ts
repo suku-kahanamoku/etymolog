@@ -3,12 +3,30 @@ import { useAdminSync } from "./useAdminSync";
 import { resources, resourceDefinition } from "../config/resources";
 import type { Dictionary } from "../providers/translations";
 import type { AdminRecord } from "../types";
+/**
+ * Tablekový administrativní editor EtymologModule.
+ *
+ * Zajišťuje výběr zdroje, filtrování, stránkování, úpravu záznamů i zobrazení
+ * důkazních podkladů. Data ovládá výhradně přes veřejné API administrace
+ * (`/api/admin/etymolog/…`), oprávnění a role uživatele ověřuje server.
+ * Vedlejší účinky: přepisuje obsah tabulky, panelu editoru a panelu důkazů,
+ * zapisuje stavové texty a potvrzuje mazání přes `confirm()`.
+ * @returns `void`; bez kořene `[data-admin]` se hook tiše ukončí.
+ */
 export function useAdminEditor() {
+  // Celý editor je jeden vanilla DOM island: načte konfiguraci ze slovníku
+  // vloženého do `data-text`, stav si drží v uzavřených proměnných a komunikuje
+  // s backendem výhradně přes `/api/admin/etymolog/`.
   const found = document.querySelector<HTMLElement>("[data-admin]");
   if (!found) return;
   const root: HTMLElement = found;
   const t: Dictionary = JSON.parse(root.dataset.text!);
   const isAdmin = root.dataset.adminRole === "admin";
+  /**
+   * Vyhledá potomka uvnitř kořene administrace.
+   * @param s Selektor potomka.
+   * @returns Nalezený element (při chybějícím selektoru vyhodí chybu).
+   */
   const select = <T extends Element>(s: string) => root.querySelector<T>(s)!;
   const status = select<HTMLElement>("[data-admin-status]");
   const editorStatus = select<HTMLElement>("[data-editor-status]");
@@ -17,6 +35,7 @@ export function useAdminEditor() {
   const form = select<HTMLFormElement>("[data-edit-form]");
   const fields = select<HTMLElement>("[data-editor-fields]");
   const evidence = select<HTMLDialogElement>("[data-evidence]");
+  // Stav seznamu; `requestId` slouží k zahození odpovědí ze starších požadavků.
   let resource = "names",
     page = 1,
     query = "",
@@ -25,8 +44,19 @@ export function useAdminEditor() {
     saving = false,
     evidencePage = 1,
     evidencePath = "";
+  /**
+   * @param key Klíč pole podle definice zdroje.
+   * @returns Překlad názvu pole, nebo samotný klíč jako zálohu.
+   */
   const label = (key: string) =>
     (t.fields as Record<string, string>)[key] ?? key;
+  /**
+   * Vytvoří element s textem a volitelnou třídou (bez vložení do DOM).
+   * @param tag Název HTML značky.
+   * @param text Textový obsah.
+   * @param className Třída pro `class`.
+   * @returns Nový element.
+   */
   const element = <K extends keyof HTMLElementTagNameMap>(
     tag: K,
     text = "",
@@ -37,8 +67,20 @@ export function useAdminEditor() {
     e.className = className;
     return e;
   };
+  /**
+   * @param error Chyba z API nebo výjimka.
+   * @returns Text chyby pro uživatele, nebo obecná hláška.
+   */
   const errorText = (error: unknown) =>
     error instanceof Error ? error.message : t.admin.error;
+  /**
+   * Volání administrativního API s překladem stavů na uživatelské hlášky.
+   * @param path Cesta za `/api/admin/etymolog/`.
+   * @param method HTTP metoda; výchozí `GET`.
+   * @param body Volitelné JSON tělo.
+   * @returns Rozbalená data z odpovědi `{ success, data }`.
+   * @throws Error S přeloženou hláškou pro 401, 403, 409, 422 a ostatní chyby.
+   */
   async function api(
     path: string,
     method = "GET",
@@ -70,6 +112,12 @@ export function useAdminEditor() {
     () => (resource === "sync-jobs" ? load() : Promise.resolve()),
     publish.setSyncBusy,
   );
+  /**
+   * Vytvoří akční tlačítko tabulky, které samo hlídá svůj stav během běhu.
+   * @param text Text tlačítka.
+   * @param run Akce spuštěná po kliknutí; chyby se zobrazí ve stavovém textu.
+   * @returns Element tlačítka (bez vložení do DOM).
+   */
   function button(text: string, run: () => void | Promise<void>) {
     const b = element("button", text, "btn btn-sm btn-outline");
     b.type = "button";
@@ -85,6 +133,12 @@ export function useAdminEditor() {
     });
     return b;
   }
+  /**
+   * Otevře a naplní panel důkazních podkladů (importy, externí záznamy, běhy).
+   * @param path Cesta podakce k jednomu záznamu.
+   * @param reset `true` při prvním otevření (resetuje stránkování a otevře dialog).
+   * @returns `void`; načtená data se vypíší jako formátovaný JSON.
+   */
   async function showEvidence(path: string, reset = true) {
     if (reset) {
       evidencePath = path;
@@ -108,6 +162,11 @@ export function useAdminEditor() {
     select<HTMLElement>("[data-evidence-page]").textContent =
       `${t.page} ${evidencePage}`;
   }
+  /**
+   * Načte aktuální stránku záznamů a překreslí tabulku.
+   * @param message Volitelný stavový text (např. „uloženo“); prázdný znamená výchozí hlášku.
+   * @returns `void`; starší otevřené požadavky se zahodí, chyby se vypíší do stavu.
+   */
   async function load(message = "") {
     const revision = ++requestId;
     rows.replaceChildren();
@@ -217,6 +276,11 @@ export function useAdminEditor() {
       if (revision === requestId) root.removeAttribute("aria-busy");
     }
   }
+  /**
+   * Otevře dialog editoru a sestaví formulář podle definice zdroje.
+   * @param id ID upravovaného záznamu; bez hodnoty se vytváří nový záznam.
+   * @returns `void`; systémová pole se pouze zobrazí, nelze je měnit.
+   */
   async function edit(id?: number) {
     const currentResource = resource;
     const definition = resourceDefinition(currentResource)!;
@@ -327,6 +391,11 @@ export function useAdminEditor() {
     select<HTMLElement>("[data-system]").hidden = !id;
     dialog.showModal();
   }
+  /**
+   * Uloží formulář editoru (`POST` pro nový záznam, `PATCH` pro existující).
+   *
+   * @returns `void`; během ukládání se formulář zamkne proti opakovanému odeslání.
+   */
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
     if (saving) return;
@@ -375,6 +444,7 @@ export function useAdminEditor() {
       saving = false;
     }
   });
+  // Přepnutí zdroje resetuje stránku, filtr i vybranou podakci a načte nová data.
   root.querySelectorAll<HTMLButtonElement>("[data-resource]").forEach((b) =>
     b.addEventListener("click", () => {
       resource = b.dataset.resource!;

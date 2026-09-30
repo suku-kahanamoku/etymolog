@@ -1,20 +1,40 @@
+/** Životní cyklus spojení: stav připojení, opakování po výpadku a bezpečné ukončení. */
 export type ConnectionState =
   "idle" | "connecting" | "open" | "retrying" | "closed";
+
+/** Nastavení realtime klienta. */
 export interface RealtimeOptions {
+  /** URL WebSocketu (musí být `ws:` nebo `wss:`). */
   url: string;
+  /** Volá se pro každou přijatou zprávu po úspěšném rozparsování JSON. */
   onMessage: (data: unknown) => void;
+  /** Volitelný zpětný callback změny stavu spojení. */
   onState?: (state: ConnectionState) => void;
+  /** Maximální počet automatických pokusů o reconnect; výchozí 8. */
   maxRetries?: number;
-  // Use short-lived, server-issued tickets if your gateway needs authentication.
-  // Never pass INTERNAL_API_KEY or the php-core bearer token in a URL/protocol.
+  // Použijte krátkodobé tickety vydané serverem, pokud gateway vyžaduje autentizaci.
+  // Nikdy nepředávejte INTERNAL_API_KEY ani bearer token php-core v URL či protokolu.
+  /** Volitelné subprotokoly předané konstruktoru `WebSocket`. */
   protocols?: string[];
 }
 
+/**
+ * Vytvoří realtime klienta nad WebSocketem.
+ *
+ * Bezpečnostní záměr: URL se ověřuje (jen `ws:`/`wss:`, žádné přihlašovací
+ * údaje, na HTTPS pouze `wss:`), data se odesílají pouze v otevřeném stavu
+ * a uzavření z důvodů autentizace či politiky (`1000`, `1008`, `4001`, `4003`,
+ * `4401`, `4403`) nespouští nekonečnou smyčku připojování.
+ * @param options Nastavení klienta.
+ * @returns Objekt s metodami `connect`, `send` a `close`.
+ * @throws Error `Invalid WebSocket URL` nebo `HTTPS requires WSS` při `connect()`.
+ */
 export function createRealtimeClient(options: RealtimeOptions) {
   let socket: WebSocket | undefined;
   let timer: ReturnType<typeof setTimeout> | undefined;
   let retries = 0;
   let stopped = true;
+  /** @param value Nový stav spojení předávaný do `options.onState`. */
   const state = (value: ConnectionState) => options.onState?.(value);
   const connect = () => {
     if (
@@ -52,7 +72,7 @@ export function createRealtimeClient(options: RealtimeOptions) {
     };
     current.onclose = (event) => {
       if (stopped || socket !== current) return;
-      // Authentication/policy closures must not cause an endless reconnect loop.
+      // Uzavření kvůli autentizaci či politice nesmí spouštět nekonečnou smyčku připojování.
       if (
         [1000, 1008, 4001, 4003, 4401, 4403].includes(event.code) ||
         retries >= (options.maxRetries ?? 8)
@@ -70,7 +90,13 @@ export function createRealtimeClient(options: RealtimeOptions) {
     };
   };
   return {
+    /** Otevře spojení (nebo ho znovu otevře po výpadku). */
     connect,
+    /**
+     * Odešle zprávu jako JSON.
+     * @param data Data k serializaci.
+     * @returns `true`, pokud byla zpráva přijata k odeslání, jinak `false`.
+     */
     send(data: unknown): boolean {
       if (
         socket?.readyState !== WebSocket.OPEN ||
@@ -80,6 +106,7 @@ export function createRealtimeClient(options: RealtimeOptions) {
       socket.send(JSON.stringify(data));
       return true;
     },
+    /** Zavíře spojení, zruší časovač reconnectu a vyvolá stav `closed`. */
     close() {
       stopped = true;
       clearTimeout(timer);

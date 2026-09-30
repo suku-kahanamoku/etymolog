@@ -6,6 +6,17 @@ import { readFields } from "../../CoreModule/server/request";
 import { isLocale, type Locale } from "../../LangModule/providers/locale";
 import { url } from "../../../config/routes";
 
+/**
+ * `POST /api/auth/logout/` – ukončení relace.
+ *
+ * Vstup: prázdné JSON nebo formulářová data s volitelným `locale`.
+ * Formulářové odeslání přesměruje 303 na přihlášení, JSON vrací
+ * `{ success: true, data: null }`. Selhání backendu se při odhlášení ignoruje
+ * (401 je očekávané) a cookie se vymaže vždy.
+ * Vedlejší účinky: zrušení relace v php-core a smazání session cookie.
+ * @param context Kontext Astro API routy.
+ * @returns Přesměrování 303, JSON odpověď nebo chybová JSON odpověď.
+ */
 export const logoutHandler: APIRoute = async (context) => {
   let locale: Locale = "cs";
   const form = context.request.headers

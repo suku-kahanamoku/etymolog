@@ -2,6 +2,17 @@ import { defineMiddleware } from "astro:middleware";
 import { clearToken, readToken } from "./session";
 import { HttpError } from "../../CoreModule/server/errors";
 import type { User } from "../types";
+
+/**
+ * Middleware pro odložené načtení relace.
+ *
+ * `getUser` se vyhodnocuje při prvním použití a výsledek se v rámci requestu
+ * cachuje, aby se backend nevolal opakovaně. Neplatná relace smaže cookie,
+ * ostatní chyby se propíší dál, aby se nezatěžoval backend při výpadku.
+ * @param context Kontext Astro požadavku.
+ * @param next Pokračování zpracování v dalších middlewarerch a routě.
+ * @returns Odpověď routy; funkci `context.locals.getUser` předtím doplní.
+ */
 export const sessionHook = defineMiddleware(async (context, next) => {
   let userPromise: Promise<User | null> | undefined;
   context.locals.getUser = () =>
