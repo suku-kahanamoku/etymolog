@@ -1,3 +1,6 @@
+# Vlastní účet Google AdSense
+google.com, pub-5191551009181826, DIRECT, f08c47fec0942fa0
+
 # Seznam základní poptávka
 appnexus.com, 6974, RESELLER, f5ab79cb980f11d1
 pubmatic.com, 159961, RESELLER, 5d62403b186f2ace
