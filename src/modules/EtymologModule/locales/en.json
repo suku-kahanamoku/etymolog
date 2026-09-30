@@ -35,6 +35,7 @@
   "source": "Source",
   "license": "License",
   "original": "Read the original source",
+  "downloadData": "Download source data",
   "year": "Year",
   "count": "Count",
   "place": "Country / region",

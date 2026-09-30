@@ -67,6 +67,13 @@ const extraEntrySources = entries.filter((entry) => {
 });
 /** `true`, pokud má záznam vlastní zdroje nebo odkazy ve výkladech mimo zdroje. */
 const hasSources = sources.length > 0 || extraEntrySources.length > 0;
+/** Přímý datový soubor označíme jako stažení, nikoli jako článek k přečtení. */
+const sourceLinkLabel = (value: string | null | undefined) => {
+  const link = safeWebUrl(value);
+  return link && new URL(link).pathname.toLowerCase().endsWith(".xlsx")
+    ? t.downloadData
+    : t.original;
+};
 /**
  * @param key Klíč slovníku hodnot (např. druh svátku).
  * @returns Překlad hodnoty, nebo `—` pro prázdnou hodnotu.
@@ -237,7 +244,7 @@ const sections = [
                       href={safeWebUrl(s.url)}
                       {...externalLinkAttributes(safeWebUrl(s.url), Astro.url)}
                     >
-                      {t.original}
+                      {sourceLinkLabel(s.url)}
                     </a>
                   </p>
                 )}
