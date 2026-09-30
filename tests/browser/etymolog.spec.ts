@@ -83,6 +83,155 @@ test("search empty, failure, invalid input and no-JS fallback", async ({
   await expect(nojs.locator("main h1")).toHaveText("Novák");
   await context.close();
 });
+test("search form locks on click and Enter, then unlocks after an error", async ({
+  page,
+}) => {
+  await page.goto("/");
+  const form = page.locator("[data-name-search]");
+  const input = page.getByLabel("Jméno nebo příjmení", { exact: true });
+  const submit = form.locator('button[type="submit"]');
+  const requests: import("@playwright/test").Route[] = [];
+  await page.route("**/api/etymolog/search/**", (route) => {
+    requests.push(route);
+  });
+  await input.fill("Neexistuje");
+  await submit.click();
+  await expect.poll(() => requests.length).toBe(1);
+  await expect(form).toHaveAttribute("data-submit-pending", "true");
+  await expect(input).toBeDisabled();
+  await expect(submit).toBeDisabled();
+  expect(
+    await submit.evaluate(
+      (button) => getComputedStyle(button, "::before").content,
+    ),
+  ).toBe('""');
+  await form.evaluate((node) =>
+    node.dispatchEvent(
+      new Event("submit", { bubbles: true, cancelable: true }),
+    ),
+  );
+  expect(requests).toHaveLength(1);
+  await requests
+    .shift()!
+    .fulfill({ status: 503, contentType: "application/json", body: "{}" });
+  await expect(form).not.toHaveAttribute("data-submit-pending", "true");
+  await expect(input).toBeEnabled();
+  await expect(submit).toBeEnabled();
+  await input.fill("Znovu");
+  await input.press("Enter");
+  await expect.poll(() => requests.length).toBe(1);
+  await expect(form).toHaveAttribute("data-submit-pending", "true");
+  await requests
+    .shift()!
+    .fulfill({ status: 503, contentType: "application/json", body: "{}" });
+  await expect(form).not.toHaveAttribute("data-submit-pending", "true");
+});
+
+test("admin filter and editor lock all controls while their requests run", async ({
+  page,
+}) => {
+  await login(page, true);
+  await expect(page.locator("[data-admin]")).not.toHaveAttribute(
+    "aria-busy",
+    "true",
+  );
+  const filter = page.locator("[data-filter]");
+  const filterInput = filter.locator('input[name="q"]');
+  const filterSubmit = filter.locator('button[type="submit"]');
+  let pendingFilter: import("@playwright/test").Route | undefined;
+  await page.route("**/api/admin/etymolog/names/**", (route) => {
+    if (route.request().method() === "GET") pendingFilter = route;
+    else void route.continue();
+  });
+  await filterInput.fill("Anna");
+  await filterSubmit.click();
+  await expect.poll(() => pendingFilter).toBeTruthy();
+  await expect(filter).toHaveAttribute("data-submit-pending", "true");
+  await expect(filterInput).toBeDisabled();
+  await expect(filter.locator("[data-refresh]")).toBeDisabled();
+  await pendingFilter!.continue();
+  await expect(filter).not.toHaveAttribute("data-submit-pending", "true");
+  await expect(filterInput).toBeEnabled();
+  await page.locator("[data-create]").click();
+  const dialog = page.locator("[data-editor]");
+  const editForm = dialog.locator("[data-edit-form]");
+  await dialog.locator('[name="name"]').fill("Pokusné jméno");
+  let pendingSave: import("@playwright/test").Route | undefined;
+  await page.route("**/api/admin/etymolog/names/", (route) => {
+    if (route.request().method() === "POST") pendingSave = route;
+    else void route.continue();
+  });
+  await editForm.locator('button[type="submit"]').click();
+  await expect.poll(() => pendingSave).toBeTruthy();
+  await expect(editForm).toHaveAttribute("data-submit-pending", "true");
+  await expect(dialog.locator('[name="name"]')).toBeDisabled();
+  await expect(editForm.locator("[data-close]")).toBeDisabled();
+  await pendingSave!.fulfill({
+    status: 503,
+    contentType: "application/json",
+    body: "{}",
+  });
+  await expect(editForm).not.toHaveAttribute("data-submit-pending", "true");
+  await expect(dialog.locator('[name="name"]')).toBeEnabled();
+});
+
+test("native login and logout retain POST values while the form is locked", async ({
+  page,
+}) => {
+  await page.goto("/en/login/");
+  const loginForm = page.locator("[data-native-pending]");
+  await loginForm.locator('[name="email"]').fill("admin@example.test");
+  await loginForm.locator('[name="password"]').fill("test-password");
+  let loginRequest: import("@playwright/test").Route | undefined;
+  await page.route("**/api/auth/login/", (route) => {
+    loginRequest = route;
+  });
+  const loginState = await loginForm.evaluate((form: HTMLFormElement) => {
+    const button = form.querySelector<HTMLButtonElement>(
+      'button[type="submit"]',
+    )!;
+    button.click();
+    return {
+      pending: form.dataset.submitPending,
+      inert: form.inert,
+      disabled: button.disabled,
+    };
+  });
+  expect(loginState).toEqual({ pending: "true", inert: true, disabled: true });
+  await expect.poll(() => loginRequest).toBeTruthy();
+  expect(loginRequest!.request().postData()).toContain(
+    "email=admin%40example.test",
+  );
+  expect(loginRequest!.request().postData()).toContain(
+    "password=test-password",
+  );
+  expect(loginRequest!.request().postData()).toContain("locale=en");
+  await loginRequest!.continue();
+  await expect(page).toHaveURL(/\/en\/admin\/$/);
+  await page.goto("/en/account/");
+  const logoutForm = page.locator("[data-native-pending]");
+  let logoutRequest: import("@playwright/test").Route | undefined;
+  await page.route("**/api/auth/logout/", (route) => {
+    logoutRequest = route;
+  });
+  const logoutState = await logoutForm.evaluate((form: HTMLFormElement) => {
+    const button = form.querySelector<HTMLButtonElement>(
+      'button[type="submit"]',
+    )!;
+    button.click();
+    return {
+      pending: form.dataset.submitPending,
+      inert: form.inert,
+      disabled: button.disabled,
+    };
+  });
+  expect(logoutState).toEqual({ pending: "true", inert: true, disabled: true });
+  await expect.poll(() => logoutRequest).toBeTruthy();
+  expect(logoutRequest!.request().postData()).toContain("locale=en");
+  await logoutRequest!.continue();
+  await expect(page).toHaveURL(/\/en\/login\/$/);
+});
+
 test("theme survives navigation and contact uses actual reference data", async ({
   page,
 }) => {
@@ -491,14 +640,16 @@ test("same spelling as a given name and surname offers two distinct choices", as
   expect(sole.headers().location).toBe("/en/name/1/");
 });
 
-test("an aborted earlier single-result search cannot navigate away from a newer selection", async ({
+test("pending single-result search blocks another submit until navigation", async ({
   page,
 }) => {
   let release!: () => void;
   const gate = new Promise<void>((resolve) => {
     release = resolve;
   });
+  let requests = 0;
   await page.route("**/api/etymolog/search/?q=Slow", async (route) => {
+    ++requests;
     await gate;
     await route.fulfill({
       json: {
@@ -513,14 +664,20 @@ test("an aborted earlier single-result search cannot navigate away from a newer 
     });
   });
   await page.goto("/");
-  await page.getByLabel("Jméno nebo příjmení", { exact: true }).fill("Slow");
-  const pending = page.waitForRequest("**/api/etymolog/search/?q=Slow");
-  await page.getByRole("button", { name: "Hledat v archivu" }).click();
-  await pending;
-  await page.getByLabel("Jméno nebo příjmení", { exact: true }).fill("Anna");
-  await page.getByRole("button", { name: "Hledat v archivu" }).click();
-  await expect(page.locator(".result-card")).toHaveCount(2);
+  const form = page.locator("[data-name-search]");
+  const input = page.getByLabel("Jméno nebo příjmení", { exact: true });
+  await input.fill("Slow");
+  await form.locator('button[type="submit"]').click();
+  await expect.poll(() => requests).toBe(1);
+  await expect(input).toBeDisabled();
+  await form.evaluate((node) =>
+    node.dispatchEvent(
+      new Event("submit", { bubbles: true, cancelable: true }),
+    ),
+  );
+  expect(requests).toBe(1);
   release();
-  await page.unrouteAll({ behavior: "wait" });
-  await expect(page).toHaveURL(/\/\?q=Anna$/);
+  await expect(page).toHaveURL("/jmeno/1/");
+  await page.goBack();
+  await expect(input).toBeEnabled();
 });

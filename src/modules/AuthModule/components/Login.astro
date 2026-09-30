@@ -30,7 +30,12 @@ const error = Astro.url.searchParams.get("error");
         {error === "invalid" ? t.auth.invalid : t.auth.unavailable}
       </p>
     )}
-    <form method="post" action="/api/auth/login/" class="auth-form">
+    <form
+      data-native-pending
+      method="post"
+      action="/api/auth/login/"
+      class="auth-form"
+    >
       <input type="hidden" name="locale" value={locale} />
       <label>
         {t.auth.email}
@@ -61,3 +66,10 @@ const error = Astro.url.searchParams.get("error");
     </form>
   </div>
 </Section>
+
+<script>
+  import { useNativeFormPending } from "../../UIModule/hooks/useFormPending";
+  useNativeFormPending(
+    document.querySelector<HTMLFormElement>("[data-native-pending]"),
+  );
+</script>

@@ -1,5 +1,6 @@
 import { useAdminPublish } from "./useAdminPublish";
 import { useAdminSync } from "./useAdminSync";
+import { beginFormPending } from "../../UIModule/hooks/useFormPending";
 import { resources, resourceDefinition } from "../config/resources";
 import type { Dictionary } from "../providers/translations";
 import type { AdminRecord } from "../types";
@@ -426,8 +427,11 @@ export function useAdminEditor() {
               ? Number(value)
               : value;
     }
-    const submit = form.querySelector<HTMLButtonElement>('[type="submit"]')!;
-    submit.disabled = true;
+    const release = beginFormPending(form);
+    if (!release) {
+      saving = false;
+      return;
+    }
     editorStatus.textContent = t.admin.loading;
     try {
       await api(
@@ -440,7 +444,7 @@ export function useAdminEditor() {
     } catch (error) {
       editorStatus.textContent = errorText(error);
     } finally {
-      submit.disabled = false;
+      release();
       saving = false;
     }
   });
@@ -475,15 +479,20 @@ export function useAdminEditor() {
     .querySelectorAll("[data-close]")
     .forEach((b) => b.addEventListener("click", () => dialog.close()));
   select("[data-refresh]").addEventListener("click", () => void load());
-  select<HTMLFormElement>("[data-filter]").addEventListener(
-    "submit",
-    (event) => {
-      event.preventDefault();
-      page = 1;
-      query = select<HTMLInputElement>("#admin-filter").value.trim();
-      void load();
-    },
-  );
+  const filterForm = select<HTMLFormElement>("[data-filter]");
+  filterForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    if (filterForm.dataset.submitPending === "true") return;
+    page = 1;
+    query = select<HTMLInputElement>("#admin-filter").value.trim();
+    const release = beginFormPending(filterForm);
+    if (!release) return;
+    try {
+      await load();
+    } finally {
+      release();
+    }
+  });
   select("[data-prev]").addEventListener("click", () => {
     if (page > 1) {
       page--;

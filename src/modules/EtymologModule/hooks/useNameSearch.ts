@@ -2,13 +2,14 @@ import type { Dictionary } from "../providers/translations";
 import type { SearchResult } from "../types";
 import { nameUrl, url, type Locale } from "../../../config/routes";
 import { singleResultUrl } from "../providers/searchNavigation";
+import { beginFormPending } from "../../UIModule/hooks/useFormPending";
 
 /**
  * Napojí veřejný formulář hledání na API `/api/etymolog/search/`.
  *
  * Vedlejší účinky: přepisuje obsah kontejneru výsledků, stavový text a URL
- * (`history.replaceState`); jednoznačný výsledek přesměruje na detail,
- * neprobíhající požadavek se zruší při novém hledání (`AbortController`).
+ * (`history.replaceState`); jednoznačný výsledek přesměruje na detail.
+ * Po dobu požadavku je formulář zamčený proti opakovanému odeslání.
  * @returns `void`; bez formuláře na stránce se hook tiše ukončí.
  */
 export function useNameSearch() {
@@ -36,13 +37,16 @@ export function useNameSearch() {
   };
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
+    if (form.dataset.submitPending === "true") return;
     const fields = new FormData(form);
     const q = String(fields.get("q") ?? "").trim();
-    active?.abort();
     if (q.length < 2 || q.length > 100) {
       status.textContent = t.invalid;
       return;
     }
+    const release = beginFormPending(form);
+    if (!release) return;
+    active?.abort();
     const controller = new AbortController();
     active = controller;
     status.classList.remove("error-text");
@@ -112,7 +116,11 @@ export function useNameSearch() {
         status.textContent = t.error;
       }
     } finally {
-      if (active === controller) results.removeAttribute("aria-busy");
+      if (active === controller) {
+        results.removeAttribute("aria-busy");
+        active = undefined;
+      }
+      release();
     }
   });
 }

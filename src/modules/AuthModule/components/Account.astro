@@ -36,7 +36,7 @@ const t = dictionary(locale);
         {t.auth.logoutError}
       </p>
     )}
-    <form method="post" action="/api/auth/logout/">
+    <form data-native-pending method="post" action="/api/auth/logout/">
       <input type="hidden" name="locale" value={locale} />
       <button class="btn btn-outline" type="submit">
         {t.auth.logout}
@@ -44,3 +44,10 @@ const t = dictionary(locale);
     </form>
   </div>
 </Section>
+
+<script>
+  import { useNativeFormPending } from "../../UIModule/hooks/useFormPending";
+  useNativeFormPending(
+    document.querySelector<HTMLFormElement>("[data-native-pending]"),
+  );
+</script>

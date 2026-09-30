@@ -114,6 +114,36 @@
     gap: 16px;
     min-height: 44px;
   }
+  form[data-submit-pending="true"]
+    :is(input, select, textarea, button:not([type="submit"])) {
+    opacity: 0.6;
+    cursor: wait;
+  }
+  form[data-submit-pending="true"] button[type="submit"] {
+    opacity: 1;
+    cursor: wait;
+  }
+  form[data-submit-pending="true"]
+    button[type="submit"]
+    > :is(svg, [aria-hidden="true"]) {
+    display: none;
+  }
+  form[data-submit-pending="true"] button[type="submit"]::before {
+    content: "";
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    flex: none;
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: form-submit-spin 0.7s linear infinite;
+  }
+  @keyframes form-submit-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
   .text-link {
     display: inline-flex;
     gap: 12px;
