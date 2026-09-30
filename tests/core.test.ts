@@ -8,6 +8,7 @@ import {
 import { createAuthProvider } from "../src/modules/AuthModule/server/provider";
 import {
   assertSameOrigin,
+  expectedWriteOrigin,
   readFields,
 } from "../src/modules/CoreModule/server/request";
 
@@ -149,6 +150,26 @@ test("state changes reject missing and foreign origins including cross-site meta
     ),
   );
 });
+test("local loopback alias accepts the browser origin only in development", () => {
+  const canonical = new URL("http://etymolog.localhost:4321");
+  const local = new URL("http://localhost:4321/api/auth/login/");
+  assert.equal(expectedWriteOrigin(local, canonical, true), local.origin);
+  assert.equal(expectedWriteOrigin(local, canonical, false), canonical.origin);
+  assert.equal(
+    expectedWriteOrigin(new URL("http://127.0.0.1:4321/"), canonical, true),
+    "http://127.0.0.1:4321",
+  );
+  for (const foreign of [
+    "http://evil.test:4321/",
+    "http://localhost:9999/",
+    "https://localhost:4321/",
+  ])
+    assert.equal(
+      expectedWriteOrigin(new URL(foreign), canonical, true),
+      canonical.origin,
+    );
+});
+
 test("body parser accepts JSON and forms but rejects malformed, unsupported and oversized bodies", async () => {
   const request = (body: string, type = "application/json") =>
     new Request("https://site.test", {

@@ -1,16 +1,15 @@
 ---
 import type { Locale } from "../../LangModule/config";
-import type { TodayNamedays } from "../types";
+import type { Entry, TodayNamedays } from "../types";
 import { dictionary } from "../providers/translations";
 import { nameUrl } from "../../../config/routes";
-import { safeWebUrl } from "../providers/links";
-import { externalLinkAttributes } from "../../UIModule/providers/external-links";
 interface Props {
   locale: Locale;
   data?: TodayNamedays;
+  narratives?: Record<number, Pick<Entry, "type" | "body">>;
 }
-const { locale, data } = Astro.props;
-const t = dictionary(locale).today;
+const { locale, data, narratives = {} } = Astro.props;
+const t = dictionary(locale);
 const date = data
   ? new Intl.DateTimeFormat(locale, {
       dateStyle: "long",
@@ -19,48 +18,39 @@ const date = data
   : undefined;
 ---
 
-<section class="page-section today-section" aria-labelledby="today-title">
+<section class="page-section today-section" aria-label={t.today.title}>
   <div class="section-inner section-pad today-namedays">
-    <p class="eyebrow">{t.eyebrow}</p>
-    <h2 id="today-title" class="rule-title">
-      {t.title}
-    </h2>
-    {data && <time datetime={data.date}>{date}</time>}
-    <p class="today-intro">{t.intro}</p>
+    {data && (
+      <h2 class="today-date">
+        <time datetime={data.date}>{date}</time>
+      </h2>
+    )}
     {!data ? (
-      <p role="status">{t.error}</p>
+      <p role="status">{t.today.error}</p>
     ) : data.items.length === 0 ? (
-      <p>{t.empty}</p>
+      <p>{t.today.empty}</p>
     ) : (
       <ul class="today-list">
         {data.items.map((item) => {
-          const sourceUrl =
-            safeWebUrl(item.source_url) ?? safeWebUrl(item.source_fallback_url);
+          const narrative = narratives[item.name_id];
           return (
             <li>
               <a class="today-name" href={nameUrl(locale, item.name_id)}>
                 {item.name}
               </a>
-              <p>{item.calendar_title}</p>
-              <small>
-                {t.source}:{" "}
-                {sourceUrl ? (
-                  <a
-                    href={sourceUrl}
-                    {...externalLinkAttributes(sourceUrl, Astro.url)}
-                  >
-                    {item.source_title}
-                  </a>
-                ) : (
-                  item.source_title
-                )}
-              </small>
+              {narrative && (
+                <div class="today-narrative">
+                  <h3>
+                    {t.types[narrative.type as "etymology" | "mythology"]}
+                  </h3>
+                  <p>{narrative.body}</p>
+                </div>
+              )}
             </li>
           );
         })}
       </ul>
     )}
-    <p class="today-note">{t.note}</p>
   </div>
 </section>
 <style>
@@ -70,25 +60,18 @@ const date = data
   :global([data-theme="newspaper-dark"]) .today-section {
     background: var(--color-base-100);
   }
-  .today-namedays time {
-    display: block;
-    color: var(--muted);
-    margin: 1rem 0;
-  }
-  .today-intro {
-    max-width: 65ch;
-    margin-bottom: 1.5rem;
+  .today-date {
+    font-size: clamp(1.6rem, 3vw, 2.25rem);
+    margin: 0 0 1.5rem;
   }
   .today-list {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
-    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+    gap: 2rem;
     list-style: none;
     padding: 0;
   }
   .today-list li {
-    border-top: 1px solid var(--rule);
-    padding-top: 1rem;
     min-width: 0;
     overflow-wrap: anywhere;
   }
@@ -98,15 +81,13 @@ const date = data
     text-decoration: underline;
     text-underline-offset: 0.2em;
   }
-  .today-list p {
-    margin: 0.7rem 0;
+  .today-narrative h3 {
+    font-size: 1.1rem;
+    margin: 1rem 0 0.35rem;
   }
-  .today-list small,
-  .today-note {
-    color: var(--muted);
-    font-size: 0.85rem;
-  }
-  .today-note {
-    margin-top: 1.5rem;
+  .today-narrative p {
+    margin: 0;
+    white-space: pre-line;
+    max-width: 70ch;
   }
 </style>

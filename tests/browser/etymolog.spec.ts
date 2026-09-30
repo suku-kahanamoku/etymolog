@@ -737,9 +737,23 @@ test("homepage alternates white namedays and concise paper introduction", async 
   await expect(
     section.getByRole("link", { name: "Testovací jmeniny" }),
   ).toHaveAttribute("href", "/jmeno/1/");
+  await expect(section.locator(".today-date")).toHaveText("30. září 2026");
   await expect(
-    section.getByRole("link", { name: "Kalendář z testovací databáze" }),
-  ).toHaveAttribute("target", "_blank");
+    section.getByRole("heading", { name: "Etymologie" }),
+  ).toBeVisible();
+  await expect(section).toContainText("Testovací citovaný text");
+  await expect(section).not.toContainText("Kalendář z testovací databáze");
+  await expect(section).not.toContainText(
+    "Jmeniny se mohou mezi kalendáři lišit",
+  );
+  await expect(section.locator('a[href^="http"]')).toHaveCount(0);
+  await expect(section.locator(".eyebrow, .rule-title")).toHaveCount(0);
+  expect(
+    await section
+      .locator("li")
+      .first()
+      .evaluate((el) => getComputedStyle(el).borderTopWidth),
+  ).toBe("0px");
   const todaySection = page.locator("main > .today-section");
   const archiveSection = page.locator("main > .page-section").last();
   await expect(todaySection).toHaveCSS(

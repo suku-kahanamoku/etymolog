@@ -1,7 +1,11 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import TodayNamedays from "../modules/EtymologModule/components/TodayNamedays.astro";
-import type { TodayNamedays as TodayData } from "../modules/EtymologModule/types";
+import type {
+  Entry,
+  TodayNamedays as TodayData,
+} from "../modules/EtymologModule/types";
+import { todayNarrative } from "../modules/EtymologModule/providers/todayNarrative";
 import Search from "../modules/EtymologModule/components/Search.astro";
 import Detail from "../modules/EtymologModule/components/Detail.astro";
 import AdminEditor from "../modules/EtymologModule/components/AdminEditor.astro";
@@ -102,10 +106,23 @@ if (!error && page === "home" && Astro.url.searchParams.has("q")) {
   }
 }
 let today: TodayData | undefined;
+const todayNarratives: Record<number, Pick<Entry, "type" | "body">> = {};
 if (!error && page === "home") {
   Astro.response.headers.set("Cache-Control", "no-store");
   try {
     today = await Astro.locals.providers.etymolog.today();
+    const ids = [...new Set(today.items.map((item) => item.name_id))];
+    await Promise.all(
+      ids.map(async (id) => {
+        try {
+          const detail = await Astro.locals.providers.etymolog.detail(id);
+          const narrative = todayNarrative(detail.entries, locale);
+          if (narrative) todayNarratives[id] = narrative;
+        } catch {
+          /* A missing detail must not hide a published name day. */
+        }
+      }),
+    );
   } catch {
     /* Show an honest unavailable state; keep search usable. */
   }
@@ -158,7 +175,7 @@ const metadata = error
   ) : page === "home" ? (
     <>
       <Search {locale} {result} error={searchError} {query} />
-      <TodayNamedays {locale} data={today} />
+      <TodayNamedays {locale} data={today} narratives={todayNarratives} />
       <ArchiveNote {locale} />
     </>
   ) : page === "about" ? (

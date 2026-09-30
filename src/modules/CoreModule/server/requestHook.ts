@@ -1,5 +1,5 @@
 import { defineMiddleware } from "astro:middleware";
-import { assertSameOrigin } from "./request";
+import { assertSameOrigin, expectedWriteOrigin } from "./request";
 import { errorResponse } from "./errors";
 
 /**
@@ -21,7 +21,7 @@ export const requestHook = defineMiddleware(async (context, next) => {
     try {
       assertSameOrigin(
         context.request,
-        context.site?.origin ?? context.url.origin,
+        expectedWriteOrigin(context.url, context.site, import.meta.env.DEV),
       );
     } catch (error) {
       return errorResponse(error);

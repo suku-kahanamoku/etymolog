@@ -1,6 +1,28 @@
 import { HttpError } from "./errors";
 
 /**
+ * During local development Astro can serve the same site through localhost and
+ * a configured *.localhost canonical domain. Only allow that loopback alias on
+ * the same protocol and port; production always uses the configured site origin.
+ */
+export function expectedWriteOrigin(
+  requestUrl: URL,
+  siteUrl: URL | undefined,
+  development: boolean,
+): string {
+  const canonical = siteUrl?.origin ?? requestUrl.origin;
+  if (!development || !siteUrl) return canonical;
+  if (
+    siteUrl.hostname.endsWith(".localhost") &&
+    ["localhost", "127.0.0.1", "[::1]"].includes(requestUrl.hostname) &&
+    requestUrl.protocol === siteUrl.protocol &&
+    requestUrl.port === siteUrl.port
+  )
+    return requestUrl.origin;
+  return canonical;
+}
+
+/**
  * Ověří, že zápis pochází ze stejného originu jako stránka webu.
  *
  * Ochrana proti cross-site POST z neznámého webu; volá se v middlewaru pro
