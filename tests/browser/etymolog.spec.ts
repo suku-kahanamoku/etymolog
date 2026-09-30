@@ -742,11 +742,20 @@ test("homepage alternates white namedays and concise paper introduction", async 
     section.getByRole("heading", { name: "Etymologie" }),
   ).toBeVisible();
   await expect(section).toContainText("Testovací citovaný text");
+  await expect(section).toContainText(
+    "Na dnešní den připadá doložená testovací pranostika.",
+  );
+  await expect(
+    section.getByRole("heading", { name: "Pranostika dne" }),
+  ).toBeVisible();
+  await expect(
+    section.locator('.today-proverb a[href="https://example.org/proverb"]'),
+  ).toHaveText("Doložený pramen");
   await expect(section).not.toContainText("Kalendář z testovací databáze");
   await expect(section).not.toContainText(
     "Jmeniny se mohou mezi kalendáři lišit",
   );
-  await expect(section.locator('a[href^="http"]')).toHaveCount(0);
+  await expect(section.locator('a[href^="http"]')).toHaveCount(1);
   await expect(section.locator(".eyebrow, .rule-title")).toHaveCount(0);
   expect(
     await section

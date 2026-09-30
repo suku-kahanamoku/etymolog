@@ -52,7 +52,6 @@
   font-size: 1.13rem;
 }
 .archive-search {
-  border-top: 1px solid var(--rule);
   border-bottom: 1px solid var(--rule);
   padding: 1.4rem 0 0.9rem;
 }

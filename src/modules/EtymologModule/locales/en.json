@@ -215,6 +215,8 @@
   "missingEtymology": "We do not yet have a published, sourced etymology for this name.",
   "missingMythology": "We do not yet have published sources documenting mythological connections for this name.",
   "today": {
+    "proverb": "Weather lore for today",
+    "source": "Source",
     "title": "Who celebrates a name day today",
     "empty": "There is no published name-day record for today yet.",
     "error": "Today’s name days could not be loaded. Please try again later."

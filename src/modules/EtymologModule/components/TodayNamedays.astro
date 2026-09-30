@@ -3,6 +3,8 @@ import type { Locale } from "../../LangModule/config";
 import type { Entry, TodayNamedays } from "../types";
 import { dictionary } from "../providers/translations";
 import { nameUrl } from "../../../config/routes";
+import { safeWebUrl } from "../providers/links";
+import { externalLinkAttributes } from "../../UIModule/providers/external-links";
 interface Props {
   locale: Locale;
   data?: TodayNamedays;
@@ -10,6 +12,9 @@ interface Props {
 }
 const { locale, data, narratives = {} } = Astro.props;
 const t = dictionary(locale);
+const proverbSourceUrl = data?.proverb
+  ? safeWebUrl(data.proverb.source_url)
+  : null;
 const date = data
   ? new Intl.DateTimeFormat(locale, {
       dateStyle: "long",
@@ -51,6 +56,25 @@ const date = data
         })}
       </ul>
     )}
+    {data?.proverb && (
+      <aside class="today-proverb">
+        <h3>{t.today.proverb}</h3>
+        <p>{data.proverb.body}</p>
+        <small>
+          {t.today.source}:{" "}
+          {proverbSourceUrl ? (
+            <a
+              href={proverbSourceUrl}
+              {...externalLinkAttributes(proverbSourceUrl, Astro.url)}
+            >
+              {data.proverb.source_title}
+            </a>
+          ) : (
+            data.proverb.source_title
+          )}
+        </small>
+      </aside>
+    )}
   </div>
 </section>
 <style>
@@ -89,5 +113,21 @@ const date = data
     margin: 0;
     white-space: pre-line;
     max-width: 70ch;
+  }
+  .today-proverb {
+    border-top: 1px solid var(--rule);
+    margin-top: 1.75rem;
+    padding-top: 1rem;
+  }
+  .today-proverb h3 {
+    font-size: 1.15rem;
+    margin: 0 0 0.4rem;
+  }
+  .today-proverb p {
+    max-width: 70ch;
+    white-space: pre-line;
+  }
+  .today-proverb small {
+    color: var(--muted);
   }
 </style>

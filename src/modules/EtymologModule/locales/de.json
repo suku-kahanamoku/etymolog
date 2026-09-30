@@ -215,6 +215,8 @@
   "missingEtymology": "Für diesen Namen liegt noch keine veröffentlichte Etymologie mit Quellenangabe vor.",
   "missingMythology": "Mythologische Bezüge dieses Namens sind bei uns noch nicht durch veröffentlichte Quellen belegt.",
   "today": {
+    "proverb": "Bauernregel des Tages",
+    "source": "Quelle",
     "title": "Wer hat heute Namenstag",
     "empty": "Für heute ist noch kein Namenstag veröffentlicht.",
     "error": "Die heutigen Namenstage konnten nicht geladen werden. Bitte versuchen Sie es später erneut."

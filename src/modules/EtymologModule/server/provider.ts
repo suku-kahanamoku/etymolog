@@ -98,9 +98,26 @@ export function createEtymologProvider(core: CoreClient, token?: string) {
         !Array.isArray(result.items)
       )
         throw new HttpError(502, "invalid_backend_response");
+      const proverb = result.proverb;
+      if (
+        proverb != null &&
+        (typeof proverb.body !== "string" ||
+          typeof proverb.source_title !== "string" ||
+          (proverb.source_url !== null &&
+            typeof proverb.source_url !== "string") ||
+          (proverb.name_id !== null &&
+            (!Number.isSafeInteger(proverb.name_id) || proverb.name_id < 1)))
+      )
+        throw new HttpError(502, "invalid_backend_response");
       return {
         date: result.date,
         timezone: result.timezone,
+        proverb: proverb
+          ? pick<TodayNamedays["proverb"]>(
+              proverb,
+              "body source_url source_title name_id",
+            )
+          : null,
         items: result.items.map((item) =>
           pick<TodayNamedays["items"][number]>(
             item,

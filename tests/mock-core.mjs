@@ -169,6 +169,12 @@ http
       return send(200, {
         date: "2026-09-30",
         timezone: "Europe/Prague",
+        proverb: {
+          body: "Na dnešní den připadá doložená testovací pranostika.",
+          source_url: "https://example.org/proverb",
+          source_title: "Doložený pramen",
+          name_id: null,
+        },
         items: [
           {
             name_id: 1,

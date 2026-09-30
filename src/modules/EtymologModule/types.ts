@@ -203,6 +203,12 @@ export type AdminRecord = Record<string, string | number | null> & {
 export interface TodayNamedays {
   date: string;
   timezone: string;
+  proverb: {
+    body: string;
+    source_url: string | null;
+    source_title: string;
+    name_id: number | null;
+  } | null;
   items: {
     name_id: number;
     name: string;

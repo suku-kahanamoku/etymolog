@@ -215,6 +215,8 @@
   "missingEtymology": "K tomuto jménu zatím nemáme zveřejněný etymologický výklad s uvedeným pramenem.",
   "missingMythology": "Mytologické souvislosti tohoto jména zatím nemáme doložené zveřejněným pramenem.",
   "today": {
+    "proverb": "Pranostika dne",
+    "source": "Pramen",
     "title": "Kdo má dnes svátek",
     "empty": "Pro dnešní den zatím nemáme zveřejněný záznam jmenin.",
     "error": "Dnešní svátky se nyní nepodařilo načíst. Zkuste to prosím později."
