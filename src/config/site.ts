@@ -10,8 +10,6 @@ import { defaultTheme } from "../modules/UIModule/config/theme";
 export const site = {
   /** Název webu používaný v titulku, hlavičce a patičce. */
   name: "Etymolog",
-  /** Jméno provozovatele zobrazené na kontaktní stránce. */
-  operatorName: "Süchceren Cecegé",
   /** Kontaktní e-mail (veřejný, bez tajných údajů). */
   email: "info@prasentace.cz",
   /** Kontaktní telefon ve formátu pro zobrazení. */
