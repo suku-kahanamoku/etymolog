@@ -39,13 +39,13 @@ const pageHref = (page: number) =>
 >
   <div class="search-fields">
     <div class="search-field">
-      <label for="name-query">{t.query}</label>
       <input
         id="name-query"
         name="q"
         type="search"
         value={query}
         placeholder={t.placeholder}
+        aria-label={t.query}
         minlength="2"
         maxlength="100"
         required
